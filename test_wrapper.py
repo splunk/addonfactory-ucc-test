@@ -7,7 +7,11 @@ from pprint import pprint
 
 def get_from_environment_variable(environment_variable: str) -> str:
     if environment_variable not in os.environ:
+        print(40*'*')
         print(f"{environment_variable} environment variable not set")
+        print("run below in terminal:")
+        print(f"export {environment_variable}=[your value]")
+        print(40*'*')
         exit(1)
     return os.environ[environment_variable]
 
@@ -23,8 +27,13 @@ api_instance = swagger_client.DefaultApi(swagger_client.ApiClient(configuration)
 
 output_mode = 'json'
 
-instruction = '''
-Open \\tmp\\restapi_client\\README.md to see all methods and how to use them.
+
+#   CUSTOMIZE BELOW
+
+
+#   once you starting yourt customisation, remove following print and exit so it does not confuse you
+print('''
+Open tmp/restapi_client/README.md to see all methods and how to use them.
 
 To create modinput tests you will be interested in following methods:
 1. api_instance.[TA_name]_settings_logging_post -   to set logging level
@@ -33,10 +42,7 @@ To create modinput tests you will be interested in following methods:
 If you want to delete your configuration after tests, you will be interested in api_instance.[TA_name]_[configuration_tabs_name,inputs_services_name]_name_delete methods as well.
 
 Edit test_wrapper.py to check code sample and write your code.
-'''
-
-#   once you starting yourt customisation, comment following print and exit so it does not confuse you
-print(instruction)
+''')
 exit(0)
 
 #   BE AWARE
@@ -45,7 +51,7 @@ exit(0)
 
 # you may want to have debug information
 try:
-    api_response = api_instance.splunk_ta_jira_cloud_settings_logging_post(loglevel='DEBUG', output_mode=output_mode)
+    api_response = api_instance.splunk_ta_jira_cloud_settings_logging_post(output_mode = output_mode, loglevel='DEBUG')
     pprint(api_response)
 except ApiException as e:
     print("Exception when calling DefaultApi->splunk_ta_jira_cloud_settings_logging_post: %s\n" % e)
@@ -70,21 +76,27 @@ input_from = '2022-01-01T00:00:00'
 input_interval = '60'
 input_index = 'default'
 
+try:
+    api_response = api_instance.splunk_ta_jira_cloud_domain_get(output_mode = output_mode)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling DefaultApi->splunk_ta_jira_cloud_domain_get: %s\n" % e)
+
 # create configuration
 try:
-    api_response = api_instance.splunk_ta_jira_cloud_domain_post(name=domain_name, output_mode=output_mode)
+    api_response = api_instance.splunk_ta_jira_cloud_domain_post(output_mode = output_mode, name=domain_name)
     pprint(api_response)
 except ApiException as e:
     print("Exception when calling DefaultApi->splunk_ta_jira_cloud_domain_post: %s\n" % e)
 
 try:
-    api_response = api_instance.splunk_ta_jira_cloud_api_token_post(domain=domain_name, name=token_name, username=token_username, token=token_value, output_mode=output_mode)
+    api_response = api_instance.splunk_ta_jira_cloud_api_token_post(output_mode = output_mode, domain=domain_name, name=token_name, username=token_username, token=token_value)
     pprint(api_response)
 except ApiException as e:
     print("Exception when calling DefaultApi->splunk_ta_jira_cloud_api_token_name_post: %s\n" % e)
 
 try:
-    api_response = api_instance.splunk_ta_jira_cloud_jira_cloud_input_post(api_token=token_name, name=input_name, _from=input_from, interval=input_interval, index=input_index, output_mode=output_mode)
+    api_response = api_instance.splunk_ta_jira_cloud_jira_cloud_input_post(output_mode = output_mode, api_token=token_name, name=input_name, _from=input_from, interval=input_interval, index=input_index)
     pprint(api_response)
 except ApiException as e:
     print("Exception when calling DefaultApi->splunk_ta_jira_cloud_jira_cloud_input_post: %s\n" % e)
@@ -92,21 +104,27 @@ except ApiException as e:
 # some tests here once configuration is ready
 # ...
 
+try:
+    api_response = api_instance.splunk_ta_jira_cloud_jira_cloud_input_name_post(output_mode = output_mode, name = input_name, disabled=True)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling DefaultApi->splunk_ta_jira_cloud_jira_cloud_input_name_post: %s\n" % e)
+
 # tear down configuration when tests are done and you don't need the configuration anymore
 try:
-    api_response = api_instance.splunk_ta_jira_cloud_jira_cloud_input_name_delete(input_name, output_mode=output_mode)
+    api_response = api_instance.splunk_ta_jira_cloud_jira_cloud_input_name_delete(name = input_name, output_mode = output_mode)
     pprint(api_response)
 except ApiException as e:
     print("Exception when calling DefaultApi->splunk_ta_jira_cloud_jira_cloud_input_name_delete: %s\n" % e)
 
 try:
-    api_response = api_instance.splunk_ta_jira_cloud_api_token_name_delete(token_name, output_mode=output_mode)
+    api_response = api_instance.splunk_ta_jira_cloud_api_token_name_delete(name = token_name, output_mode = output_mode)
     pprint(api_response)
 except ApiException as e:
     print("Exception when calling DefaultApi->splunk_ta_jira_cloud_api_token_name_delete: %s\n" % e)
 
 try:
-    api_response = api_instance.splunk_ta_jira_cloud_domain_name_delete(domain_name, output_mode=output_mode)
+    api_response = api_instance.splunk_ta_jira_cloud_domain_name_delete(name = domain_name, output_mode = output_mode)
     pprint(api_response)
 except ApiException as e:
     print("Exception when calling DefaultApi->splunk_ta_jira_cloud_domain_name_delete: %s\n" % e)
