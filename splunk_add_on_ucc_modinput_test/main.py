@@ -47,7 +47,8 @@ def main(argv: Optional[Sequence[str]] = None):
                 print(l)
                 if len(l) != 1:
                     raise argparse.ArgumentTypeError(
-                        f"""Default path ({OpenApiPath.DEFAULT}) does not work in this case.
+                        f"""
+                        Default path ({OpenApiPath.DEFAULT}) does not work in this case.
                         It returns {len(l)} results: {[str(x) for x in l]}
                         Define path to openapi.json
                         """
