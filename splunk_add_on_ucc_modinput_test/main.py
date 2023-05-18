@@ -1,5 +1,6 @@
 import argparse
 import sys
+from pathlib import Path
 from typing import Optional, Sequence
 import logging
 from splunk_add_on_ucc_modinput_test import setup_environment
@@ -33,27 +34,32 @@ class DefaultSubcommandArgumentParser(argparse.ArgumentParser):
 def main(argv: Optional[Sequence[str]] = None):
     argv = argv if argv is not None else sys.argv[1:]
     parser = DefaultSubcommandArgumentParser()
-    parser.set_default_subparser("build")
-    subparsers = parser.add_subparsers(dest="command", description="Build an add-on")
 
-    build_parser = subparsers.add_parser("build")
-    build_parser.add_argument(
-        "--source",
-        type=str,
-        nargs="?",
-        help="Folder containing the app.manifest and app source.",
-        default="package",
+    class OpenApiPath():
+        DEFAULT = "output/*/static/openapi.json"
+
+        @staticmethod
+        def validate(value):
+            if value != OpenApiPath.DEFAULT:
+                return value
+            else:
+                l = sorted(Path().glob(OpenApiPath.DEFAULT))
+                if len(l) != 1:
+                    raise argparse.ArgumentTypeError(
+                        f"""Default path ({OpenApiPath.DEFAULT}) does not work in this case.
+                        Define path to openapi.json
+                        """
+                        )
+            return str(l[0].parents[0])
+
+    parser.add_argument(
+        "--openapi-json",
+        type=OpenApiPath.validate,
+        help=f"openapi.json path",
+        default=OpenApiPath.DEFAULT,
     )
-
     args = parser.parse_args(argv)
-    if args.command == "build":
-        pass
-        # build.generate(
-        #     source=args.source,
-        #     config_path=args.config,
-        #     addon_version=args.ta_version,
-        #     python_binary_name=args.python_binary_name,
-        # )
+    print(args)
 
 if __name__ == "__main__":
     raise SystemExit(main())
