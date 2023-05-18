@@ -44,6 +44,7 @@ def main(argv: Optional[Sequence[str]] = None):
                 return value
             else:
                 l = sorted(Path().glob(OpenApiPath.DEFAULT))
+                print(l)
                 if len(l) != 1:
                     raise argparse.ArgumentTypeError(
                         f"""Default path ({OpenApiPath.DEFAULT}) does not work in this case.
