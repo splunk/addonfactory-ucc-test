@@ -30,6 +30,7 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = "^3.7"
+python-on-whales = "^0.60.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.2.1"

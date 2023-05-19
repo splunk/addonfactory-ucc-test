@@ -14,7 +14,7 @@ CLIENT=restapi_client
 mkdir -p ${TMP}/${CLIENT}
 cp ${OPENAPI_JSON} ${TMP}
 cp -R ${PWD}/swagger-codegen-generators/ ${TMP}
-docker run --rm -v ${TMP}:/local swaggerapi/swagger-codegen-cli-v3 generate     -i /local/openapi.json     -l python     -o /local/${CLIENT} -t /local/swagger-codegen-generators/src/main/resources/handlebars/python/
+docker run --rm -v ${TMP}:/local swaggerapi/swagger-codegen-cli-v3 generate -i /local/openapi.json -l python -o /local/${CLIENT} -t /local/swagger-codegen-generators/src/main/resources/handlebars/python/
 
 cp test_wrapper.py ${TMP}/${CLIENT}
 cd ${TMP}/${CLIENT}
