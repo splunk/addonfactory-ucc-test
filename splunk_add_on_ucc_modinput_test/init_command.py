@@ -52,7 +52,7 @@ def init(
         volumes=[(str(tmp.resolve()), "/local")],
         remove=True,
     )
-    shutil.copytree(str(restapi_client_path), str(client))
+    shutil.copytree(str(restapi_client_path / "swagger_client"), str(client / "swagger_client"))
 # Open restapi_client directory and read README.md to find out the details of how the client should be installed, imported and used. (cd restapi_client ; more README.md)
 # Install the client (python setup.py install --user)
 # You can use below code as an inspiration for your own script that imports the client and uses for TA configuration

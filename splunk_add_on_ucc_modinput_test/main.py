@@ -25,10 +25,6 @@ class DefaultSubcommandArgumentParser(argparse.ArgumentParser):
                 if subparser_found:
                     break
             else:
-                logger.warning(
-                    "Please use `ucc-gen build` if you want to build "
-                    "an add-on, using just `ucc-gen` will be deprecated"
-                )
                 arg_strings = [d_sp] + arg_strings
         return super()._parse_known_args(arg_strings, *args, **kwargs)
 
@@ -82,15 +78,13 @@ def main(argv: Optional[Sequence[str]] = None):
             return p
 
     class ClientCodePath():
-        DEFAULT = "tests/modinput/client"
+        DEFAULT = "."
 
         @staticmethod
         def validate(value):
             directory = Path(value)
-            if directory.exists():
-                raise argparse.ArgumentTypeError(f"Given directory ({value}) must not exist. It will be created.")
-            if not directory.resolve().parent.exists():
-                raise argparse.ArgumentTypeError(f"Given directory ({value}) parent has to exist. Create {directory.resolve().parent}")
+            if not directory.exists():
+                raise argparse.ArgumentTypeError(f"Given directory ({value}) has to exist. Create {directory.resolve()}")
             return directory
 
     init_parser.add_argument(
