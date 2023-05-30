@@ -5,10 +5,6 @@ from tests.modinput_functional.vendor_product import Configuration as VendorProd
 import swagger_client
 from swagger_client.api.default_api import DefaultApi
 
-output_mode = 'json'
-pprint = utils.logger.debug
-print = utils.logger.error
-
 
 class InputConfigurationBase():
     def __init__(self, *, name_prefix: str, interval: int=60):

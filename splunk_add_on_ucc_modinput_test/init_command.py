@@ -53,35 +53,8 @@ def init(
         remove=True,
     )
     shutil.copytree(str(restapi_client_path / "swagger_client"), str(client / "swagger_client"))
+    shutil.copy(str(restapi_client_path / "README.md"), str(client / "swagger_client"))
 # Open restapi_client directory and read README.md to find out the details of how the client should be installed, imported and used. (cd restapi_client ; more README.md)
 # Install the client (python setup.py install --user)
 # You can use below code as an inspiration for your own script that imports the client and uses for TA configuration
 
-
-    # try:
-    #     generated_addon_path = main.cookiecutter(
-    #         template=os.path.join(
-    #             os.path.dirname(__file__),
-    #             "init_template",
-    #         ),
-    #         overwrite_if_exists=overwrite,
-    #         no_input=True,
-    #         extra_context={
-    #             "addon_name": addon_name,
-    #             "addon_display_name": addon_display_name,
-    #             "addon_input_name": addon_input_name,
-    #             "addon_version": addon_version,
-    #         },
-    #     )
-    #     logger.info(f"Generated add-on is located here {generated_addon_path}")
-    #     logger.info(
-    #         "LICENSE.txt and README.txt are empty, "
-    #         "you may need to modify the content of those files. "
-    #     )
-    #     return generated_addon_path
-    # except exceptions.OutputDirExistsException:
-    #     logger.error(
-    #         "The location is already taken, use `--overwrite` "
-    #         "option to overwrite the content of existing folder."
-    #     )
-    #     sys.exit(1)
