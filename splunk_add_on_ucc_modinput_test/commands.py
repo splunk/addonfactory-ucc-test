@@ -25,7 +25,7 @@ logger = logging.getLogger("ucc_gen")
 def initialize(
     modinput: Path
 ) -> Path:
-    shutil.copy(str(files(resources).joinpath('modinput_functional')),str(modinput))
+    shutil.copytree(str(files(resources).joinpath('modinput_functional')),str(modinput))
 
 def generate(
     openapi: Path,
