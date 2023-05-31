@@ -17,17 +17,17 @@ import logging
 from pathlib import Path
 import shutil
 from python_on_whales import docker
-# from importlib import resources as resources_lib
-# from splunk_add_on_ucc_modinput_test import resources as resources_dir
 from importlib_resources import files
 from splunk_add_on_ucc_modinput_test import resources
 
-# from cookiecutter import exceptions, main
-
 logger = logging.getLogger("ucc_gen")
 
+def initialize(
+    modinput: Path
+) -> Path:
+    shutil.copy(str(files(resources).joinpath('modinput_functional')),str(modinput))
 
-def init(
+def generate(
     openapi: Path,
     tmp: Path,
     client: Path,

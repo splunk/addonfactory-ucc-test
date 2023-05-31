@@ -4,7 +4,7 @@ from pathlib import Path
 from datetime import datetime
 from typing import Optional, Sequence
 import logging
-from splunk_add_on_ucc_modinput_test import init_command
+from splunk_add_on_ucc_modinput_test import commands
 
 logger = logging.getLogger("ucc_test")
 
@@ -29,13 +29,6 @@ class DefaultSubcommandArgumentParser(argparse.ArgumentParser):
         return super()._parse_known_args(arg_strings, *args, **kwargs)
 
 def main(argv: Optional[Sequence[str]] = None):
-    argv = argv if argv is not None else sys.argv[1:]
-    parser = DefaultSubcommandArgumentParser()
-    # parser.set_default_subparser("build")
-    # subparsers = parser.add_subparsers(dest="command", description="Build an add-on")
-    subparsers = parser.add_subparsers(dest="command")
-    init_parser = subparsers.add_parser("init", description="Generate python client code from openapi.json")
-    test_parser = subparsers.add_parser("test", description="Run end to end, modinput tests")
 
     class OpenApiPath():
         DEFAULT = "output/*/static/openapi.json"
@@ -87,36 +80,78 @@ def main(argv: Optional[Sequence[str]] = None):
                 raise argparse.ArgumentTypeError(f"Given directory ({value}) has to exist. Create {directory.resolve()}")
             return directory
 
-    init_parser.add_argument(
+    class ModinputPath():
+        DEFAULT = "tests/modinput_functional"
+
+        @staticmethod
+        def validate(value):
+            directory = Path(value)
+            if directory.exists():
+                raise argparse.ArgumentTypeError(f"Given directory ({value}) already exist")
+            return directory
+
+
+    argv = argv if argv is not None else sys.argv[1:]
+    parser = DefaultSubcommandArgumentParser()
+    subparsers = parser.add_subparsers(dest="command")
+    gen_parser = subparsers.add_parser("gen", description="Generate python client code from openapi.json")
+    init_parser = subparsers.add_parser("init", description="Initialize modinput tests. This is one time action.")
+    parser.set_default_subparser("gen")
+    
+    _o_args = (
         "-o",
         "--openapi-json",
-        type=OpenApiPath.validate,
-        help="openapi.json path",
-        default=OpenApiPath.DEFAULT,
     )
+    _o_kwargs = {
+        "type":OpenApiPath.validate,
+        "help":"openapi.json path. Client code will be generated from this.",
+        "default":OpenApiPath.DEFAULT,
+        }
+    gen_parser.add_argument(*_o_args,**_o_kwargs)
+    init_parser.add_argument(*_o_args,**_o_kwargs)
 
-    init_parser.add_argument(
+    _t_args = (
         "-t",
         "--tmp",
-        type=TmpPath.validate,
-        help="Temporary directory, where resources needed for client code creation will be stored",
-        default=TmpPath.DEFAULT,
     )
+    _t_kwargs = {
+        "type":TmpPath.validate,
+        "help":"Temporary directory, where resources needed for client code creation will be stored",
+        "default":TmpPath.DEFAULT,
+        }
+    gen_parser.add_argument(*_t_args,**_t_kwargs)
+    init_parser.add_argument(*_t_args,**_t_kwargs)
 
-    init_parser.add_argument(
+    _c_args = (
         "-c",
         "--client-code",
-        type=ClientCodePath.validate,
-        help="Path to client code",
-        default=ClientCodePath.DEFAULT,
+    )
+    _c_kwargs = {
+        "type":ClientCodePath.validate,
+        "help":"Path to client code directory. This is target directory.",
+        "default":ClientCodePath.DEFAULT,
+    }
+    gen_parser.add_argument(*_c_args,**_c_kwargs)
+    init_parser.add_argument(*_c_args,**_c_kwargs)
+
+    init_parser.add_argument(
+        "-m",
+        "--modinput",
+        type=ModinputPath.validate,
+        help="Path to modinput_functional. This is target directory.",
+        default=ModinputPath.DEFAULT,
     )
 
     args = parser.parse_args(argv)
-    if args.command == "init":
-        init_command.init(
+    if args.command in ["gen","init"]:
+        commands.generate(
             openapi=args.openapi_json,
             tmp=args.tmp,
             client=args.client_code,
+        )
+    if args.command == "init":
+        commands.initialize(
+            modinput=args.modinput
         )
 
 if __name__ == "__main__":
