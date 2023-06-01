@@ -165,7 +165,7 @@ Time is limited to the modinput test execution
 
 DO NOT MODIFY CODE IN THIS FILE
 
-4. Set environment variables before pytest run:
+4. Set environment variables and pytest run:
 
     4.1.    common for all TAs
 
@@ -185,10 +185,12 @@ export MODINPUT_TEST_FOOBAR_USERNAME=[your_value]
 export MODINPUT_TEST_FOOBAR_TOKEN=[your_value]
 ```
 
-5.  When all necessary code modifications are ready, commit and push your modifications, except output and swagger_client directories
+    4.3. `poetry run pytest tests/modinput_functional/`
+
+5.  When all necessary code modifications are ready, commit and push your modifications (except output and swagger_client directories that are generated during ucc-gen and ucc-test-modinput respectively)
 
 6.  If you want to run your modinput tests from just cloned repository:
 
     6.1.    Run ucc-gen and ucc-test-modinput to recreate output and swagger_client directories
 
-    6.2.    Set environment variables before pytest run; check pt. 4. for details
+    6.2.    Set environment variables and pytest run; check pt. 4. for details
