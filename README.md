@@ -3,32 +3,32 @@ A framework to test UCC-based Splunk Add-ons.
 
 splunk_add_on_ucc_modinput_test is aimed for TA modinput tests that currently involve vendor products becoming end to end tests.
 
-1.  If you want to apply this library for your TA, there three aspects you need to facus on and document:
+1. If you want to apply this library for your TA, there three aspects you need to facus on and document:
 
-    1.1.    your TA 
+    1.1. your TA 
 
-        1.1.1.  Configuration
+        1.1.1. Configuration
 
 What parameters need to be defined and in what order.
 Are there common parameters?
 Are there confidential parameters?
 etc.
 
-        1.1.2.  Inputs
+        1.1.2. Inputs
 
 Do following for each modular input type
 
-            1.1.2.1.    What are values for common parameters for all modular inputs (you'll be able to define name prefix and interval; index will be set by the framework)?
+            1.1.2.1. What are values for common parameters for all modular inputs (you'll be able to define name prefix and interval; index will be set by the framework)?
 
-            1.1.2.2.    What are modular input type specific fields?
+            1.1.2.2. What are modular input type specific fields?
 
-    1.2.    vendor product
+    1.2. vendor product
 
 Focus on each unique event you are collecting with use of modular inputs
 What actions need to be taken in vendor product to generate the event?
 How the actions can be achieved programatically?
 
-    1.3.    Splunk
+    1.3. Splunk
 
 How does each unique event look like in Splunk?
 What query needs to be applied to find particular event?
