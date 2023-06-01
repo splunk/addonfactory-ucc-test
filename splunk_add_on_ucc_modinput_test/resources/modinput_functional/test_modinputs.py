@@ -5,6 +5,10 @@ from splunk_add_on_ucc_modinput_test.common import splunk_instance
 from tests.modinput_functional import vendor_product
 from tests.modinput_functional.ta import InputConfiguration
 
+#   BE AWARE
+#   the file content is extremely vendor product and TA specific
+#   to be consistent with framework, you just need to keep test_internal_index
+#   as the last function in the file
 
 def test_foo_bar_group_creation(configuration):
     vendor_product.group_create(configuration.vendor_product_configuration)

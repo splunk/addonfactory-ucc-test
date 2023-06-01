@@ -71,7 +71,10 @@ class Configuration(ConfigurationBase):
             )
         )
 
+#   BE AWARE
+#   set_up and tear_down methods are required by the framework
     def set_up(self, api_instance):
+        
         #   keep setting loglevel to DEBUG as a good practice
         try:
             api_response = api_instance.splunk_ta_foo_bar_settings_logging_post(
@@ -156,6 +159,8 @@ class Configuration(ConfigurationBase):
                         % e
                     )
 
+#   BE AWARE
+#   set_up and tear_down methods are required by the framework
     def tear_down(self, api_instance):
         #   disable all inputs
         for input_configuration in self.get_all_inputs():
