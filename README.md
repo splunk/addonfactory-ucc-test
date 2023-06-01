@@ -58,7 +58,7 @@ This document will be used for tests/modinput_functional/ta.py customization
 
         2.3.2.  tests/modinput_functional/ directory that contain bleaprint for modinput tests
 
-:exclamation: Due to limitations of dependant tools, ucc-test-modinput usage is limited to intel-based architectures.
+:exclamation: Due to dependencies, ucc-test-modinput usage is limited to intel-based architectures.
 
 3.  Customize tests/modinput_functional/*.py files
 
@@ -165,8 +165,30 @@ Time is limited to the modinput test execution
 
 DO NOT MODIFY CODE IN THIS FILE
 
-4.  When all necessary code modifications are ready, commit and push your modifications, except output and swagger_client directories
+4. Set environment variables before pytest run:
 
-5.  If you want to run your modinput tests from just cloned repository:
+    4.1.    common for all TAs
 
-    5.1.    Run ucc-gen and ucc-test-modinput to recreate output and swagger_client directories
+```
+export MODINPUT_TEST_SPLUNK_HOST=[your_value; eg. localhost]
+export MODINPUT_TEST_SPLUNK_PORT=[your_value; eg. 8089]
+export MODINPUT_TEST_SPLUNK_USERNAME=[your_value; eg. admin]
+export MODINPUT_TEST_SPLUNK_PASSWORD=[your_value]
+```
+
+    4.2.    TA-specific
+
+Check 3.2.2 for your list. What's given below is just an example 
+```
+export MODINPUT_TEST_FOOBAR_DOMAIN=[your_value]
+export MODINPUT_TEST_FOOBAR_TOKEN_USERNAME=[your_value]
+export MODINPUT_TEST_FOOBAR_TOKEN_VALUE=[your_value]
+```
+
+5.  When all necessary code modifications are ready, commit and push your modifications, except output and swagger_client directories
+
+6.  If you want to run your modinput tests from just cloned repository:
+
+    6.1.    Run ucc-gen and ucc-test-modinput to recreate output and swagger_client directories
+
+    6.2.    Set environment variables before pytest run; check pt. 4. for details
