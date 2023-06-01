@@ -58,7 +58,7 @@ This document will be used for tests/modinput_functional/ta.py customization
 
         2.3.2.  tests/modinput_functional/ directory that contain bleaprint for modinput tests
 
-        :exclamation: Due to limitations of dependant tools, ucc-test-modinput usage is limited to intel-based architectures.
+:exclamation: Due to limitations of dependant tools, ucc-test-modinput usage is limited to intel-based architectures.
 
 3.  Customize tests/modinput_functional/*.py files
 
