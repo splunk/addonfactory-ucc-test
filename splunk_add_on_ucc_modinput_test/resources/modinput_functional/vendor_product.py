@@ -4,17 +4,21 @@ import requests
 from requests.auth import HTTPBasicAuth
 from splunk_add_on_ucc_modinput_test.common import utils
 
+#   BE AWARE
+#   the file content is extremely vendor product specific
+#   to be consistent with framework, you just need to keep Configuration class
+#   it is also adviced to have unique events creation in dedicated functions
 
 class Configuration:
     def __init__(self):
         self._domain = utils.get_from_environment_variable(
-            "MODINPUT_TEST_JIRACLOUD_DOMAIN"
+            "MODINPUT_TEST_FOOBAR_DOMAIN"
         )
-        self._token_username = utils.get_from_environment_variable(
-            "MODINPUT_TEST_JIRACLOUD_TOKEN_USERNAME"
+        self._username = utils.get_from_environment_variable(
+            "MODINPUT_TEST_FOOBAR_USERNAME"
         )
-        self._token_value = utils.get_from_environment_variable(
-            "MODINPUT_TEST_JIRACLOUD_TOKEN_VALUE"
+        self._token = utils.get_from_environment_variable(
+            "MODINPUT_TEST_FOOBAR_TOKEN"
         )
 
     @property
@@ -22,30 +26,56 @@ class Configuration:
         return self._domain
 
     @property
-    def token_username(self):
-        return self._token_username
+    def username(self):
+        return self._username
 
     @property
-    def token_value(self):
-        return self._token_value
+    def token(self):
+        return self._token
+    
+    @property
+    def url(self):
+        return f"https://{self.domain}.foo.bar/rest/api/2/group"
+    
+    @property
+    def auth(self):
+        return HTTPBasicAuth(configuration.username, configuration.token)
 
+def _get_group_name():
+    return f"g_{utils.Common().sufix}"
 
-def group_create_and_delete(configuration: Configuration):
-    _GROUP_NAME = f"g_{utils.Common().sufix}"
-
-    url = f"https://{configuration.domain}.atlassian.net/rest/api/2/group"
-
-    auth = HTTPBasicAuth(configuration.token_username, configuration.token_value)
+def group_create(configuration: Configuration) -> str:
+    _GROUP_NAME = _get_group_name
     headers = {"Accept": "application/json", "Content-Type": "application/json"}
-
     payload = json.dumps({"name": _GROUP_NAME})
 
     try:
         response = requests.request(
-            "POST", url, data=payload, headers=headers, auth=auth
+            "POST", configuration.url, data=payload, headers=headers, auth=configuration.auth
         )
     except Exception as e:
-        msg = f"Error occured during Jira Cloud group {_GROUP_NAME} creation:\n{e}"
+        msg = f"Error occured during Foo Bar group {_GROUP_NAME} creation:\n{e}"
+        utils.logger.error(msg)
+        pytest.exit(1, msg=msg)
+    response_json = json.loads(response.text)
+    utils.logger.debug(
+        json.dumps(response_json, sort_keys=True, indent=4, separators=(",", ": "))
+    )
+    groupId = response_json["groupId"]
+    
+    return groupId
+
+def group_delete(configuration: Configuration):
+    _GROUP_NAME = _get_group_name
+    headers = {"Accept": "application/json", "Content-Type": "application/json"}
+    payload = json.dumps({"name": _GROUP_NAME})
+    
+    try:
+        response = requests.request(
+            "GET", configuration.url, data=payload, headers=headers, auth=configuration.auth
+        )
+    except Exception as e:
+        msg = f"Error occured during Foo Bar group {_GROUP_NAME} creation:\n{e}"
         utils.logger.error(msg)
         pytest.exit(1, msg=msg)
     response_json = json.loads(response.text)
@@ -54,13 +84,11 @@ def group_create_and_delete(configuration: Configuration):
     )
     groupId = response_json["groupId"]
 
-    time.sleep(10)  # Jira Cloud needs a time to populate the change
-
     query = {"groupId": f"{groupId}"}
     try:
-        response = requests.request("DELETE", url, params=query, auth=auth)
+        response = requests.request("DELETE", configuration.url, params=query, auth=configuration.auth)
     except Exception as e:
-        msg = f"Error occured during Jira Cloud group {_GROUP_NAME} deletion (groupId: {groupId}):\n{e}"
+        msg = f"Error occured during Foo Bar group {_GROUP_NAME} deletion (groupId: {groupId}):\n{e}"
         utils.logger.error(msg)
         pytest.exit(1, msg=msg)
     utils.logger.debug(response.text)

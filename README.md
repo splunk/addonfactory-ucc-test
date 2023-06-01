@@ -73,10 +73,10 @@ This document will be used for tests/modinput_functional/ta.py customization
 as an example:
 ```
 try:
-    api_response = api_instance.splunk_ta_jira_cloud_settings_logging_post(output_mode, loglevel=loglevel)
+    api_response = api_instance.splunk_ta_foo_bar_settings_logging_post(output_mode, loglevel=loglevel)
     pprint(api_response)
 except ApiException as e:
-    print("Exception when calling DefaultApi->splunk_ta_jira_cloud_settings_logging_post: %s\n" % e)
+    print("Exception when calling DefaultApi->splunk_ta_foo_bar_settings_logging_post: %s\n" % e)
 ```
 
                 3.1.1.1.2.  Paste the code snippet to the setup method and make sure arguments are assigned to expected value (in this case or variables in other cases)
@@ -84,10 +84,10 @@ except ApiException as e:
 All other details are organised for you (api_instance created, output_mode set to json, pprint and print aliased to logging debug and error respectively, etc.)
 ```
 try:
-    api_response = api_instance.splunk_ta_jira_cloud_settings_logging_post(output_mode, loglevel="DEBUG")
+    api_response = api_instance.splunk_ta_foo_bar_settings_logging_post(output_mode, loglevel="DEBUG")
     pprint(api_response)
 except ApiException as e:
-    print("Exception when calling DefaultApi->splunk_ta_jira_cloud_settings_logging_post: %s\n" % e)
+    print("Exception when calling DefaultApi->splunk_ta_foo_bar_settings_logging_post: %s\n" % e)
 ```
 
             3.1.1.2.    create configuration
@@ -181,8 +181,8 @@ export MODINPUT_TEST_SPLUNK_PASSWORD=[your_value]
 Check 3.2.2 for your list. What's given below is just an example 
 ```
 export MODINPUT_TEST_FOOBAR_DOMAIN=[your_value]
-export MODINPUT_TEST_FOOBAR_TOKEN_USERNAME=[your_value]
-export MODINPUT_TEST_FOOBAR_TOKEN_VALUE=[your_value]
+export MODINPUT_TEST_FOOBAR_USERNAME=[your_value]
+export MODINPUT_TEST_FOOBAR_TOKEN=[your_value]
 ```
 
 5.  When all necessary code modifications are ready, commit and push your modifications, except output and swagger_client directories
