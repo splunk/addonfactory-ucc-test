@@ -116,7 +116,7 @@ For each input type:
 
         3.1.2.  teardown
 
-Use algorithm given in point 3.1.1.3.2 to construct similar loop.
+Use algorithm given in point 3.1.1.3.3 to construct similar loop.
 The difference will be that code snippets for *_name_post will be used with additional argument disabled, that should be set to True
 
     3.2.    vendor_product.py
