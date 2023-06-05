@@ -1,5 +1,6 @@
 import argparse
 import sys
+import tempfile
 from pathlib import Path
 from datetime import datetime
 from typing import Optional, Sequence
@@ -57,7 +58,7 @@ def main(argv: Optional[Sequence[str]] = None):
             return l[0]
 
     class TmpPath():
-        DEFAULT = "/tmp/modinput"
+        DEFAULT = Path(tempfile.gettempdir()) / "modinput"
 
         @staticmethod
         def validate(value):
