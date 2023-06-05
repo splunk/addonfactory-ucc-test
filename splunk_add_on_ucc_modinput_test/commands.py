@@ -20,12 +20,15 @@ from python_on_whales import docker
 from importlib_resources import files
 from splunk_add_on_ucc_modinput_test import resources
 
-logger = logging.getLogger("ucc_gen")
+logger = logging.getLogger("ucc-test-modinput")
 
 def initialize(
     modinput: Path
 ) -> Path:
     shutil.copytree(str(files(resources).joinpath('modinput_functional')),str(modinput))
+    init_in_tests = modinput.parent / "__init__.py"
+    if not init_in_tests.exists():
+        init_in_tests.touch()
 
 def generate(
     openapi: Path,
