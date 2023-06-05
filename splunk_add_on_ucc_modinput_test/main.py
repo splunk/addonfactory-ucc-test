@@ -58,7 +58,7 @@ def main(argv: Optional[Sequence[str]] = None):
             return l[0]
 
     class TmpPath():
-        DEFAULT = Path(tempfile.gettempdir()) / "modinput"
+        DEFAULT = str(Path(tempfile.gettempdir()) / "modinput")
 
         @staticmethod
         def validate(value):
