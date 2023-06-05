@@ -1,7 +1,7 @@
 from typing import List
 from splunk_add_on_ucc_modinput_test.common import utils
 from splunk_add_on_ucc_modinput_test.common.splunk_instance import Configuration as SplunkConfiguration
-from .vendor_product import Configuration as VendorProductConfiguration
+from tests.modinput_functional.vendor_product import Configuration as VendorProductConfiguration
 import swagger_client
 from swagger_client.api.default_api import DefaultApi
 
