@@ -16,8 +16,10 @@ def test_foo_bar_group_creation(configuration):
     input_configuration = configuration.get_input_configuration("in_")
     time.sleep(input_configuration.interval)  #   input interval
     time.sleep(60)  #   just to give a little bit more time to get the data
-
-    spl = f"search index={configuration.splunk_configuration.dedicated_index.name} action=group_created"
+    
+    # construct spl the way it collects this test case events
+    # use _raw data; eg. if your TA contains field extractions in props/transforms disable your TA when testing your spl
+    spl = f"search index={configuration.splunk_configuration.dedicated_index.name} action=group_created | where _time>{utils.Common().start_timestamp}"
     utils.logger.debug(spl)
     search_result_details = splunk_instance.search(
         service=configuration.splunk_configuration.service, searchquery=spl
@@ -31,6 +33,7 @@ def test_foo_bar_group_creation(configuration):
 
 
 def test_foo_bar_group_deletion(configuration):
+    # execute vendor product action that will generate unique event
     vendor_product.group_delete(configuration.vendor_product_configuration)
 
     # get input that will be tested
@@ -38,7 +41,7 @@ def test_foo_bar_group_deletion(configuration):
     time.sleep(input_configuration.interval)  #   input interval
     time.sleep(60)  #   just to give a little bit more time to get the data
 
-    spl = f"search index={configuration.splunk_configuration.dedicated_index.name} action=group_deleted"
+    spl = f"search index={configuration.splunk_configuration.dedicated_index.name} action=group_deleted | where _time>{utils.Common().start_timestamp}"
     utils.logger.debug(spl)
     search_result_details = splunk_instance.search(
         service=configuration.splunk_configuration.service, searchquery=spl
@@ -54,7 +57,7 @@ def test_foo_bar_group_deletion(configuration):
 #   this test checks if none internal error occured
 #   as such, has to be executed a the last one
 def test_internal_index(configuration):
-    spl = f"search index=_internal log_level IN (CRITICAL,ERROR,WARN) where _time>{utils.Common().start_timestamp}"
+    spl = f"search index=_internal log_level IN (CRITICAL,ERROR,WARN) | where _time>{utils.Common().start_timestamp}"
     utils.logger.debug(spl)
     search_result_details = splunk_instance.search(
         service=configuration.splunk_configuration.service, searchquery=spl
