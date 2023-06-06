@@ -3,7 +3,6 @@ import pytest
 from splunk_add_on_ucc_modinput_test.common import utils
 from splunk_add_on_ucc_modinput_test.common import splunk_instance
 from tests.modinput_functional import vendor_product
-from tests.modinput_functional.ta import InputConfiguration
 
 #   BE AWARE
 #   the file content is extremely vendor product and TA specific
