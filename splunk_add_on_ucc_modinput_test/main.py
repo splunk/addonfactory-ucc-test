@@ -4,10 +4,8 @@ import tempfile
 from pathlib import Path
 from datetime import datetime
 from typing import Optional, Sequence
-import logging
-from splunk_add_on_ucc_modinput_test import commands
+from splunk_add_on_ucc_modinput_test import commands,tools
 
-logger = logging.getLogger("ucc_test")
 
 class DefaultSubcommandArgumentParser(argparse.ArgumentParser):
     __default_subparser = None
@@ -91,12 +89,24 @@ def main(argv: Optional[Sequence[str]] = None):
                 raise argparse.ArgumentTypeError(f"Given directory ({value}) already exist")
             return directory
 
+    class FilePath():
+        @staticmethod
+        def validate(value):
+            f = Path(value)
+            if not f.exists():
+                raise argparse.ArgumentTypeError(f"{value} does not exist")
+            elif not f.is_file():
+                raise argparse.ArgumentTypeError(f"{value} is not a file")
+            return f
+
 
     argv = argv if argv is not None else sys.argv[1:]
     parser = DefaultSubcommandArgumentParser()
     subparsers = parser.add_subparsers(dest="command")
     gen_parser = subparsers.add_parser("gen", description="Generate python client code from openapi.json")
     init_parser = subparsers.add_parser("init", description="Initialize modinput tests. This is one time action.")
+    base64encode_parser = subparsers.add_parser("base64encode", description="Tool to convert complex string (due to special characters or structure) to base64 string")
+    base64decode_parser = subparsers.add_parser("base64decode", description="Tool to decode base64 string")
     parser.set_default_subparser("gen")
     
     _o_args = (
@@ -143,6 +153,22 @@ def main(argv: Optional[Sequence[str]] = None):
         default=ModinputPath.DEFAULT,
     )
 
+    base64encode_parser.add_argument(
+        "-f",
+        "--file",
+        type=FilePath.validate,
+        help="Path to input text file.",
+        required=True
+    )
+
+    base64decode_parser.add_argument(
+        "-s",
+        "--string",
+        type=str,
+        help="Base64 encoded string.",
+        required=True
+    )
+
     args = parser.parse_args(argv)
     if args.command in ["gen","init"]:
         commands.generate(
@@ -152,7 +178,20 @@ def main(argv: Optional[Sequence[str]] = None):
         )
     if args.command == "init":
         commands.initialize(
-            modinput=args.modinput
+            openapi=args.openapi_json,
+            modinput=args.modinput,
+        )
+    if args.command == "base64encode":
+        print(
+            tools.base64encode(
+                text_file=args.file
+            )
+        )
+    if args.command == "base64decode":
+        print(
+            tools.base64decode(
+                base64_string=args.string
+            )
         )
 
 if __name__ == "__main__":

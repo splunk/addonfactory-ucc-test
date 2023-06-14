@@ -8,6 +8,8 @@ output_mode = "json"
 pprint = utils.logger.debug
 print = utils.logger.error
 
+NAME = "splunk_ta_foo_bar" # will be replaced by ucc-test-modinput init
+
 # create modinput type specific classes
 # InputTypeAbcConfiguration and InputTypeXyzConfiguration are just examples
 # and should be used as motivation for your code

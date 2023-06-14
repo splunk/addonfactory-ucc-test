@@ -4,20 +4,51 @@ import datetime
 from functools import lru_cache
 import pytz
 import logging
+import base64
+from pathlib import Path
+from collections.abc import Callable
 
 global logger
 logger = logging.getLogger("tests_modinput")
 
 
-def get_from_environment_variable(environment_variable: str) -> str:
-    if environment_variable not in os.environ:
+def get_from_environment_variable(
+    environment_variable: str,
+    *,
+    string_function = None,
+    alternative_environment_variable = None,
+) -> str:
+    def use_string_function_if_needed(*,value,function):
+        return value if function == None else function(value)
+    if environment_variable not in os.environ and alternative_environment_variable != None and alternative_environment_variable in os.environ:
+        return use_string_function_if_needed(value=os.environ[alternative_environment_variable],function=string_function)
+    elif environment_variable not in os.environ:
         logger.critical(40 * "*")
         logger.critical(f"{environment_variable} environment variable not set")
         logger.critical("run below in terminal:")
         logger.critical(f"export {environment_variable}=[your value]")
         logger.critical(40 * "*")
         exit(1)
-    return os.environ[environment_variable]
+    return use_string_function_if_needed(value=os.environ[environment_variable],function=string_function)
+
+
+class Base64:
+    
+    @staticmethod
+    def encode(string: str) -> str:
+        _bytes = string.encode('utf-8')
+        base64_encoded = base64.b64encode(_bytes)
+        base64_string = base64_encoded.decode('utf-8')
+        return base64_string
+    
+    @staticmethod
+    def decode(
+        base64_string: str
+    ) -> str:
+        base64_bytes = base64_string.encode('utf-8')
+        decoded_bytes = base64.b64decode(base64_bytes)
+        string = decoded_bytes.decode('utf-8')
+        return string
 
 
 def get_epoch_timestamp() -> float:
@@ -54,3 +85,31 @@ class Common(object):
     def sufix(self) -> str:
         return f"mit_{convert_to_utc(self.start_timestamp)}"
         # MIT from "MODULARINPUT TEST"
+
+def replace_line(
+    *,
+    file: Path,
+    pattern: str,
+    replacement: str,
+    ):
+    logger.debug(f"replace_line(file_path:{file},pattern:{pattern},replacement{replacement})")
+
+    with file.open() as f:
+        lines = f.readlines()
+
+    found = False
+    modified_lines = []
+    for line in lines:
+        if re.match(pattern, line):
+            logger.debug(f"Found a line ({line}) that will be replaced")
+            found = True
+            line = re.sub(pattern, replacement, line)
+        modified_lines.append(line)
+
+    if found:
+        with open(file, 'w') as file:
+            file.writelines(modified_lines)
+        logger.debug("Pattern found and replaced successfully. Leaving replace_line.")
+    else:
+        logger.debug("Pattern not found in the file. Leaving replace_line.")
+

@@ -13,19 +13,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-import logging
+import json
 from pathlib import Path
 import shutil
 from python_on_whales import docker
 from importlib_resources import files
 from splunk_add_on_ucc_modinput_test import resources
+from splunk_add_on_ucc_modinput_test.common import utils
 
-logger = logging.getLogger("ucc-test-modinput")
 
 def initialize(
+    openapi: Path,
     modinput: Path
 ) -> Path:
+# copy resources/modinput_functional from here to tests in TA repo
     shutil.copytree(str(files(resources).joinpath('modinput_functional')),str(modinput))
+# replace NAME value in ta.py with TA name from openapi.json info.title; remove comment
+    with openapi.open() as f:
+        data = json.load(f)
+    ta_py_path = modinput / "ta.py"
+    utils.replace_line(
+        file=ta_py_path,
+        pattern=r'NAME = "splunk_ta_foo_bar" #.*',
+        replacement=f"NAME = \"{data['info']['title']}\""
+        )
+
+# make sure tests directory contains __init__.py to import tests modules
     init_in_tests = modinput.parent / "__init__.py"
     if not init_in_tests.exists():
         init_in_tests.touch()
