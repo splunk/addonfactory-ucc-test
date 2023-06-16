@@ -15,21 +15,15 @@
 #
 
 from pathlib import Path
-import base64
+from splunk_add_on_ucc_modinput_test.common import utils
 
 def base64encode(
     text_file: Path
 ) -> str:
     string = text_file.read_text()
-    _bytes = string.encode('utf-8')
-    base64_encoded = base64.b64encode(_bytes)
-    base64_string = base64_encoded.decode('utf-8')
-    return base64_encoded
+    return utils.Base64.encode(string=string)
 
 def base64decode(
     base64_string: str
 ) -> str:
-    base64_bytes = base64_string.encode('utf-8')
-    decoded_bytes = base64.b64decode(base64_bytes)
-    string = decoded_bytes.decode('utf-8')
-    return string
+    return utils.Base64.decode(base64_string=base64_string)
