@@ -169,6 +169,22 @@ def main(argv: Optional[Sequence[str]] = None):
         required=True
     )
 
+    group = base64encode_parser.add_mutually_exclusive_group()
+    group.add_argument(
+        "-f",
+        "--file",
+        type=FilePath.validate,
+        help="Path to input text file.",
+        required=True
+    )
+    group.add_argument(
+        "-s",
+        "--string",
+        type=str,
+        help="Base64 encoded string.",
+        required=True
+    )
+
     args = parser.parse_args(argv)
     if args.command in ["gen","init"]:
         commands.generate(
