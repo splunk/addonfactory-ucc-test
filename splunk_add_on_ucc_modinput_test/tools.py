@@ -18,9 +18,11 @@ from pathlib import Path
 from splunk_add_on_ucc_modinput_test.common import utils
 
 def base64encode(
-    text_file: Path
+    text_file: Path,
+    string: str,
 ) -> str:
-    string = text_file.read_text()
+    if string == None:
+        string = text_file.read_text()
     return utils.Base64.encode(string=string)
 
 def base64decode(

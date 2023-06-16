@@ -200,7 +200,8 @@ def main(argv: Optional[Sequence[str]] = None):
     if args.command == "base64encode":
         print(
             tools.base64encode(
-                text_file=args.file
+                text_file=args.file,
+                string=args.string,
             )
         )
     if args.command == "base64decode":
