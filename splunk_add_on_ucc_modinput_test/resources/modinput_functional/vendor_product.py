@@ -17,7 +17,8 @@ class Configuration:
             "MODINPUT_TEST_FOOBAR_USERNAME"
         )
         self._token = utils.get_from_environment_variable(
-            "MODINPUT_TEST_FOOBAR_TOKEN"
+            "MODINPUT_TEST_FOOBAR_TOKEN_BASE64",
+            string_function=utils.Base64.decode
         )
 
     @property

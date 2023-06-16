@@ -134,7 +134,7 @@ class Configuration:
     def __init__(self):
         self.domain = utils.get_from_environment_variable("MODINPUT_TEST_FOOBAR_DOMAIN")
         self.username = utils.get_from_environment_variable("MODINPUT_TEST_FOOBAR_USERNAME")
-        self.token = utils.get_from_environment_variable("MODINPUT_TEST_FOOBAR_TOKEN")
+        self.token = utils.get_from_environment_variable("MODINPUT_TEST_FOOBAR_TOKEN_BASE64")
 ```
 
     3.3.    test_modinputs.py
@@ -173,7 +173,7 @@ DO NOT MODIFY CODE IN THIS FILE
 export MODINPUT_TEST_SPLUNK_HOST=[your_value; eg. localhost]
 export MODINPUT_TEST_SPLUNK_PORT=[your_value; eg. 8089]
 export MODINPUT_TEST_SPLUNK_USERNAME=[your_value; eg. admin]
-export MODINPUT_TEST_SPLUNK_PASSWORD=[your_value]
+export MODINPUT_TEST_SPLUNK_PASSWORD_BASE64=[your_value]
 ```
 
     4.2.    TA-specific
@@ -182,7 +182,7 @@ Check 3.2.2 for your list. What's given below is just an example
 ```
 export MODINPUT_TEST_FOOBAR_DOMAIN=[your_value]
 export MODINPUT_TEST_FOOBAR_USERNAME=[your_value]
-export MODINPUT_TEST_FOOBAR_TOKEN=[your_value]
+export MODINPUT_TEST_FOOBAR_TOKEN_BASE64=[your_value]
 ```
 
     4.3. `poetry run pytest tests/modinput_functional/`

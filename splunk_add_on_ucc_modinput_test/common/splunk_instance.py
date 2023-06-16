@@ -37,7 +37,8 @@ class Configuration:
                 "MODINPUT_TEST_SPLUNK_USERNAME"
             )
             Configuration.__instance._password = utils.get_from_environment_variable(
-                "MODINPUT_TEST_SPLUNK_PASSWORD"
+                "MODINPUT_TEST_SPLUNK_PASSWORD_BASE64",
+                string_function=utils.Base64.decode,
             )
             Configuration.__instance._service = client.connect(
                 host=Configuration.__instance._host,
