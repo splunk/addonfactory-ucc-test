@@ -153,13 +153,13 @@ def main(argv: Optional[Sequence[str]] = None):
         default=ModinputPath.DEFAULT,
     )
 
-    base64encode_parser.add_argument(
-        "-f",
-        "--file",
-        type=FilePath.validate,
-        help="Path to input text file.",
-        required=True
-    )
+    # base64encode_parser.add_argument(
+    #     "-f",
+    #     "--file",
+    #     type=FilePath.validate,
+    #     help="Path to input text file.",
+    #     required=True
+    # )
 
     base64decode_parser.add_argument(
         "-s",
