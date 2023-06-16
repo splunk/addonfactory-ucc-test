@@ -175,14 +175,14 @@ def main(argv: Optional[Sequence[str]] = None):
         "--file",
         type=FilePath.validate,
         help="Path to input text file.",
-        required=True
+        # required=True
     )
     group.add_argument(
         "-s",
         "--string",
         type=str,
-        help="Base64 encoded string.",
-        required=True
+        help="String to be base64 encoded.",
+        # required=True
     )
 
     args = parser.parse_args(argv)
