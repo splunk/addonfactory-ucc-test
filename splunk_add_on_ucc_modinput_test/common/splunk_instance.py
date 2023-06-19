@@ -74,6 +74,8 @@ class Configuration:
                         Configuration.__instance._service
                     )
                 )
+            utils.logger.info(f"Splunk - host:port and user set to {Configuration.__instance._host}:{Configuration.__instance._port}, {Configuration.__instance._username}")
+            utils.logger.info(f"Splunk - dedicated index set to {Configuration.__instance._dedicated_index.name}")
         return Configuration.__instance
 
     def __init__(self):
