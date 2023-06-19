@@ -8,9 +8,15 @@ from splunk_add_on_ucc_modinput_test.common import utils
 
 
 class Configuration:
+    def get_index(self, index_name, client_service):
+        if any(i.name == index_name for i in client_service.indexes):
+            return client_service.indexes[index_name]
+        else:
+            return None
+    
     def _create_dedicated_index(self, client_service):
         the_index_name = f"idx_{utils.Common().sufix}"
-        if any(i.name == the_index_name for i in client_service.indexes):
+        if self.get_index(the_index_name,client_service) != None:
             pytest.exit(1, msg=f"Index {the_index_name} already exists")
         idx_not_created_msg = f"Index {the_index_name} was not created"
         try:
@@ -46,11 +52,20 @@ class Configuration:
                 username=Configuration.__instance._username,
                 password=Configuration.__instance._password,
             )
-            Configuration.__instance._dedicated_index = (
-                Configuration.__instance._create_dedicated_index(
-                    Configuration.__instance._service
-                )
+            dedicated_index_name = utils.get_from_environment_variable(
+                "MODINPUT_TEST_SPLUNK_DEDICATED_INDEX",
+                is_optional=True,
             )
+            if dedicated_index_name:
+                Configuration.__instance._dedicated_index = Configuration.__instance.get_index(dedicated_index_name,Configuration.__instance._service)
+                if Configuration.__instance._dedicated_index == None:
+                    pytest.exit(1, msg=f"Environment variable MODINPUT_TEST_SPLUNK_DEDICATED_INDEX set to {dedicated_index_name}, but Splunk instance {Configuration.__instance._host} does not contain such index. Remove the variable or create the index.")
+            else:
+                Configuration.__instance._dedicated_index = (
+                    Configuration.__instance._create_dedicated_index(
+                        Configuration.__instance._service
+                    )
+                )
         return Configuration.__instance
 
     def __init__(self):

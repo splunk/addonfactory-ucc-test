@@ -19,12 +19,14 @@ def get_from_environment_variable(
     string_function = None,
     # alternative_environment_variable = None,
     # alternative_string_function = None,
+    is_optional: bool=False,
 ) -> str:
     def use_string_function_if_needed(*,variable,function):
         return variable if function == None else function(variable)
     # if environment_variable not in os.environ and alternative_environment_variable != None and alternative_environment_variable in os.environ:
     #     return use_string_function_if_needed(variable=os.environ[alternative_environment_variable],function=alternative_string_function)
     # el
+    if environment_variable not in os.environ and is_optional:  return None
     if environment_variable not in os.environ:
         logger.critical(40 * "*")
         logger.critical(f"{environment_variable} environment variable not set")

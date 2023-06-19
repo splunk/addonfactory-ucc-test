@@ -2,7 +2,7 @@ import time
 import pytest
 from splunk_add_on_ucc_modinput_test.common import utils
 from splunk_add_on_ucc_modinput_test.common import splunk_instance
-from tests.modinput_functional import vendor_product
+from tests.modinput_functional import ta,vendor_product
 
 #   BE AWARE
 #   the file content is extremely vendor product and TA specific
@@ -57,7 +57,7 @@ def test_foo_bar_group_deletion(configuration):
 #   this test checks if none internal error occured
 #   as such, has to be executed a the last one
 def test_internal_index(configuration):
-    spl = f"search index=_internal log_level IN (CRITICAL,ERROR,WARN) | where _time>{utils.Common().start_timestamp}"
+    spl = f"search index=_internal ({ta.NAME} OR source=*{ta.NAME}* OR sourcetype=*{ta.NAME}*) log_level IN (CRITICAL,ERROR,WARN) | where _time>{utils.Common().start_timestamp}"
     utils.logger.debug(spl)
     search_result_details = splunk_instance.search(
         service=configuration.splunk_configuration.service, searchquery=spl

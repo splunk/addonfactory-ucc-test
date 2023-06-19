@@ -19,6 +19,9 @@ def test_get_from_environment_variable_string_function(monkeypatch):
     monkeypatch.setenv(k, v)
     assert utils.get_from_environment_variable(k,string_function=utils.Base64.decode) == some_str
 
+def test_get_from_environment_variable_optional(monkeypatch):
+    assert utils.get_from_environment_variable("DOES_NOT_EXIST", is_optional=True) == None
+
 # def test_get_from_environment_variable_alternative_environment_variable(monkeypatch):
 #     k = 'DOES_NOT_EXIST'
 #     k_alternative = "EXISTING_ENV_VARIABLE"
