@@ -18,16 +18,16 @@ class Configuration:
     def _create_dedicated_index(self, client_service):
         the_index_name = f"idx_{utils.Common().sufix}"
         if self.get_index(the_index_name,client_service) != None:
-            pytest.exit(1, reason=f"Index {the_index_name} already exists")
+            pytest.exit(f"Index {the_index_name} already exists")
         idx_not_created_msg = f"Index {the_index_name} was not created"
         try:
             new_index = client_service.indexes.create(the_index_name)
         except Exception as e:
-            pytest.exit(1, reason=f"{idx_not_created_msg}\nException raised:\n{e}")
+            pytest.exit(f"{idx_not_created_msg}\nException raised:\n{e}")
         if new_index:
             return new_index
         else:
-            pytest.exit(1, reason=idx_not_created_msg)
+            pytest.exit(idx_not_created_msg)
 
     __instance = None
 
@@ -60,7 +60,7 @@ class Configuration:
             if dedicated_index_name:
                 Configuration.__instance._dedicated_index = Configuration.__instance.get_index(dedicated_index_name,Configuration.__instance._service)
                 if Configuration.__instance._dedicated_index == None:
-                    pytest.exit(1, reason=f"Environment variable MODINPUT_TEST_SPLUNK_DEDICATED_INDEX set to {dedicated_index_name}, but Splunk instance {Configuration.__instance._host} does not contain such index. Remove the variable or create the index.")
+                    pytest.exit(f"Environment variable MODINPUT_TEST_SPLUNK_DEDICATED_INDEX set to {dedicated_index_name}, but Splunk instance {Configuration.__instance._host} does not contain such index. Remove the variable or create the index.")
             else:
                 Configuration.__instance._dedicated_index = (
                     Configuration.__instance._create_dedicated_index(
