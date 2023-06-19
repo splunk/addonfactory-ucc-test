@@ -64,7 +64,7 @@ class Configuration:
             )
             if dedicated_index_name:
                 Configuration.__instance._dedicated_index = Configuration.__instance.get_index(dedicated_index_name,Configuration.__instance._service)
-                if Configuration.__instance._dedicated_index == None:
+                if not Configuration.__instance._dedicated_index:
                     reason = f"Environment variable MODINPUT_TEST_SPLUNK_DEDICATED_INDEX set to {dedicated_index_name}, but Splunk instance {Configuration.__instance._host} does not contain such index. Remove the variable or create the index."
                     utils.logger.critical(reason)
                     pytest.exit(reason)
