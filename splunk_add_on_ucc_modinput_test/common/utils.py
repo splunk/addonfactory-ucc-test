@@ -10,8 +10,25 @@ from pathlib import Path
 from collections.abc import Callable
 
 global logger
-logger = logging.getLogger("tests_modinput")
+def init_logger():
+    """
+    Configure file based logger for the plugin
+    """
+    fh = logging.FileHandler("ucc_modinput_test.log")
+    fh.setLevel(logging.DEBUG)
+    formatter = logging.Formatter(
+        "%(asctime)s - %(levelname)s - %(filename)s - %(funcName)s - %(message)s"
+    )
+    fh.setFormatter(formatter)
+    logger = logging.getLogger("ucc-modinput-test")
+    logger.addHandler(fh)
+    logging.root.propagate = False
+    logger.setLevel(logging.DEBUG)
+    return logger
 
+init_logger()
+logger = logging.getLogger("ucc-modinput-test")
+logger.debug("Logger set")
 
 def get_from_environment_variable(
     environment_variable: str,
