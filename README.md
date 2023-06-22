@@ -3,6 +3,14 @@ A framework to test UCC-based Splunk Add-ons.
 
 splunk_add_on_ucc_modinput_test is aimed for TA modinput tests that currently involve vendor products becoming end to end tests.
 
+ucc-test-modinput CLI tool is delivered with this project. You can use the tool with following arguments:
+- `base64encode` 
+-- `-s [string you want to encode]` - eg. `base64encode -s ThisIsMyPassword`
+-- `-f [text file path; string from the file will be encoded]` - eg. `ucc-test-modinput base64encode -f ~/client_secret.json`
+- `base64decode -s [string you want to decode]` - eg. `ucc-test-modinput base64decode -s VGghczEkTXlQQHNzdzByZA==`
+- `init` and `gen` - their meaning and usecases are described in further part of this documentation; run with `-h` or `--help` argument to see arguments that can be customised if needed
+
+
 1. If you want to apply this library for your TA, there three aspects you need to facus on and document:
 
     1.1. your TA 
@@ -18,9 +26,11 @@ etc.
 
 Do following for each modular input type
 
-            1.1.2.1. What are values for common parameters for all modular inputs (you'll be able to define name prefix and interval; index will be set by the framework)?
+            1.1.2.1. What are values for common parameters for all modular inputs?
 
             1.1.2.2. What are modular input type specific fields?
+
+            1.1.2.3. Do you want to use existing Splunk index or let the framework to create dedicated index for each test run? Due to better  data isolation, dedicated index is recommended.
 
     1.2. vendor product
 
@@ -30,10 +40,14 @@ How the actions can be achieved programatically?
 
     1.3. Splunk
 
-How does each unique event look like in Splunk?
+        1.3.1. Is it Enterprise or Cloud (Victoria is supported only). If Cloud, is the stack in production or some other environment (eg. Staging)
+
+        1.3.2. How does each unique event look like in Splunk?
 What query needs to be applied to find particular event?
 What are expected field values?
 etc. 
+
+
 
 
 2.  Once you are ready to add the tests to your TA project:
@@ -133,9 +147,17 @@ To do so, use utils.get_from_environment_variable. As an example, to load domain
 class Configuration:
     def __init__(self):
         self.domain = utils.get_from_environment_variable("MODINPUT_TEST_FOOBAR_DOMAIN")
-        self.username = utils.get_from_environment_variable("MODINPUT_TEST_FOOBAR_USERNAME")
-        self.token = utils.get_from_environment_variable("MODINPUT_TEST_FOOBAR_TOKEN_BASE64")
+        self.username = utils.get_from_environment_variable("MODINPUT_TEST_FOOBAR_USERNAME", is_optional=True)
+        self.token = utils.get_from_environment_variable("MODINPUT_TEST_FOOBAR_TOKEN_BASE64", string_function=utils.Base64.decode)
 ```
+---
+**NOTE**
+`MODINPUT_TEST_FOOBAR_USERNAME` environment variable is optional in this case. If not set, `None` will be assigned to `self.username`.
+---
+---
+**NOTE**
+`_BASE64` suffix is used to emphasize the password value should be base64 encoded. `string_function` is pointing to callable object that will do string transformation.
+---
 
     3.3.    test_modinputs.py
 
@@ -149,11 +171,13 @@ class Configuration:
 The additional minute is to allow data to be propagated.
 The value is just a proposition and in some cases different values may be appropriate
 
-            3.3.1.4.    Create spl to get the unique event from dedicated splunk index
+            3.3.1.4.    Make sure you are setting `test_start_timestamp` and `test_end_timestamp` (`test_end_timestamp = utils.get_epoch_timestamp()`)
 
-`spl = f"search index={configuration.splunk_configuration.dedicated_index.name} [other conditions like expected source, sourcetype, attribute value, etc.]"`
+            3.3.1.5.    Create spl to get the unique event from dedicated splunk index
 
-            3.3.1.5.    Run search (`splunk_instance.search`) and compare (assert) results with expected values
+`spl = f"search index={input_configuration.index} [other conditions like expected source, sourcetype, attribute value, etc.] | where _time>{test_start_timestamp} AND _time<{test_end_timestamp}"`
+
+            3.3.1.6.    Run search (`splunk_instance.search`) and compare (assert) results with expected values
 
         3.3.2.  test_internal_index
 
@@ -167,16 +191,29 @@ DO NOT MODIFY CODE IN THIS FILE
 
 4. Set environment variables and pytest run:
 
-    4.1.    common for all TAs
+    4.1.    Splunk
 
+        4.1.1.  common for all Splunk architectures and usecases
 ```
 export MODINPUT_TEST_SPLUNK_HOST=[your_value; eg. localhost]
 export MODINPUT_TEST_SPLUNK_PORT=[your_value; eg. 8089]
 export MODINPUT_TEST_SPLUNK_USERNAME=[your_value; eg. admin]
 export MODINPUT_TEST_SPLUNK_PASSWORD_BASE64=[your_value]
 ```
+If you use Splunk Enterprise and want to have dedicated index created for each test run, that's all you need to define for Splunk.
 
-    4.2.    TA-specific
+        4.1.2.  if you want to use existing index (for both architectures)
+`export MODINPUT_TEST_SPLUNK_DEDICATED_INDEX=[existing_index_name]`
+
+        4.1.3. if you use Splunk Cloud and want to have dedicated index created for each test run
+```
+export MODINPUT_TEST_SPLUNK_TOKEN_BASE64=[base64_encoded_Splunk_token]
+export MODINPUT_TEST_ACS_SERVER=[ACS_server eg. https://staging.admin.splunk.com]
+export MODINPUT_TEST_ACS_STACK=[ACS_stack eg. if your instance address is https://my-splunk.splunkcloud.com/, most likely, your stack is my-splunk]
+```
+
+
+    4.2.    TA
 
 Check 3.2.2 for your list. What's given below is just an example 
 ```

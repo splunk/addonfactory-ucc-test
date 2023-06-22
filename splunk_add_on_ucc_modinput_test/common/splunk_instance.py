@@ -114,6 +114,7 @@ class Configuration:
                     reason = f"Environment variable MODINPUT_TEST_SPLUNK_DEDICATED_INDEX set to {dedicated_index_name}, but Splunk instance {Configuration.__instance._host} does not contain such index. Remove the variable or create the index."
                     utils.logger.critical(reason)
                     pytest.exit(reason)
+                utils.logger.debug(f"Existing index {dedicated_index_name} will be used for test in splunk {Configuration.__instance._host}")
             else:
                 created_index_name = f"idx_{utils.Common().sufix}"
                 if Configuration.get_index(created_index_name,Configuration.__instance._service):
@@ -135,6 +136,7 @@ class Configuration:
                             Configuration.__instance._service
                         )
                     )
+                utils.logger.debug(f"Index {created_index_name} has just been created in splunk {Configuration.__instance._host}")
 
             utils.logger.info(f"Splunk - host:port and user set to {Configuration.__instance._host}:{Configuration.__instance._port}, {Configuration.__instance._username}")
             utils.logger.info(f"Splunk - index {Configuration.__instance._dedicated_index.name} will be used for the test run")
