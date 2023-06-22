@@ -1,6 +1,7 @@
 import time
 import pytest
 import requests
+from requests.adapters import HTTPAdapter, Retry
 from splunklib import client
 from splunklib.client import Service
 from splunklib.client import Job
