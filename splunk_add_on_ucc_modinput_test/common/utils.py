@@ -17,7 +17,7 @@ def init_logger():
     fh = logging.FileHandler("ucc_modinput_test.log")
     fh.setLevel(logging.DEBUG)
     formatter = logging.Formatter(
-        "%(asctime)s - %(levelname)s - %(filename)s - %(funcName)s - %(message)s"
+        "%(asctime)s - %(levelname)s - %(process)d - %(filename)s - %(funcName)s - %(message)s"
     )
     fh.setFormatter(formatter)
     logger = logging.getLogger("ucc-modinput-test")
