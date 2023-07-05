@@ -69,7 +69,7 @@ class Base64:
     ) -> str:
         base64_bytes = base64_string.encode('utf-8')
         decoded_bytes = base64.b64decode(base64_bytes)
-        string = decoded_bytes.decode('utf-8')
+        string = decoded_bytes.decode('utf-8').replace('\n', '')
         return string
 
 
