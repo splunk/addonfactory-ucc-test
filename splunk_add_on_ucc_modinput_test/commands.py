@@ -62,6 +62,7 @@ def generate(
     # cp -R ${PWD}/swagger-codegen-generators/ ${TMP}
     shutil.copy(str(files(resources).joinpath('swagger-codegen-generators/src/main/resources/handlebars/python/rest.mustache')), str(generator_path))
 # Create client (docker run --rm -v ${PWD}:/local swaggerapi/swagger-codegen-cli-v3 generate -i /local/openapi.json -l python -o /local/restapi_client -t /local/generator/); it should appear in restapi_client directory
+    print(f"Directory with output of swagger docker: {str(tmp.resolve())}")
     docker.run(
         "swaggerapi/swagger-codegen-cli-v3",
         ["generate", "-i", f"/local/{openapi.name}", "-l", "python", "-o", f"/local/{RESTAPI_CLIENT}", "-t", f"/local/{GENERATOR}/"],
