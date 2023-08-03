@@ -55,10 +55,19 @@ def get_from_environment_variable(
 
 
 class Base64:
+
+    @staticmethod
+    def _remove_ending_chars(string: str) -> str:
+        if len(string) == 0: return string
+        CHARS_TO_BE_REMOVED = ['\n']
+        for i in range(len(string),-1,-1):
+            if string[i-1] not in CHARS_TO_BE_REMOVED:
+                break
+        return string[:i]
     
     @staticmethod
     def encode(string: str) -> str:
-        _bytes = string.encode('utf-8')
+        _bytes = Base64._remove_ending_chars(string=string).encode('utf-8')
         base64_encoded = base64.b64encode(_bytes)
         base64_string = base64_encoded.decode('utf-8')
         return base64_string
@@ -70,7 +79,7 @@ class Base64:
         base64_bytes = base64_string.encode('utf-8')
         decoded_bytes = base64.b64decode(base64_bytes)
         string = decoded_bytes.decode('utf-8')
-        return string
+        return Base64._remove_ending_chars(string=string)
 
 
 def get_epoch_timestamp() -> float:
