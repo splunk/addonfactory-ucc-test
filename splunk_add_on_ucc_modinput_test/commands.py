@@ -21,6 +21,7 @@ from importlib_resources import files
 from splunk_add_on_ucc_modinput_test import resources
 from splunk_add_on_ucc_modinput_test.common import utils
 
+SWAGGER_CODEGEN_CLI_VERSION = "3.0.46"
 
 def initialize(
     openapi: Path,
@@ -63,7 +64,7 @@ def generate(
     shutil.copy(str(files(resources).joinpath('swagger-codegen-generators/src/main/resources/handlebars/python/rest.mustache')), str(generator_path))
 # Create client (docker run --rm -v ${PWD}:/local swaggerapi/swagger-codegen-cli-v3 generate -i /local/openapi.json -l python -o /local/restapi_client -t /local/generator/); it should appear in restapi_client directory
     docker.run(
-        "swaggerapi/swagger-codegen-cli-v3:3.0.46",
+        f"swaggerapi/swagger-codegen-cli-v3:{SWAGGER_CODEGEN_CLI_VERSION}",
         ["generate", "-i", f"/local/{openapi.name}", "-l", "python", "-o", f"/local/{RESTAPI_CLIENT}", "-t", f"/local/{GENERATOR}/"],
         volumes=[(str(tmp.resolve()), "/local")],
         remove=True,
