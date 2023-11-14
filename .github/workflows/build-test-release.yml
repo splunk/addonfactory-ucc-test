@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - "main"
+      - "develop"
+      - "release/**"
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+"
+  pull_request:
+    branches: [ main, develop, "release/**" ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  meta:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix_supportedSplunk: ${{ steps.matrix.outputs.supportedSplunk }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: matrix
+        uses: splunk/addonfactory-test-matrix-action@v1.10
+
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.7"
+      - uses: pre-commit/action@v3.0.0
+
+  build:
+    needs:
+      - fossa-scan
+      - build-ui
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.7"
+      - run: curl -sSL https://install.python-poetry.org | python3 - --version 1.5.1
+      - run: poetry install
+      - name: Build UCC test
+        run: |
+          poetry build
+      - uses: actions/upload-artifact@v3
+        with:
+          name: UCC-test-build
+          path: dist/
+
+  test-unit:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    strategy:
+      matrix:
+        python-version:
+          - "3.7"
+          - "3.8"
+          - "3.9"
+          - "3.10"
+          - "3.11"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: curl -sSL https://install.python-poetry.org | python3 - --version 1.5.1
+      - run: |
+          poetry install
+          poetry run pytest --cov=splunk_add_on_ucc_modinput_test --cov-report=xml tests/unit
