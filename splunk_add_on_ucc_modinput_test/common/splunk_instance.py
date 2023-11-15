@@ -1,7 +1,9 @@
+# mypy: disable-error-code="attr-defined,arg-type"
+
 import time
 import pytest
-import requests
-from requests.adapters import HTTPAdapter, Retry
+import requests  # type: ignore
+from requests.adapters import HTTPAdapter, Retry  # type: ignore
 from splunklib import client
 from splunklib.client import Service
 from splunklib.client import Job
@@ -11,17 +13,18 @@ from splunk_add_on_ucc_modinput_test.common import utils
 
 
 class Configuration:
-
     @staticmethod
-    def get_index(index_name, client_service):
+    def get_index(index_name: str, client_service: Service) -> Index:
         if any(i.name == index_name for i in client_service.indexes):
             return client_service.indexes[index_name]
         else:
             return None
 
     @staticmethod
-    def _victoria_create_index(index_name, *, acs_stack, acs_server, splunk_token):
-        url = f'{acs_server}/{acs_stack}/adminconfig/v2/indexes'
+    def _victoria_create_index(
+        index_name: str, *, acs_stack: str, acs_server: str, splunk_token: str
+    ) -> None:
+        url = f"{acs_server}/{acs_stack}/adminconfig/v2/indexes"
         data = {
             "datatype": "event",
             "maxDataSizeMB": 0,
@@ -29,19 +32,20 @@ class Configuration:
             "searchableDays": 365,
             "splunkArchivalRetentionDays": 366,
             "totalEventCount": "0",
-            "totalRawSizeMB": "0"
+            "totalRawSizeMB": "0",
         }
         headers = {
-            'Authorization': 'Bearer ' + splunk_token,
-            'Content-Type': 'application/json'
+            "Authorization": "Bearer " + splunk_token,
+            "Content-Type": "application/json",
         }
-        idx_not_created_msg = f"Index {index_name} was not created on stack {acs_stack} controlleb by {acs_server}"
+        idx_not_created_msg = f"Index {index_name} was not created on stack \
+            {acs_stack} controlleb by {acs_server}"
         response = requests.post(url, headers=headers, json=data)
         if response.ok:
             session = requests.Session()
             retries = Retry(total=5, backoff_factor=1, status_forcelist=[404])
-            session.mount('http://', HTTPAdapter(max_retries=retries))
-            response = session.get(f'{url}/{index_name}', headers=headers)
+            session.mount("http://", HTTPAdapter(max_retries=retries))
+            response = session.get(f"{url}/{index_name}", headers=headers)
             if response.ok:
                 return
             else:
@@ -49,10 +53,12 @@ class Configuration:
         utils.logger.critical(idx_not_created_msg)
         pytest.exit(idx_not_created_msg)
 
-
     @staticmethod
-    def _enterprise_create_index(index_name, client_service):
-        idx_not_created_msg = f"Index {index_name} was not created on instance {client_service.host}"
+    def _enterprise_create_index(
+        index_name: str, client_service: Service
+    ) -> Index:
+        idx_not_created_msg = f"Index {index_name} was not created on \
+            instance {client_service.host}"
         try:
             new_index = client_service.indexes.create(index_name)
         except Exception as e:
@@ -67,40 +73,59 @@ class Configuration:
 
     __instance = None
 
-    def __new__(cls, *args, **kwargs):
+    def __new__(cls, *args, **kwargs):  # type: ignore
         if not Configuration.__instance:
             Configuration.__instance = object.__new__(cls)
-            Configuration.__instance._host = utils.get_from_environment_variable(
-                "MODINPUT_TEST_SPLUNK_HOST"
+            Configuration.__instance._host = (
+                utils.get_from_environment_variable(
+                    "MODINPUT_TEST_SPLUNK_HOST"
+                )
             )
-            Configuration.__instance._port = utils.get_from_environment_variable(
-                "MODINPUT_TEST_SPLUNK_PORT"
+            Configuration.__instance._port = (
+                utils.get_from_environment_variable(
+                    "MODINPUT_TEST_SPLUNK_PORT"
+                )
             )
-            Configuration.__instance._username = utils.get_from_environment_variable(
-                "MODINPUT_TEST_SPLUNK_USERNAME"
+            Configuration.__instance._username = (
+                utils.get_from_environment_variable(
+                    "MODINPUT_TEST_SPLUNK_USERNAME"
+                )
             )
-            Configuration.__instance._password = utils.get_from_environment_variable(
-                "MODINPUT_TEST_SPLUNK_PASSWORD_BASE64",
-                string_function=utils.Base64.decode,
+            Configuration.__instance._password = (
+                utils.get_from_environment_variable(
+                    "MODINPUT_TEST_SPLUNK_PASSWORD_BASE64",
+                    string_function=utils.Base64.decode,
+                )
             )
             dedicated_index_name = utils.get_from_environment_variable(
                 "MODINPUT_TEST_SPLUNK_DEDICATED_INDEX",
                 is_optional=True,
             )
-            Configuration.__instance._is_cloud = 'splunkcloud.com' in Configuration.__instance._host.lower()
-            create_index_in_cloud = Configuration.__instance._is_cloud and not dedicated_index_name
-            Configuration.__instance._token = utils.get_from_environment_variable(
-                "MODINPUT_TEST_SPLUNK_TOKEN_BASE64",
-                string_function=utils.Base64.decode,
-                is_optional=not create_index_in_cloud,
+            Configuration.__instance._is_cloud = (
+                "splunkcloud.com"
+                in Configuration.__instance._host.lower()  # type: ignore
             )
-            Configuration.__instance._acs_server = utils.get_from_environment_variable(
-                "MODINPUT_TEST_ACS_SERVER",
-                is_optional=not create_index_in_cloud,
+            create_index_in_cloud = (
+                Configuration.__instance._is_cloud and not dedicated_index_name
             )
-            Configuration.__instance._acs_stack = utils.get_from_environment_variable(
-                "MODINPUT_TEST_ACS_STACK",
-                is_optional=not create_index_in_cloud,
+            Configuration.__instance._token = (
+                utils.get_from_environment_variable(
+                    "MODINPUT_TEST_SPLUNK_TOKEN_BASE64",
+                    string_function=utils.Base64.decode,
+                    is_optional=not create_index_in_cloud,
+                )
+            )
+            Configuration.__instance._acs_server = (
+                utils.get_from_environment_variable(
+                    "MODINPUT_TEST_ACS_SERVER",
+                    is_optional=not create_index_in_cloud,
+                )
+            )
+            Configuration.__instance._acs_stack = (
+                utils.get_from_environment_variable(
+                    "MODINPUT_TEST_ACS_STACK",
+                    is_optional=not create_index_in_cloud,
+                )
             )
             Configuration.__instance._service = client.connect(
                 host=Configuration.__instance._host,
@@ -110,15 +135,29 @@ class Configuration:
             )
 
             if dedicated_index_name:
-                Configuration.__instance._dedicated_index = Configuration.get_index(dedicated_index_name,Configuration.__instance._service)
+                Configuration.__instance._dedicated_index = (
+                    Configuration.get_index(
+                        dedicated_index_name, Configuration.__instance._service
+                    )
+                )
                 if not Configuration.__instance._dedicated_index:
-                    reason = f"Environment variable MODINPUT_TEST_SPLUNK_DEDICATED_INDEX set to {dedicated_index_name}, but Splunk instance {Configuration.__instance._host} does not contain such index. Remove the variable or create the index."
+                    reason = f"Environment variable \
+                        MODINPUT_TEST_SPLUNK_DEDICATED_INDEX set to \
+                            {dedicated_index_name}, but Splunk instance \
+                                {Configuration.__instance._host} does not \
+                                    contain such index. Remove the variable \
+                                        or create the index."
                     utils.logger.critical(reason)
                     pytest.exit(reason)
-                utils.logger.debug(f"Existing index {dedicated_index_name} will be used for test in splunk {Configuration.__instance._host}")
+                utils.logger.debug(
+                    f"Existing index {dedicated_index_name} will be used for \
+                        test in splunk {Configuration.__instance._host}"
+                )
             else:
                 created_index_name = f"idx_{utils.Common().sufix}"
-                if Configuration.get_index(created_index_name,Configuration.__instance._service):
+                if Configuration.get_index(
+                    created_index_name, Configuration.__instance._service
+                ):
                     reason = f"Index {created_index_name} already exists"
                     utils.logger.critical(reason)
                     pytest.exit(reason)
@@ -128,22 +167,39 @@ class Configuration:
                         acs_stack=Configuration.__instance._acs_stack,
                         acs_server=Configuration.__instance._acs_server,
                         splunk_token=Configuration.__instance._token,
+                    )
+                    Configuration.__instance._dedicated_index = (
+                        Configuration.get_index(
+                            created_index_name,
+                            Configuration.__instance._service,
                         )
-                    Configuration.__instance._dedicated_index = Configuration.get_index(created_index_name,Configuration.__instance._service)
+                    )
                 else:
                     Configuration.__instance._dedicated_index = (
                         Configuration._enterprise_create_index(
                             created_index_name,
-                            Configuration.__instance._service
+                            Configuration.__instance._service,
                         )
                     )
-                utils.logger.debug(f"Index {created_index_name} has just been created in splunk {Configuration.__instance._host}")
+                utils.logger.debug(
+                    f"Index {created_index_name} has just been created in \
+                        splunk {Configuration.__instance._host}"
+                )
 
-            utils.logger.info(f"Splunk - host:port and user set to {Configuration.__instance._host}:{Configuration.__instance._port}, {Configuration.__instance._username}")
-            utils.logger.info(f"Splunk - index {Configuration.__instance._dedicated_index.name} will be used for the test run")
+            utils.logger.info(
+                f"Splunk - host:port and user set to \
+                    {Configuration.__instance._host}:\
+                        {Configuration.__instance._port}, \
+                            {Configuration.__instance._username}"
+            )
+            utils.logger.info(
+                f"Splunk - index \
+                    {Configuration.__instance._dedicated_index.name} will be \
+                        used for the test run"
+            )
         return Configuration.__instance
 
-    def __init__(self):
+    def __init__(self) -> None:
         pass
 
     @property
@@ -172,7 +228,11 @@ class Configuration:
 
     @property
     def acs_server(self) -> str:
-        return self._acs_server if self._acs_server or not self.is_cloud else 'https://admin.splunk.com'
+        return (
+            self._acs_server
+            if self._acs_server or not self.is_cloud
+            else "https://admin.splunk.com"
+        )
 
     @property
     def service(self) -> Service:
@@ -193,7 +253,9 @@ class SearchState:
         self._results = (
             [
                 result
-                for result in results.JSONResultsReader(job.results(output_mode="json"))
+                for result in results.JSONResultsReader(
+                    job.results(output_mode="json")
+                )
             ]
             if self._is_done
             else None

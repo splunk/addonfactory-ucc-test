@@ -23,55 +23,66 @@ from splunk_add_on_ucc_modinput_test.common import utils
 
 SWAGGER_CODEGEN_CLI_VERSION = "3.0.46"
 
-def initialize(
-    openapi: Path,
-    modinput: Path
-) -> Path:
-# copy resources/modinput_functional from here to tests in TA repo
-    shutil.copytree(str(files(resources).joinpath('modinput_functional')),str(modinput))
-# replace NAME value in ta.py with TA name from openapi.json info.title; remove comment
+
+def initialize(openapi: Path, modinput: Path) -> Path:
+    shutil.copytree(
+        str(files(resources).joinpath("modinput_functional")), str(modinput)
+    )
     with openapi.open() as f:
         data = json.load(f)
     ta_py_path = modinput / "ta.py"
     utils.replace_line(
         file=ta_py_path,
         pattern=r'NAME = "splunk_ta_foo_bar" #.*',
-        replacement=f"NAME = \"{data['info']['title']}\""
-        )
-
-# make sure tests directory contains __init__.py to import tests modules
+        replacement=f"NAME = \"{data['info']['title']}\"",
+    )
     init_in_tests = modinput.parent / "__init__.py"
     if not init_in_tests.exists():
         init_in_tests.touch()
+    return modinput
+
 
 def generate(
     openapi: Path,
     tmp: Path,
     client: Path,
 ) -> Path:
-# Create directory structure and open the tmp directory (run in terminal: mkdir -p tmp/restapi_client ; mkdir -p tmp/generator ; cd tmp)
     RESTAPI_CLIENT = "restapi_client"
     GENERATOR = "generator"
     restapi_client_path = tmp / RESTAPI_CLIENT
     generator_path = tmp / GENERATOR
     restapi_client_path.mkdir()
     generator_path.mkdir()
-# Save your openapi.json file to the directory
     shutil.copy(str(openapi), str(tmp))
-# Download the rest.mustache file (wget https://raw.githubusercontent.com/swagger-api/swagger-codegen/master/modules/swagger-codegen/src/main/resources/python/rest.mustache)
-# Splunk does not expect body for DELETE requests, so we need to revert modifications done for https://github.com/swagger-api/swagger-codegen/issues/9558 (sed "s/request_body[[:blank:]]=[[:blank:]]\'{}\'/request_body = None/g" rest.mustache > generator/rest.mustache). If you want to understand exactly which line of rest.mustache is affected: https://github.com/swagger-api/swagger-codegen/blob/master/modules/swagger-codegen/src/main/resources/python/rest.mustache#L150
-    # cp -R ${PWD}/swagger-codegen-generators/ ${TMP}
-    shutil.copy(str(files(resources).joinpath('swagger-codegen-generators/src/main/resources/handlebars/python/rest.mustache')), str(generator_path))
-# Create client (docker run --rm -v ${PWD}:/local swaggerapi/swagger-codegen-cli-v3 generate -i /local/openapi.json -l python -o /local/restapi_client -t /local/generator/); it should appear in restapi_client directory
+    shutil.copy(
+        str(
+            files(resources).joinpath(
+                "swagger-codegen-generators/src/main/resources/handlebars/python/rest.mustache"  # noqa: E501
+            )
+        ),
+        str(generator_path),
+    )
     docker.run(
         f"swaggerapi/swagger-codegen-cli-v3:{SWAGGER_CODEGEN_CLI_VERSION}",
-        ["generate", "-i", f"/local/{openapi.name}", "-l", "python", "-o", f"/local/{RESTAPI_CLIENT}", "-t", f"/local/{GENERATOR}/"],
+        [
+            "generate",
+            "-i",
+            f"/local/{openapi.name}",
+            "-l",
+            "python",
+            "-o",
+            f"/local/{RESTAPI_CLIENT}",
+            "-t",
+            f"/local/{GENERATOR}/",
+        ],
         volumes=[(str(tmp.resolve()), "/local")],
         remove=True,
     )
-    shutil.copytree(str(restapi_client_path / "swagger_client"), str(client / "swagger_client"))
-    shutil.copy(str(restapi_client_path / "README.md"), str(client / "swagger_client"))
-# Open restapi_client directory and read README.md to find out the details of how the client should be installed, imported and used. (cd restapi_client ; more README.md)
-# Install the client (python setup.py install --user)
-# You can use below code as an inspiration for your own script that imports the client and uses for TA configuration
-
+    shutil.copytree(
+        str(restapi_client_path / "swagger_client"),
+        str(client / "swagger_client"),
+    )
+    shutil.copy(
+        str(restapi_client_path / "README.md"), str(client / "swagger_client")
+    )
+    return restapi_client_path
