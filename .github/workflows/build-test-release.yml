@@ -85,13 +85,17 @@ jobs:
       - uses: actions/setup-python@v4
         with:
           python-version: 3.7
-      - name: Install Splunk
+      - name: Expose endpoints (vendor product)
         run: |
           pip install Flask
-          python tests/functional/demo_rest_endpoints_generator/endpoints_exposer.py
+          python tests/functional/demo_rest_endpoints_generator/endpoints_exposer.py &
           sleep 5
           curl -X PATCH -H "Content-Type: application/json" -d '{"key": "new_value"}' http://localhost:5000/endpoint1
           curl http://localhost:5000/endpoint1
+      - name: Build TA
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 - --version 1.5.1
+
 
       # - run: curl -sSL https://install.python-poetry.org | python3 - --version 1.5.1
       # - name: Install Splunk
