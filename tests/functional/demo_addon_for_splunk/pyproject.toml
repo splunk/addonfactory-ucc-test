@@ -1,0 +1,31 @@
+[tool.poetry]
+name = "demo_addon_for_splunk"
+version = "0.0.1"
+description = "Demo Add-on for Splunk"
+license = "Apache-2.0"
+authors = ["Splunk <addonfactory@splunk.com>"]
+include = ["NOTICE"]
+readme = "README.md"
+repository = "https://github.com/hsekowski-splunk/demo_addon_for_splunk"
+homepage = "https://github.com/hsekowski-splunk/demo_addon_for_splunk"
+keywords = ["splunk"]
+classifiers = [
+]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+splunktaucclib = "^5.0.7"
+solnlib = "^4.5.0"
+
+[tool.poetry.dev-dependencies]
+pytest = "^7.2.1"
+splunk-add-on-ucc-framework = "5.32.0"
+# we want to test what we are developing
+# splunk-add-on-ucc-modinput-test = {git = "git@github.com:splunk/addonfactory-ucc-test.git"}
+
+[tool.poetry.scripts]
+ucc-test-modinput="splunk_add_on_ucc_modinput_test.main:main"
+
+[build-system]
+requires = ["poetry>=1.0.2"]
+build-backend = "poetry.masonry.api"

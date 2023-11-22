@@ -1,5 +1,4 @@
 #   DO NOT MODIFY CODE IN THIS FILE
-from typing import Generator
 import pytest
 from splunk_add_on_ucc_modinput_test.common.splunk_instance import (
     Configuration as SplunkConfiguration,
@@ -12,7 +11,7 @@ from tests.modinput_functional.ta import Configuration as TaConfiguration
 
 #   DO NOT MODIFY CODE IN THIS FILE
 @pytest.fixture(scope="session")
-def configuration() -> Generator[TaConfiguration, None, None]:
+def configuration():
     ta_configuration = TaConfiguration(
         splunk_configuration=SplunkConfiguration(),
         vendor_product_configuration=VendorProductConfiguration(),
