@@ -108,9 +108,17 @@ jobs:
           mkdir -p package/lib || true
           poetry export --without-hashes -o package/lib/requirements.txt
           ucc-gen build --ta-version 1.0.0
-
           cd ../../..
-
+      - uses: actions/download-artifact@v3
+        with:
+          name: UCC-test-build
+          path: dist/
+      - name: Generate modinput tests
+        run: |
+          pip install dist/*.whl
+          cd tests/functional/demo_addon_for_splunk
+          ucc-test-modinput
+          cd ../../..
       # - run: curl -sSL https://install.python-poetry.org | python3 - --version 1.5.1
       - name: Install Splunk and Demo TA
         run: |
@@ -135,11 +143,7 @@ jobs:
           sudo /opt/splunk/bin/splunk restart
           until curl -k -s -u admin:Chang3d! https://localhost:8089/services/server/info\?output_mode\=json | jq '.entry[0].content.kvStoreStatus' | grep -o "ready" ; do echo -n "Waiting for KVStore to become ready-" && sleep 5 ; done
         timeout-minutes: 5
-      - name: Generate modinput tests
-        run: |
-          pip install dist/*.whl
-          cd tests/functional/demo_addon_for_splunk
-          ucc-test-modinput
+
           
       # - name: Run tests
       #   run: |
