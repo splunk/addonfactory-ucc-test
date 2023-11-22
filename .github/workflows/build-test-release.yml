@@ -25,15 +25,15 @@ jobs:
       - id: matrix
         uses: splunk/addonfactory-test-matrix-action@v1.10
 
-      - name: Check if Docker is installed
-        run: docker --version
+      # - name: Check if Docker is installed
+      #   run: docker --version
 
-      - name: Check if Docker daemon is running
-        run: docker info
+      # - name: Check if Docker daemon is running
+      #   run: docker info
 
-      - name: Build and run a simple Docker container
-        run: |
-          docker run --rm hello-world    
+      # - name: Build and run a simple Docker container
+      #   run: |
+      #     docker run --rm hello-world    
 
   pre-commit:
     runs-on: ubuntu-latest
@@ -87,6 +87,7 @@ jobs:
     continue-on-error: true
     needs:
       - meta
+      - build
     strategy:
       matrix:
         splunk: ${{ fromJson(needs.meta.outputs.matrix_supportedSplunk) }}
@@ -107,6 +108,7 @@ jobs:
           mkdir -p package/lib || true
           poetry export --without-hashes -o package/lib/requirements.txt
           ucc-gen build --ta-version 1.0.0
+
           cd ../../..
 
       # - run: curl -sSL https://install.python-poetry.org | python3 - --version 1.5.1
@@ -135,6 +137,8 @@ jobs:
         timeout-minutes: 5
       - name: Generate modinput tests
         run: |
+          pip install dist/*.whl
+          cd tests/functional/demo_addon_for_splunk
           ucc-test-modinput
           
       # - name: Run tests
