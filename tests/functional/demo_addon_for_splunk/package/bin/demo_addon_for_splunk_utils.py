@@ -13,6 +13,7 @@ from solnlib import conf_manager, log
 
 ADDON_NAME = "demo_addon_for_splunk"
 
+
 def set_logger(session_key, filename):
     """
     This function sets up a logger with configured log level.
@@ -29,8 +30,10 @@ def set_logger(session_key, filename):
     logger.setLevel(log_level)
     return logger
 
+
 def set_logger_for_input(session_key, input_name) -> logging.Logger:
     return set_logger(session_key, f"{ADDON_NAME.lower()}_{input_name}")
+
 
 class Connect:
     def __init__(self, *, logger) -> None:
@@ -38,7 +41,9 @@ class Connect:
 
     @staticmethod
     def status_code(response: Response) -> int:
-        return response.status_code if response and response.status_code else 400
+        return (
+            response.status_code if response and response.status_code else 400
+        )
 
     def get(
         self,
@@ -58,6 +63,7 @@ class Connect:
             msg = f"Failed to connect to {uri} and get data"
             self.logger.error(msg + traceback.format_exc())
             raise RestError(400, msg)
+
 
 class Validator:
     def __init__(self, *, session_key) -> None:

@@ -1,4 +1,4 @@
-
+# mypy: disable-error-code="import_declare_test"
 import import_declare_test
 
 from demo_addon_for_splunk_utils import Validator
@@ -17,21 +17,16 @@ util.remove_http_proxy_env_vars()
 
 fields = [
     field.RestField(
-        'uri',
-        required=True,
-        encrypted=False,
-        default=None,
-        validator=None
+        "uri", required=True, encrypted=False, default=None, validator=None
     )
 ]
 model = RestModel(fields, name=None)
 
 
 endpoint = SingleModel(
-    'demo_addon_for_splunk_endpoint',
-    model,
-    config_name='endpoint'
+    "demo_addon_for_splunk_endpoint", model, config_name="endpoint"
 )
+
 
 class demo_addon_for_splunkExternalHandler(AdminExternalHandler):
     def __init__(self, *args, **kwargs):
@@ -52,7 +47,8 @@ class demo_addon_for_splunkExternalHandler(AdminExternalHandler):
     def handleRemove(self, confInfo):
         AdminExternalHandler.handleRemove(self, confInfo)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     logging.getLogger().addHandler(logging.NullHandler())
     admin_external.handle(
         endpoint,
