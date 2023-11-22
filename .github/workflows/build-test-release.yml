@@ -118,6 +118,7 @@ jobs:
           pip install dist/*.whl
           cd tests/functional/demo_addon_for_splunk
           ucc-test-modinput
+          tree -a
           cd ../../..
       # - run: curl -sSL https://install.python-poetry.org | python3 - --version 1.5.1
       - name: Install Splunk and Demo TA
