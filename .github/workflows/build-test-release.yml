@@ -120,7 +120,6 @@ jobs:
           ucc-test-modinput
           tree -a
           cd ../../..
-      # - run: curl -sSL https://install.python-poetry.org | python3 - --version 1.5.1
       - name: Install Splunk and Demo TA
         run: |
           export SPLUNK_PRODUCT=splunk
@@ -146,10 +145,17 @@ jobs:
         timeout-minutes: 5
 
           
-      # - name: Run tests
-      #   run: |
-      #     poetry install
-      #     SPLUNK_HOME=/opt/splunk/ poetry run pytest --junitxml=test-results/results.xml -v tests/integration
+      - name: Run modinput tests
+        run: |
+          export MODINPUT_TEST_SPLUNK_HOST=localhost
+          export MODINPUT_TEST_SPLUNK_PORT=8089
+          export MODINPUT_TEST_SPLUNK_USERNAME=admin
+          export MODINPUT_TEST_SPLUNK_PASSWORD_BASE64=Q2hhbmczZEA=
+          export MODINPUT_TEST_DEMO_ENDPOINT1=http://localhost:5000/endpoint1
+          export MODINPUT_TEST_DEMO_ENDPOINT2=http://localhost:5000/endpoint2
+          export MODINPUT_TEST_DEMO_ENDPOINT3=http://localhost:5000/endpoint3
+          cd tests/functional/demo_addon_for_splunk
+          poetry run pytest tests/modinput_functional
       - uses: actions/upload-artifact@v3
         with:
           name: test-splunk
