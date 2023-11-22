@@ -150,7 +150,7 @@ jobs:
           export MODINPUT_TEST_SPLUNK_HOST=localhost
           export MODINPUT_TEST_SPLUNK_PORT=8089
           export MODINPUT_TEST_SPLUNK_USERNAME=admin
-          export MODINPUT_TEST_SPLUNK_PASSWORD_BASE64=Q2hhbmczZEA=
+          export MODINPUT_TEST_SPLUNK_PASSWORD_BASE64=Q2hhbmczZCE==
           export MODINPUT_TEST_DEMO_ENDPOINT1=http://localhost:5000/endpoint1
           export MODINPUT_TEST_DEMO_ENDPOINT2=http://localhost:5000/endpoint2
           export MODINPUT_TEST_DEMO_ENDPOINT3=http://localhost:5000/endpoint3
