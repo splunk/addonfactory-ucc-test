@@ -1,3 +1,5 @@
+# mypy: disable-error-code="attr-defined"
+
 import time
 import pytest  # noqa: F401
 from splunk_add_on_ucc_modinput_test.common import utils

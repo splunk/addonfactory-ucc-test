@@ -1,3 +1,5 @@
+# mypy: disable-error-code="attr-defined"
+
 from splunk_add_on_ucc_modinput_test.common.splunk_instance import (
     Configuration as SplunkConfiguration,
 )

@@ -1,4 +1,3 @@
-# mypy: disable-error-code="import_declare_test"
 import import_declare_test
 
 from demo_addon_for_splunk_utils import Validator
@@ -29,22 +28,22 @@ endpoint = SingleModel(
 
 
 class demo_addon_for_splunkExternalHandler(AdminExternalHandler):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs):  # type: ignore
         AdminExternalHandler.__init__(self, *args, **kwargs)
 
-    def handleEdit(self, confInfo):
+    def handleEdit(self, confInfo):  # type: ignore
         Validator(session_key=self.getSessionKey()).validate(
             uri=self.payload.get("uri")
         )
         AdminExternalHandler.handleEdit(self, confInfo)
 
-    def handleCreate(self, confInfo):
+    def handleCreate(self, confInfo):  # type: ignore
         Validator(session_key=self.getSessionKey()).validate(
             uri=self.payload.get("uri")
         )
         AdminExternalHandler.handleCreate(self, confInfo)
 
-    def handleRemove(self, confInfo):
+    def handleRemove(self, confInfo):  # type: ignore
         AdminExternalHandler.handleRemove(self, confInfo)
 
 

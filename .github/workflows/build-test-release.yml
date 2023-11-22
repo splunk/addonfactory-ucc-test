@@ -25,16 +25,6 @@ jobs:
       - id: matrix
         uses: splunk/addonfactory-test-matrix-action@v1.10
 
-      # - name: Check if Docker is installed
-      #   run: docker --version
-
-      # - name: Check if Docker daemon is running
-      #   run: docker info
-
-      # - name: Build and run a simple Docker container
-      #   run: |
-      #     docker run --rm hello-world    
-
   pre-commit:
     runs-on: ubuntu-latest
     steps:

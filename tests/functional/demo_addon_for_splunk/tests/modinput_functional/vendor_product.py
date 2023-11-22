@@ -1,3 +1,4 @@
+from typing import Optional
 from splunk_add_on_ucc_modinput_test.common import utils
 
 #   BE AWARE
@@ -31,8 +32,8 @@ class Configuration:
         return self._endpoint3
 
 
-def patch_endpoint(*, url: str, message: str = None) -> str:
-    import requests
+def patch_endpoint(*, url: str, message: Optional[str] = None) -> str:
+    import requests  # type: ignore
 
     request_json = {"message": message} if message else {}
     response = requests.patch(url, json=request_json)
@@ -43,13 +44,19 @@ def patch_endpoint(*, url: str, message: str = None) -> str:
     )
 
 
-def patch_endpoint1(configuration: Configuration, message: str = None) -> str:
+def patch_endpoint1(
+    configuration: Configuration, message: Optional[str] = None
+) -> str:
     return patch_endpoint(url=configuration.endpoint1, message=message)
 
 
-def patch_endpoint2(configuration: Configuration, message: str = None) -> str:
+def patch_endpoint2(
+    configuration: Configuration, message: Optional[str] = None
+) -> str:
     return patch_endpoint(url=configuration.endpoint2, message=message)
 
 
-def patch_endpoint3(configuration: Configuration, message: str = None) -> str:
+def patch_endpoint3(
+    configuration: Configuration, message: Optional[str] = None
+) -> str:
     return patch_endpoint(url=configuration.endpoint3, message=message)

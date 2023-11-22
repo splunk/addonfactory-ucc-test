@@ -5,7 +5,7 @@
 #
 import logging
 import traceback
-import requests
+import requests  # type: ignore
 from requests import Response
 
 from splunktaucclib.rest_handler.error import RestError
@@ -14,7 +14,7 @@ from solnlib import conf_manager, log
 ADDON_NAME = "demo_addon_for_splunk"
 
 
-def set_logger(session_key, filename):
+def set_logger(session_key: str, filename: str) -> logging.Logger:
     """
     This function sets up a logger with configured log level.
     :param filename: Name of the log file
@@ -31,12 +31,12 @@ def set_logger(session_key, filename):
     return logger
 
 
-def set_logger_for_input(session_key, input_name) -> logging.Logger:
+def set_logger_for_input(session_key: str, input_name: str) -> logging.Logger:
     return set_logger(session_key, f"{ADDON_NAME.lower()}_{input_name}")
 
 
 class Connect:
-    def __init__(self, *, logger) -> None:
+    def __init__(self, *, logger: logging.Logger) -> None:
         self.logger = logger
 
     @staticmethod
@@ -48,8 +48,8 @@ class Connect:
     def get(
         self,
         *,
-        uri,
-    ):
+        uri: str,
+    ) -> Response:
         try:
             r = requests.get(uri)
             if r:
@@ -66,12 +66,12 @@ class Connect:
 
 
 class Validator:
-    def __init__(self, *, session_key) -> None:
+    def __init__(self, *, session_key: str) -> None:
         self.connect = Connect(
             logger=set_logger(session_key, ADDON_NAME.lower())
         )
 
-    def validate(self, *, uri):
+    def validate(self, *, uri: str) -> None:
         self.connect.get(
             uri=uri,
         )

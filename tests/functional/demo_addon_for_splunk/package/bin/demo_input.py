@@ -3,6 +3,8 @@ import logging
 import sys
 import traceback
 
+from requests import Response  # type: ignore
+
 import import_declare_test  # noqa: F401
 from solnlib import conf_manager, log
 from splunklib import modularinput as smi
@@ -14,7 +16,7 @@ from demo_addon_for_splunk_utils import (
 )
 
 
-def get_endpoint_uri(session_key: str, endpoint_name: str):
+def get_endpoint_uri(session_key: str, endpoint_name: str) -> str:
     cfm = conf_manager.ConfManager(
         session_key,
         ADDON_NAME,
@@ -25,16 +27,16 @@ def get_endpoint_uri(session_key: str, endpoint_name: str):
     return endpoint_conf_file.get(endpoint_name).get("uri")
 
 
-def get_data(logger: logging.Logger, uri: str):
+def get_data(logger: logging.Logger, uri: str) -> Response:
     logger.info(f"Getting data from an external URI {uri}")
     return Connect(logger=logger).get(uri=uri)
 
 
 class Input(smi.Script):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
-    def get_scheme(self):
+    def get_scheme(self) -> smi.Scheme:
         scheme = smi.Scheme("demo_input")
         scheme.description = "demo_input input"
         scheme.use_external_validation = True
@@ -50,12 +52,12 @@ class Input(smi.Script):
         )
         return scheme
 
-    def validate_input(self, definition: smi.ValidationDefinition):
-        return
+    # def validate_input(self, definition: smi.ValidationDefinition):
+    #     return
 
     def stream_events(
         self, inputs: smi.InputDefinition, event_writer: smi.EventWriter
-    ):
+    ) -> None:
         for input_name, input_item in inputs.inputs.items():
             normalized_input_name = input_name.split("/")[-1]
             try:
