@@ -155,6 +155,7 @@ jobs:
           export MODINPUT_TEST_DEMO_ENDPOINT2=http://localhost:5000/endpoint2
           export MODINPUT_TEST_DEMO_ENDPOINT3=http://localhost:5000/endpoint3
           cd tests/functional/demo_addon_for_splunk
+          poetry install
           poetry run pytest tests/modinput_functional
       - uses: actions/upload-artifact@v3
         with:

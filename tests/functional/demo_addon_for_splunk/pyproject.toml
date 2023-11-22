@@ -20,7 +20,8 @@ solnlib = "^4.5.0"
 [tool.poetry.dev-dependencies]
 pytest = "^7.2.1"
 splunk-add-on-ucc-framework = "5.32.0"
-splunk-add-on-ucc-modinput-test = {git = "git@github.com:splunk/addonfactory-ucc-test.git"}
+# we want to test what we are developing
+# splunk-add-on-ucc-modinput-test = {git = "git@github.com:splunk/addonfactory-ucc-test.git"}
 
 [tool.poetry.scripts]
 ucc-test-modinput="splunk_add_on_ucc_modinput_test.main:main"
