@@ -17,15 +17,15 @@
 from pathlib import Path
 from splunk_add_on_ucc_modinput_test.common import utils
 
+
 def base64encode(
     text_file: Path,
     string: str,
 ) -> str:
-    if string == None:
+    if string is None:
         string = text_file.read_text()
     return utils.Base64.encode(string=string)
 
-def base64decode(
-    base64_string: str
-) -> str:
+
+def base64decode(base64_string: str) -> str:
     return utils.Base64.decode(base64_string=base64_string)
