@@ -148,20 +148,12 @@ jobs:
           poetry add ../../../dist/*.whl
           poetry install
           poetry run pytest tests/modinput_functional
-      - uses: actions/upload-artifact@v3
-        with:
-          name: test-splunk
-          path: test-results
 
   release:
     needs:
       - build
-      # - compliance-copyrights
-      # - fossa-scan
       - test-unit
       - test-splunk
-      # - appinspect-for-expected-outputs
-      # - semgrep
       - pre-commit
     runs-on: ubuntu-latest
     steps:
