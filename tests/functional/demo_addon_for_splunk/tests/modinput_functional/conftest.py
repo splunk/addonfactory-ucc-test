@@ -51,7 +51,7 @@ def configuration(
                     splunk_configuration=SplunkConfiguration(),
                     vendor_product_configuration=VendorProductConfiguration(),
                 )
-        # ta_configuration.set_up(ta_configuration.api_instance)
+            # ta_configuration.set_up(ta_configuration.api_instance)
             else:
                 data = utils.Common().start_timestamp
                 fn.write_text(json.dumps(data))
@@ -61,7 +61,6 @@ def configuration(
                 )
                 ta_configuration.set_up(ta_configuration.api_instance)
         # return data
-
 
     yield ta_configuration
     ta_configuration.tear_down(ta_configuration.api_instance)

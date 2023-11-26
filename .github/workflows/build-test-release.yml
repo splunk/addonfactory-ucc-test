@@ -148,6 +148,11 @@ jobs:
           poetry add ../../../dist/*.whl
           poetry install
           poetry run pytest tests/modinput_functional
+      
+      - uses: actions/upload-artifact@v3
+        with:
+          name: ucc_modinput_test.log
+          path: ucc_modinput_test.log
 
   # release:
   #   needs:
