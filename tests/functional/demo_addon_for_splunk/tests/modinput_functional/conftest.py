@@ -63,7 +63,8 @@ def configuration(
         # return data
 
     yield ta_configuration
-    ta_configuration.tear_down(ta_configuration.api_instance)
+    # ta_configuration.tear_down(ta_configuration.api_instance)
+    pass
 
 
 #   DO NOT MODIFY CODE IN THIS FILE
