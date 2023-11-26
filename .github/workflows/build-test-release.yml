@@ -152,7 +152,7 @@ jobs:
       - uses: actions/upload-artifact@v3
         with:
           name: ucc_modinput_test.log
-          path: ucc_modinput_test.log
+          path: tests/functional/demo_addon_for_splunk/ucc_modinput_test.log
 
   # release:
   #   needs:
