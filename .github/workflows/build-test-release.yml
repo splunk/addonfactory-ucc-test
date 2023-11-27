@@ -110,6 +110,10 @@ jobs:
           ucc-test-modinput
           tree -a
           cd ../../..
+      - uses: actions/upload-artifact@v3
+        with:
+          name: swagger_client
+          path: tests/functional/demo_addon_for_splunk/swagger_client
       - name: Install Splunk and Demo TA
         run: |
           export SPLUNK_PRODUCT=splunk
@@ -147,7 +151,7 @@ jobs:
           cd tests/functional/demo_addon_for_splunk
           poetry add ../../../dist/*.whl
           poetry install
-          poetry run pytest -n 2 tests/modinput_functional
+          poetry run pytest tests/modinput_functional
       
       - uses: actions/upload-artifact@v3
         with:
