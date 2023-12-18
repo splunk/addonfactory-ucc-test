@@ -28,11 +28,12 @@ class InputTypeEndpointConfiguration(InputConfigurationBase):
     def __init__(
         self,
         name_prefix: str,
+        interval: int,
         *,
         endpoint_name: str,
         source_type: str,
     ):
-        super().__init__(name_prefix=name_prefix)
+        super().__init__(name_prefix=name_prefix, interval=interval)
         # kwarguments assignment is TA specific
         self.endpoint_name = endpoint_name
         self.source_type = source_type
@@ -52,6 +53,7 @@ class Configuration(ConfigurationBase):
         )
         #   do not modify the code above
         self.source_type = "demo"
+        self.interval = 10
         self.endpoints = {
             f"endpoint1_{utils.Common().sufix}": self.vendor_product_configuration.endpoint1,
             f"endpoint2_{utils.Common().sufix}": self.vendor_product_configuration.endpoint2,
@@ -62,6 +64,7 @@ class Configuration(ConfigurationBase):
             self.add_input_configuration(
                 InputTypeEndpointConfiguration(
                     name_prefix=f"in{endpoint_name[len('endpoint'):-len(utils.Common().sufix)]}",
+                    interval=self.interval,
                     endpoint_name=endpoint_name,
                     source_type=self.source_type,
                 )
