@@ -151,7 +151,7 @@ jobs:
           cd tests/functional/demo_addon_for_splunk
           poetry add ../../../dist/*.whl
           poetry install
-          poetry run pytest tests/modinput_functional
+          poetry run pytest -n 10 tests/modinput_functional
       
       - uses: actions/upload-artifact@v3
         with:
