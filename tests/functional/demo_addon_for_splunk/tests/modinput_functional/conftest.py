@@ -68,10 +68,13 @@ def configuration(
                 fn.write_text(json.dumps(data))
             else:
                 ta_configuration = create_ta_configuration_and_setup()
+                index_name = (
+                    ta_configuration.splunk_configuration.dedicated_index.name
+                )
                 data = {
                     "start_timestamp": utils.Common().start_timestamp,
                     "workers": [worker_id],
-                    MODINPUT_TEST_SPLUNK_INDEX_LOCK: ta_configuration.splunk_configuration.dedicated_index.name,
+                    MODINPUT_TEST_SPLUNK_INDEX_LOCK: index_name,
                 }
                 fn.write_text(json.dumps(data))
     yield ta_configuration
