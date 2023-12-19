@@ -30,6 +30,7 @@ test once again."
     ta_configuration.set_up(ta_configuration.api_instance)
     return ta_configuration
 
+
 def setup(
     tmp_path_factory: pytest.TempPathFactory, worker_id: str
 ) -> Generator[TaConfiguration, None, None]:
@@ -68,11 +69,17 @@ def setup(
                 fn.write_text(json.dumps(data))
     return ta_configuration
 
+
 def ta_configuration_tear_down(ta_configuration: TaConfiguration) -> None:
     ta_configuration.tear_down(ta_configuration.api_instance)
     del os.environ[MODINPUT_TEST_SPLUNK_INDEX_LOCK]
 
-def tear_down(ta_configuration: TaConfiguration, tmp_path_factory: pytest.TempPathFactory, worker_id: str) -> None:
+
+def tear_down(
+    ta_configuration: TaConfiguration,
+    tmp_path_factory: pytest.TempPathFactory,
+    worker_id: str,
+) -> None:
     if worker_id == "master":
         ta_configuration_tear_down(ta_configuration=ta_configuration)
     else:
