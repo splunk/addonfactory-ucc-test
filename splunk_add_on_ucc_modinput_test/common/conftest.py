@@ -1,5 +1,4 @@
 import os
-from typing import Generator
 from filelock import FileLock
 import json
 import pytest
@@ -33,7 +32,7 @@ test once again."
 
 def setup(
     tmp_path_factory: pytest.TempPathFactory, worker_id: str
-) -> Generator[TaConfiguration, None, None]:
+) -> TaConfiguration:
     # https://pytest-xdist.readthedocs.io/en/latest/how-to.html#making-session-scoped-fixtures-execute-only-once
     if worker_id == "master":
         ta_configuration = create_ta_configuration_and_setup()
