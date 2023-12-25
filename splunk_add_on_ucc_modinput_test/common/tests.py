@@ -47,7 +47,7 @@ def after_test_checker(
 
 def before_and_after_test_checker(
     test_function: Callable[[TaConfiguration], None]
-):
+) -> Callable[[TaConfiguration], None]:
     @functools.wraps(test_function)
     def wrapper(*, configuration: TaConfiguration) -> None:
         before_test_checker(
