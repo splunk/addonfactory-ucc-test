@@ -15,8 +15,6 @@ output_mode = "json"
 pprint = utils.logger.debug
 print = utils.logger.error
 
-NAME = "demo_addon_for_splunk"
-
 
 # create modinput type specific classes
 # InputTypeAbcConfiguration and InputTypeXyzConfiguration are just examples
@@ -51,6 +49,7 @@ class Configuration(ConfigurationBase):
             splunk_configuration=splunk_configuration,
             vendor_product_configuration=vendor_product_configuration,
         )
+        self.NAME = "demo_addon_for_splunk"
         #   do not modify the code above
         self.source_type = "demo"
         self.interval = 10

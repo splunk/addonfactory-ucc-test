@@ -18,8 +18,6 @@ output_mode = "json"
 pprint = utils.logger.debug
 print = utils.logger.error
 
-NAME = "splunk_ta_foo_bar"  # will be replaced by ucc-test-modinput init
-
 
 # create modinput type specific classes
 # InputTypeAbcConfiguration and InputTypeXyzConfiguration are just examples
@@ -65,6 +63,7 @@ class Configuration(ConfigurationBase):
             splunk_configuration=splunk_configuration,
             vendor_product_configuration=vendor_product_configuration,
         )
+        self.NAME = "splunk_ta_foo_bar"  # ucc-test-modinput init will replace
         #   do not modify the code above
 
         # variables that are defined in TA Configuration (as token)
