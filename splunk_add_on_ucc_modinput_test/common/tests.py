@@ -3,7 +3,8 @@ from splunk_add_on_ucc_modinput_test.common import utils
 from splunk_add_on_ucc_modinput_test.common import splunk_instance
 from tests.modinput_functional.ta import Configuration as TaConfiguration
 import logging
-from collections.abc import Callable
+from typing import Callable
+from mypy_extensions import NamedArg
 
 utils.logger.setLevel(logging.DEBUG)
 
@@ -47,7 +48,7 @@ def after_test_checker(
 
 def before_and_after_test_checker(
     test_function: Callable[[TaConfiguration], None]
-) -> Callable[[TaConfiguration], None]:
+) -> Callable[[NamedArg(TaConfiguration, 'configuration')], None]:
     @functools.wraps(test_function)
     def wrapper(*, configuration: TaConfiguration) -> None:
         before_test_checker(
