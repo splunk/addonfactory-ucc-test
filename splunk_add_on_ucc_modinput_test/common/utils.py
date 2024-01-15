@@ -122,6 +122,10 @@ class Common:
     def start_timestamp(self) -> float:
         return self._start_timestamp
 
+    @start_timestamp.setter
+    def start_timestamp(self, value: float) -> None:
+        self._start_timestamp = value
+
     @property
     def sufix(self) -> str:
         return f"mit_{convert_to_utc(self.start_timestamp)}"
