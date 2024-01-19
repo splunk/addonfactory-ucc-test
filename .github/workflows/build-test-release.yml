@@ -93,7 +93,7 @@ jobs:
           sleep 5
       - name: Build TA
         run: |
-          pip install poetry==1.5.1 poetry-plugin-export==1.4.0 splunk-add-on-ucc-framework==5.33.0
+          pip install poetry==1.5.1 poetry-plugin-export==1.4.0 splunk-add-on-ucc-framework
           cd tests/functional/demo_addon_for_splunk/
           mkdir -p package/lib || true
           poetry export --without-hashes -o package/lib/requirements.txt
