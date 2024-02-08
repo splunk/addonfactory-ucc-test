@@ -58,7 +58,7 @@ splunk-add-on-ucc-framework = "^5.27.0"
 splunk-add-on-ucc-modinput-test = {git = "git@github.com:splunk/addonfactory-ucc-test.git"}
 ```
 
-    2.2.    Run ucc-gen to generate output/[your TA name]/static/openapi.json
+    2.2.    Run ucc-gen to generate output/[your TA name]/appserver/static/openapi.json
 
     2.3.    Run ucc-test-modinput init to have created for you:
 
