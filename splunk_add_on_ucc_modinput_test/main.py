@@ -32,7 +32,7 @@ class DefaultSubcommandArgumentParser(argparse.ArgumentParser):
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     class OpenApiPath:
-        DEFAULT = "output/*/static/openapi.json"
+        DEFAULT = "output/*/appserver/static/openapi.json"
 
         @staticmethod
         def validate(value: str) -> Path:
