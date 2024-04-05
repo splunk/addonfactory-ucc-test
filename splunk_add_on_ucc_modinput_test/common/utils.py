@@ -95,7 +95,7 @@ def get_epoch_timestamp() -> float:
 
 @lru_cache(maxsize=32)
 def convert_to_utc(
-    epoch_timestamp: float, format: str = "%Y%m%d%H%M%S"
+    epoch_timestamp: float, format: str = "%Y%m%d%H%M%S%f"
 ) -> str:
     return datetime.datetime.fromtimestamp(
         epoch_timestamp, pytz.timezone("UTC")
