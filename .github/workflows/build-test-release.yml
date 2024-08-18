@@ -150,6 +150,7 @@ jobs:
           poetry run pytest tests/modinput_functional
 
   release:
+    if: startsWith(github.event.ref, 'refs/tags/')
     needs:
       - build
       - test-unit
@@ -157,26 +158,34 @@ jobs:
       - pre-commit
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v2
+      - name: Create a Release
+        uses: elgohr/Github-Release-Action@v5
+        env:
+          GH_TOKEN: ${{ secrets.AUTOMATION_TOKEN }}
         with:
-          # Very important: semantic-release won't trigger a tagged
-          # build if this is not set false
-          persist-credentials: false
-      - uses: actions/setup-python@v4
-        with:
-          python-version: "3.7"
-      - id: semantic
-        uses: splunk/semantic-release-action@v1.3
-        with:
-          git_committer_name: ${{ secrets.SA_GH_USER_NAME }}
-          git_committer_email: ${{ secrets.SA_GH_USER_EMAIL }}
-          gpg_private_key: ${{ secrets.SA_GPG_PRIVATE_KEY }}
-          passphrase: ${{ secrets.SA_GPG_PASSPHRASE }}
+          title: ${{ github.ref_name }} release
+    # steps:
+    #   - uses: actions/checkout@v4
+    #     with:
+    #       # Very important: semantic-release won't trigger a tagged
+    #       # build if this is not set false
+    #       persist-credentials: false
+    #   - uses: actions/setup-python@v4
+    #     with:
+    #       python-version: "3.7"
+    #   - id: semantic
+    #     uses: splunk/semantic-release-action@v1.3
+    #     with:
+    #       git_committer_name: ${{ secrets.SA_GH_USER_NAME }}
+    #       git_committer_email: ${{ secrets.SA_GH_USER_EMAIL }}
+    #       gpg_private_key: ${{ secrets.SA_GPG_PRIVATE_KEY }}
+    #       passphrase: ${{ secrets.SA_GPG_PASSPHRASE }}
 
-  update-semver:
-    if: startsWith(github.ref, 'refs/tags/v')
-    needs: release
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: haya14busa/action-update-semver@v1
+  # update-semver:
+  #   if: startsWith(github.ref, 'refs/tags/v')
+  #   needs: release
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - uses: haya14busa/action-update-semver@v1
