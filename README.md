@@ -232,3 +232,4 @@ export MODINPUT_TEST_FOOBAR_TOKEN_BASE64=[your_value]
 
     6.2.    Set environment variables and pytest run; check pt. 4. for details
 
+ 
