@@ -150,7 +150,7 @@ jobs:
           poetry run pytest tests/modinput_functional
 
   release:
-    if: startsWith(github.event.ref, 'refs/tags/')
+    if: startsWith(github.event.ref, 'refs/tags/v')
     needs:
       - build
       - test-unit
