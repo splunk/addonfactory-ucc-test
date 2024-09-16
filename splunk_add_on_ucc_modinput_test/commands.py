@@ -57,6 +57,14 @@ def generate(
     shutil.copy(
         str(
             files(resources).joinpath(
+                "swagger-codegen-generators/src/main/resources/handlebars/python/api_client.mustache"  # noqa: E501
+            )
+        ),
+        str(generator_path),
+    )
+    shutil.copy(
+        str(
+            files(resources).joinpath(
                 "swagger-codegen-generators/src/main/resources/handlebars/python/rest.mustache"  # noqa: E501
             )
         ),
