@@ -4,6 +4,8 @@ from enum import Enum
 class ForgeProbe(Enum):
     DEFAULT_INTERVAL = 5
     MAX_WAIT_TIME = 600
+    MAX_INTERWAL = 60
+    MIN_INTERVAL = 1
 
 
 DEPENDENCIES_WAIT_TIMEOUT = 600

@@ -64,6 +64,13 @@ class FrameworkTask:
     def default_artifact_name(self):
         return self._dep.original_name
 
+    def make_result(self, test_result):
+        if test_result is None:
+            return {}
+        if not isinstance(test_result, dict):
+            return {self.default_artifact_name: test_result}
+        return test_result
+
     def apply_probe(self, probe_fn):
         self._probe_fn = probe_fn
         if inspect.isgeneratorfunction(self._probe_fn):
@@ -123,16 +130,22 @@ class FrameworkTask:
             k: v for k, v in available_kwargs.items() if k in self._probe_required_args
         }
 
-    def wait_for_probe(self):
+    def wait_for_probe(self, last_result):
         if not self._probe_gen:
             return
 
         probe_args = self.get_probe_args()
+        probe_args.update(self.make_result(last_result))
         expire_time = time.time() + ForgeProbe.MAX_WAIT_TIME.value
         for interval in self._probe_gen(**probe_args):
             if time.time() > expire_time:
                 msg = f"Test {self.test_key}, forge {self.dep_key}: probe {self._probe.__name__} exceeted {ForgeProbe.MAX_WAIT_TIME.value} seconds timeout"
                 raise SplTaFwkWaitForProbeTimeout(msg)
+
+            if interval > ForgeProbe.MAX_INTERWAL.value:
+                interval = ForgeProbe.MAX_INTERWAL.value
+            elif interval < ForgeProbe.MIN_INTERVAL.value:
+                interval = ForgeProbe.MIN_INTERVAL.value
             time.sleep(interval)
 
     def completed_with_error(self, error):
@@ -242,7 +255,7 @@ class FrameworkTask:
             logger.debug(
                 f"EXECTASK: execute {self._dep}, execution res: {result}, {type(result)}"
             )
-            self.wait_for_probe()
+            self.wait_for_probe(result)
             self._is_executed = True
 
         logger.debug(
