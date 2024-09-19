@@ -1,9 +1,12 @@
 import time
 from splunk_add_on_ucc_modinput_test.functional import logger
 from splunk_add_on_ucc_modinput_test.functional.constants import ForgeScope
-from splunk_add_on_ucc_modinput_test.functional.entities.collections import TestCollection, DependencyCollection
-from splunk_add_on_ucc_modinput_test.functional.entities.test import FrameworkTest
-from splunk_add_on_ucc_modinput_test.functional.entities.forge import FrameworkForge
+from splunk_add_on_ucc_modinput_test.functional.entities import (
+    TestCollection, 
+    DependencyCollection,
+    FrameworkTest,
+    FrameworkForge
+)
 from splunk_add_on_ucc_modinput_test.functional.executor import FrmwkParallelExecutor, FrmwkSequentialExecutor
 from splunk_add_on_ucc_modinput_test.functional.splunk.client import SplunkClientBase
 from splunk_add_on_ucc_modinput_test.functional.vendor.client import VendorClientBase
