@@ -5,7 +5,6 @@ from dataclasses import dataclass, replace
 from splunk_add_on_ucc_modinput_test.functional import logger
 from splunk_add_on_ucc_modinput_test.functional.entities.executable import ExecutableBase
 from splunk_add_on_ucc_modinput_test.functional.entities.collections import TestCollection
-
 @dataclass
 class ForgeExecData:
     id: str
@@ -143,11 +142,10 @@ class FrameworkForge(ExecutableBase):
         return test in self._tests
 
     def unlink_test(self, test):
-        assert isinstance(test, FrameworkTest)
         return self._tests.pop(test.key, None)
 
     def link_test(self, test):
-        assert isinstance(test, FrameworkTest)
+        assert isinstance(test, ExecutableBase)
         if test.key not in self._tests:
             self._tests[test.key] = test
 

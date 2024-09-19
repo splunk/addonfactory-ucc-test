@@ -9,7 +9,6 @@ from splunk_add_on_ucc_modinput_test.functional.exceptions import (
 from splunk_add_on_ucc_modinput_test.functional.entities.executable import ExecutableBase
 from splunk_add_on_ucc_modinput_test.functional.entities.task import FrameworkTask
 from splunk_add_on_ucc_modinput_test.functional.entities.collections import DependencyCollection
-
 class FrameworkTest(ExecutableBase):
     def __init__(self, function, altered_name=None):
         super().__init__(function)
@@ -54,7 +53,7 @@ class FrameworkTest(ExecutableBase):
 
     def link_dependency(self, dep_list, parametrize_kwargs={}):
         for dep, _, _ in dep_list:
-            assert isinstance(dep, FrameworkForge)
+            assert isinstance(dep, ExecutableBase)
             assert dep.key not in self._dependencies
             self._dependencies[dep.key] = dep
 
