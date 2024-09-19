@@ -1,12 +1,9 @@
 import time
 from splunk_add_on_ucc_modinput_test.functional import logger
-from splunk_add_on_ucc_modinput_test.functional.constants import (
-    ForgeScope,
-    DEPENDENCIES_WAIT_TIMEOUT,
-)
-from splunk_add_on_ucc_modinput_test.functional.exceptions import SplTaFwkWaitForDependenciesTimeout
-from splunk_add_on_ucc_modinput_test.functional.collections import TestCollection, DependencyCollection
-from splunk_add_on_ucc_modinput_test.functional.entities import FrmwkTest, FrmwkDependency
+from splunk_add_on_ucc_modinput_test.functional.constants import ForgeScope
+from splunk_add_on_ucc_modinput_test.functional.entities.collections import TestCollection, DependencyCollection
+from splunk_add_on_ucc_modinput_test.functional.entities.test import FrameworkTest
+from splunk_add_on_ucc_modinput_test.functional.entities.forge import FrameworkForge
 from splunk_add_on_ucc_modinput_test.functional.executor import FrmwkParallelExecutor, FrmwkSequentialExecutor
 from splunk_add_on_ucc_modinput_test.functional.splunk.client import SplunkClientBase
 from splunk_add_on_ucc_modinput_test.functional.vendor.client import VendorClientBase
@@ -62,7 +59,7 @@ class TestDependencyManager:
 
         test = self.tests.lookup_by_function(test_fn)
         if not test:
-            test = FrmwkTest(test_fn)
+            test = FrameworkTest(test_fn)
             self.tests.add(test)
 
         dep_group_scope = self._interpret_scope(scope, test)
@@ -77,7 +74,7 @@ class TestDependencyManager:
             else:
                 dep_scope = dep_group_scope
 
-            dep = FrmwkDependency(dep_fn, dep_scope)
+            dep = FrameworkForge(dep_fn, dep_scope)
             found = self.dependencies.get(dep.key)
             if not found:
                 self.dependencies.add(dep)
@@ -99,7 +96,7 @@ class TestDependencyManager:
         return test
 
     def find_test(self, test_fn, parametrized_name):
-        test_obj = FrmwkTest(test_fn, parametrized_name)
+        test_obj = FrameworkTest(test_fn, parametrized_name)
         dependency_manager.dump_tests()
         logger.debug(
             f"find_test {test_obj.key}, {test_obj} ==>> {test_fn}, {parametrized_name} ==>> {test_obj}"
@@ -120,7 +117,7 @@ class TestDependencyManager:
                     logger.debug(
                         f"expand_parametrized_tests: adding test: {test.key} => test_name: {test_name}, kwargs: {parametrized_kwargs}"
                     )
-                    parametrized_test = FrmwkTest(test._function, test_name)
+                    parametrized_test = FrameworkTest(test._function, test_name)
                     logger.debug(
                         f"create parametrized test: {parametrized_test.key}, {vars(parametrized_test)}"
                     )

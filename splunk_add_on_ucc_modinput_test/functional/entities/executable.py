@@ -1,8 +1,6 @@
 import inspect
-from splunk_add_on_ucc_modinput_test.functional import logger
 
-
-class FrmwkFunction:
+class ExecutableBase:
     def __init__(self, function):
         assert callable(function)
         self._function = function
@@ -58,38 +56,3 @@ class FrmwkFunction:
 
     def filter_requied_kwargs(self, kwargs):
         return {k: v for k, v in kwargs.items() if k in self._required_args}
-
-
-class FrmwrkFunctionCollection(dict):
-    def add(self, item):
-        assert isinstance(item, FrmwkFunction)
-        if item.key not in self:
-            self[item.key] = item
-
-    def _get_item_key(self, item):
-        if isinstance(item, FrmwkFunction):
-            return item.key
-        elif isinstance(item, str):
-            return item
-
-        assert True, "Instance of FrmwkTest or str is expected as test argument"
-
-    def lookup_by_function(self, fn):
-        function = FrmwkFunction(fn)
-        if function in self:
-            return self.__getitem__(function)
-        return None
-
-    def __getitem__(self, item):
-        return super().__getitem__(self._get_item_key(item))
-
-    def __contains__(self, item):
-        return super().__contains__(self._get_item_key(item))
-
-
-class TestCollection(FrmwrkFunctionCollection):
-    pass
-
-
-class DependencyCollection(FrmwrkFunctionCollection):
-    pass
