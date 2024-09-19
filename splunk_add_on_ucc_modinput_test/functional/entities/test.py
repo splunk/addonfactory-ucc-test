@@ -6,11 +6,9 @@ from splunk_add_on_ucc_modinput_test.functional.exceptions import (
     SplTaFwkWaitForDependenciesTimeout,
     SplTaFwkDependencyExecutionError,
 )
-from splunk_add_on_ucc_modinput_test.functional.entities import (
-    ExecutableBase, 
-    FrameworkTask,
-    DependencyCollection
-)
+from splunk_add_on_ucc_modinput_test.functional.entities.executable import ExecutableBase
+from splunk_add_on_ucc_modinput_test.functional.entities.task import FrameworkTask
+from splunk_add_on_ucc_modinput_test.functional.entities.collections import DependencyCollection
 
 class FrameworkTest(ExecutableBase):
     def __init__(self, function, altered_name=None):
