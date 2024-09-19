@@ -131,12 +131,14 @@ class FrameworkTask:
         }
 
     def wait_for_probe(self, last_result):
+        logger.debug(f"WAIT FOR PROBE started\n\ttest {self.test_key}\n\tforge {self.dep_key}\n\tprobe {self._probe.__name__}")
         if not self._probe_gen:
             return
 
         probe_args = self.get_probe_args()
         probe_args.update(self.make_result(last_result))
         expire_time = time.time() + ForgeProbe.MAX_WAIT_TIME.value
+        logger.debug(f"WAIT FOR PROBE\n\ttest {self.test_key}\n\tforge {self.dep_key}\n\tprobe {self._probe.__name__}\n\tprobe_gen {self._probe_gen}\n\tprobe_args {probe_args}")
         for interval in self._probe_gen(**probe_args):
             if time.time() > expire_time:
                 msg = f"Test {self.test_key}, forge {self.dep_key}: probe {self._probe.__name__} exceeted {ForgeProbe.MAX_WAIT_TIME.value} seconds timeout"
