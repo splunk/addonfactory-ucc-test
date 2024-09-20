@@ -1,14 +1,15 @@
 import os
-from splunk_add_on_ucc_modinput_test.functional import logger
 
 
 class SplunkClientBase:
-    def __init__(self, *args, **kwargs):
+    def __init__(self) -> None:
         self._auto_config()
 
-    def _auto_config(self):
+    def _auto_config(self) -> None:
         self.splunk_version = os.environ.get("SPLUNK_VERSION", "latest")
-        self.splunk_app_version = os.environ.get("SPLUNK_APP_VERSION", "latest")
+        self.splunk_app_version = os.environ.get(
+            "SPLUNK_APP_VERSION", "latest"
+        )
         self.splunk_app_id = os.environ.get("SPLUNK_APP_ID", "")
         self.splunk_home = os.environ.get("SPLUNK_HOME", "/opt/splunk")
         self.splunk_host = os.environ.get("SPLUNK_HOST", "")
@@ -26,5 +27,5 @@ class SplunkClientBase:
         # logger.debug(f"self.splunk_password: {self.splunk_password}")
         # logger.debug(f"self.splunk_hec_token: {self.splunk_hec_token}")
 
-    def custom_config(self):
+    def custom_config(self) -> None:
         pass
