@@ -96,7 +96,7 @@ class FrmwkExecutorBase:
                 logger.debug(
                     f"TEST RESULT {test_result} is dict - {isinstance(test_result, dict)}, test {task.test_key}, dep: {task.dep_key}, result {task.result}"
                 )
-                test_result = task.make_result(test_result)
+                test_result = task.make_kwarg(test_result)
                 task.update_test_artifacts(test_result)
                 logger.debug(
                     f"ARTIFACTS UPDATED dep: {task.dep_key}, test {task.test_key}, artifacts: {task._test.artifacts}"

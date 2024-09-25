@@ -64,7 +64,7 @@ class FrameworkTask:
     def default_artifact_name(self):
         return self._dep.original_name
 
-    def make_result(self, test_result):
+    def make_kwarg(self, test_result):
         if test_result is None:
             return {}
         if not isinstance(test_result, dict):
@@ -123,9 +123,10 @@ class FrameworkTask:
     def get_probe_fn(self):
         return self._probe_fn
 
-    def get_probe_args(self):
+    def get_probe_args(self, extra_args={}):
         available_kwargs = self.collect_available_kwargs()
-
+        available_kwargs.update(extra_args)
+        
         return {
             k: v for k, v in available_kwargs.items() if k in self._probe_required_args
         }
@@ -135,8 +136,8 @@ class FrameworkTask:
         if not self._probe_gen:
             return
 
-        probe_args = self.get_probe_args()
-        probe_args.update(self.make_result(last_result))
+        extra_args = self.make_kwarg(last_result)
+        probe_args = self.get_probe_args(extra_args)
         expire_time = time.time() + ForgeProbe.MAX_WAIT_TIME.value
         logger.debug(f"WAIT FOR PROBE\n\ttest {self.test_key}\n\tforge {self.dep_key}\n\tprobe {self._probe_fn}\n\tprobe_gen {self._probe_gen}\n\tprobe_args {probe_args}")
         for interval in self._probe_gen(**probe_args):
