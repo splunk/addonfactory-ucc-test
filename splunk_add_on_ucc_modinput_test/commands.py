@@ -73,6 +73,8 @@ def generate(
     docker.run(
         f"swaggerapi/swagger-codegen-cli-v3:{SWAGGER_CODEGEN_CLI_VERSION}",
         [
+            "--platform",
+            "linux/amd64",            
             "generate",
             "-i",
             f"/local/{openapi.name}",
