@@ -31,6 +31,24 @@ class DefaultSubcommandArgumentParser(argparse.ArgumentParser):
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
+
+    class Platform:
+        #   https://docs.docker.com/build/building/multi-platform/
+        DEFAULT = None
+        SUPPORTED = ["windows/amd64","linux/amd64","linux/arm64","linux/arm/v7"]
+
+        @staticmethod
+        def validate(value: Optional[str]) -> Optional[str]:
+
+            if value in {Platform.DEFAULT, *Platform.SUPPORTED}:
+                return value
+            raise argparse.ArgumentTypeError(
+                f"""
+                Given platform ({value}) is not supported. Supported platforms are:
+                {Platform.SUPPORTED}
+                """
+            )
+
     class OpenApiPath:
         DEFAULT = "output/*/appserver/static/openapi.json"
 
@@ -132,6 +150,18 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     )
     parser.set_default_subparser("gen")
 
+    _p_args = (
+        "-p",
+        "--platform",
+    )
+    _p_kwargs = {
+        "type": Platform.validate,
+        "help": "--platform flag when running swaggerapi/swagger-codegen-cli-v3 docker image",
+        "default": Platform.DEFAULT,
+    }
+    gen_parser.add_argument(*_p_args, **_p_kwargs)
+    init_parser.add_argument(*_p_args, **_p_kwargs)
+
     _o_args = (
         "-o",
         "--openapi-json",
@@ -215,6 +245,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             openapi=args.openapi_json,
             tmp=args.tmp,
             client=args.client_code,
+            platform=args.platform,
         )
     if args.command == "init":
         commands.initialize(

@@ -16,6 +16,7 @@
 import json
 from pathlib import Path
 import shutil
+from typing import Optional
 from python_on_whales import docker
 from importlib_resources import files
 from splunk_add_on_ucc_modinput_test import resources
@@ -46,6 +47,7 @@ def generate(
     openapi: Path,
     tmp: Path,
     client: Path,
+    platform: Optional[str],
 ) -> Path:
     RESTAPI_CLIENT = "restapi_client"
     GENERATOR = "generator"
@@ -70,11 +72,10 @@ def generate(
         ),
         str(generator_path),
     )
-    docker.run(
-        f"swaggerapi/swagger-codegen-cli-v3:{SWAGGER_CODEGEN_CLI_VERSION}",
-        [
-            "--platform",
-            "linux/amd64",            
+    docker_run_command = []
+    if platform:
+        docker_run_command.extend(["--platform", platform])
+    docker_run_command.extend([       
             "generate",
             "-i",
             f"/local/{openapi.name}",
@@ -84,7 +85,11 @@ def generate(
             f"/local/{RESTAPI_CLIENT}",
             "-t",
             f"/local/{GENERATOR}/",
-        ],
+        ])    
+
+    docker.run(
+        f"swaggerapi/swagger-codegen-cli-v3:{SWAGGER_CODEGEN_CLI_VERSION}",
+        docker_run_command,
         volumes=[(str(tmp.resolve()), "/local")],
         remove=True,
     )
