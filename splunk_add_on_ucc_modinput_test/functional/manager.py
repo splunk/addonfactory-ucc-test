@@ -2,14 +2,21 @@ import time
 from splunk_add_on_ucc_modinput_test.functional import logger
 from splunk_add_on_ucc_modinput_test.functional.constants import ForgeScope
 from splunk_add_on_ucc_modinput_test.functional.entities import (
-    TestCollection, 
+    TestCollection,
     DependencyCollection,
     FrameworkTest,
-    FrameworkForge
+    FrameworkForge,
 )
-from splunk_add_on_ucc_modinput_test.functional.executor import FrmwkParallelExecutor, FrmwkSequentialExecutor
-from splunk_add_on_ucc_modinput_test.functional.splunk.client import SplunkClientBase
-from splunk_add_on_ucc_modinput_test.functional.vendor.client import VendorClientBase
+from splunk_add_on_ucc_modinput_test.functional.executor import (
+    FrmwkParallelExecutor,
+    FrmwkSequentialExecutor,
+)
+from splunk_add_on_ucc_modinput_test.functional.splunk.client import (
+    SplunkClientBase,
+)
+from splunk_add_on_ucc_modinput_test.functional.vendor.client import (
+    VendorClientBase,
+)
 
 
 class TestDependencyManager:
@@ -69,9 +76,12 @@ class TestDependencyManager:
 
         dep_list = []
         for dep_data in dep_fns:
-            dep_fn, dep_probe, dep_scope, dep_kwargs = self._interpret_dep_data(
-                dep_data
-            )
+            (
+                dep_fn,
+                dep_probe,
+                dep_scope,
+                dep_kwargs,
+            ) = self._interpret_dep_data(dep_data)
             if dep_scope:
                 dep_scope = self._interpret_scope(dep_scope, test)
             else:
@@ -115,12 +125,16 @@ class TestDependencyManager:
         for test_key, param_tests in parametrized_tests.items():
             test = self.unregister_test(test_key)
             if test:
-                logger.debug(f"expand_parametrized_tests: test found: {test.key}")
+                logger.debug(
+                    f"expand_parametrized_tests: test found: {test.key}"
+                )
                 for test_name, parametrized_kwargs in param_tests:
                     logger.debug(
                         f"expand_parametrized_tests: adding test: {test.key} => test_name: {test_name}, kwargs: {parametrized_kwargs}"
                     )
-                    parametrized_test = FrameworkTest(test._function, test_name)
+                    parametrized_test = FrameworkTest(
+                        test._function, test_name
+                    )
                     logger.debug(
                         f"create parametrized test: {parametrized_test.key}, {vars(parametrized_test)}"
                     )
@@ -134,12 +148,16 @@ class TestDependencyManager:
                             dep_probe = task.get_probe_fn()
                             dep_kwargs = task.get_dep_kwargs()
                             dep_list.append((dep, dep_probe, dep_kwargs))
-                        parametrized_test.link_dependency(dep_list, parametrized_kwargs)
+                        parametrized_test.link_dependency(
+                            dep_list, parametrized_kwargs
+                        )
                         logger.debug(
                             f"parametrized_test.link_dependency: {parametrized_test.key}: {dep_list} => {parametrized_test}"
                         )
             else:
-                logger.debug(f"expand_parametrized_tests: TEST NOT FOUND: {test.key}")
+                logger.debug(
+                    f"expand_parametrized_tests: TEST NOT FOUND: {test.key}"
+                )
 
     def log_dep_exec_matrix(self, tests, dep_mtx):
         matrix = "\nDependency execution matrix:\n"
@@ -151,13 +169,15 @@ class TestDependencyManager:
                     for task in test_tasks:
                         matrix += f"\t\tDependency {'::'.join(task.dep_key[:2])}, scope {task.dep_key[2]}\n"
                 else:
-                    matrix += f"\t\tNo depemdemcies at this step\n"
+                    matrix += "\t\tNo depemdemcies at this step\n"
         logger.info(matrix)
 
     def build_dep_exec_matrix(self, skip_tests):
         skipped_test_keys = [test.key for test, _ in skip_tests]
         tests = [
-            test for test in self.tests.values() if test.key not in skipped_test_keys
+            test
+            for test in self.tests.values()
+            if test.key not in skipped_test_keys
         ]
 
         res = []

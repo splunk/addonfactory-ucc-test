@@ -3,6 +3,7 @@ import queue
 import traceback
 from splunk_add_on_ucc_modinput_test.functional import logger
 
+
 def log_exceptions_traceback(fn):
     def wrapper(*args, **kwargs):
         try:
@@ -14,6 +15,7 @@ def log_exceptions_traceback(fn):
         return None
 
     return wrapper
+
 
 class FrmwkExecutorBase:
     def __init__(self, manager):
@@ -46,16 +48,22 @@ class FrmwkExecutorBase:
                     return i, j
         return None
 
-    def _try_skip_task(self, task_group, test_index, task_index, matched_tasks):
+    def _try_skip_task(
+        self, task_group, test_index, task_index, matched_tasks
+    ):
         task = task_group[test_index][task_index]
         same_task = self._find_same_task(task_group, task)
         logger.debug(f"{task.dep_key} SAME TASK IS  {same_task}")
         if same_task:
-            logger.debug(f"task_index={task_index} skip task {task.dep_key} execution")
+            logger.debug(
+                f"task_index={task_index} skip task {task.dep_key} execution"
+            )
             matched_tasks[(test_index, task_index)] = same_task
         return same_task
 
-    def _process_test_tasks(self, task_group, test_index, test_tasks, matched_tasks):
+    def _process_test_tasks(
+        self, task_group, test_index, test_tasks, matched_tasks
+    ):
         processed_tasks = []
         for task_index, task in enumerate(test_tasks):
             task.prepare_forge_call_args(
@@ -78,7 +86,9 @@ class FrmwkExecutorBase:
         result_collector = [None] * len(task_group)
 
         for test_index, test_tasks in enumerate(task_group):
-            logger.debug(f"test_index={test_index} push parallel_task {test_tasks}")
+            logger.debug(
+                f"test_index={test_index} push parallel_task {test_tasks}"
+            )
             if test_tasks is not None:
                 result_collector[test_index] = [None] * len(test_tasks)
                 if test_tasks is not None:
@@ -120,7 +130,12 @@ class FrmwkExecutorBase:
             task.completed_with_error(e)
 
     def _copy_result_to_matching_tasks(
-        self, task_group, src_test_i, src_task_j, result_collector, matched_tasks
+        self,
+        task_group,
+        src_test_i,
+        src_task_j,
+        result_collector,
+        matched_tasks,
     ):
         src_task = task_group[src_test_i][src_task_j]
         for dst, src in matched_tasks.items():
@@ -130,7 +145,9 @@ class FrmwkExecutorBase:
                 task_group[dst_test_i][dst_task_j].reuse_execution(
                     src_task._exec_id, src_task._result
                 )
-                self._update_test_artifacts(task_group, dst_test_i, result_collector)
+                self._update_test_artifacts(
+                    task_group, dst_test_i, result_collector
+                )
 
     def _process_response(
         self, response, result_collector, task_group, matched_tasks, done=None
@@ -159,9 +176,11 @@ class FrmwkSequentialExecutor(FrmwkExecutorBase):
 
         logger.debug("monitor has started")
         for task_group in tasks:
-            result_collector, matched_tasks, tasks_to_run = self._process_task_group(
-                task_group
-            )
+            (
+                result_collector,
+                matched_tasks,
+                tasks_to_run,
+            ) = self._process_task_group(task_group)
             for request in tasks_to_run:
                 test_index, task_index, task = request
                 self._execute_request(request, 0)
@@ -188,7 +207,9 @@ class FrmwkParallelExecutor(FrmwkExecutorBase):
         ]
         [thread.start() for thread in self.threads]
 
-        self.monitor_thread = threading.Thread(target=self.monitor, args=(tasks,))
+        self.monitor_thread = threading.Thread(
+            target=self.monitor, args=(tasks,)
+        )
         self.monitor_thread.start()
 
         self._started = True
@@ -201,12 +222,14 @@ class FrmwkParallelExecutor(FrmwkExecutorBase):
     def wait(self):
         self.monitor_thread.join()
 
-    def _collect_results(self, done, result_collector, task_group, matched_tasks):
+    def _collect_results(
+        self, done, result_collector, task_group, matched_tasks
+    ):
         while not all(done.values()):
             response = self.monitor_queue.get()
             logger.debug(f"monitor got finished task {response}")
             if response is None:
-                logger.debug(f"monitor is interrupted")
+                logger.debug("monitor is interrupted")
                 return True
 
             self._process_response(
@@ -219,9 +242,11 @@ class FrmwkParallelExecutor(FrmwkExecutorBase):
     def monitor(self, tasks):
         logger.debug("monitor has started")
         for task_group in tasks:
-            result_collector, matched_tasks, tasks_to_run = self._process_task_group(
-                task_group
-            )
+            (
+                result_collector,
+                matched_tasks,
+                tasks_to_run,
+            ) = self._process_task_group(task_group)
             done = {}
             for request in tasks_to_run:
                 test_index, task_index, _ = request

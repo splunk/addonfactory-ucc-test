@@ -1,14 +1,25 @@
 import time
 from dataclasses import dataclass, replace
 from splunk_add_on_ucc_modinput_test.functional import logger
-from splunk_add_on_ucc_modinput_test.functional.constants import DEPENDENCIES_WAIT_TIMEOUT, BuiltInArg
+from splunk_add_on_ucc_modinput_test.functional.constants import (
+    DEPENDENCIES_WAIT_TIMEOUT,
+    BuiltInArg,
+)
 from splunk_add_on_ucc_modinput_test.functional.exceptions import (
     SplTaFwkWaitForDependenciesTimeout,
     SplTaFwkDependencyExecutionError,
 )
-from splunk_add_on_ucc_modinput_test.functional.entities.executable import ExecutableBase
-from splunk_add_on_ucc_modinput_test.functional.entities.task import FrameworkTask
-from splunk_add_on_ucc_modinput_test.functional.entities.collections import DependencyCollection
+from splunk_add_on_ucc_modinput_test.functional.entities.executable import (
+    ExecutableBase,
+)
+from splunk_add_on_ucc_modinput_test.functional.entities.task import (
+    FrameworkTask,
+)
+from splunk_add_on_ucc_modinput_test.functional.entities.collections import (
+    DependencyCollection,
+)
+
+
 class FrameworkTest(ExecutableBase):
     def __init__(self, function, altered_name=None):
         super().__init__(function)
@@ -125,10 +136,20 @@ class FrameworkTest(ExecutableBase):
             )
 
     def collect_required_kwargs(self, splunk_client=None, vendor_client=None):
-        kwargs = {k: v for k, v in self._artifacts.items() if k in self._required_args}
-        if splunk_client and BuiltInArg.SPLUNK_CLIENT.value in self._required_args:
+        kwargs = {
+            k: v
+            for k, v in self._artifacts.items()
+            if k in self._required_args
+        }
+        if (
+            splunk_client
+            and BuiltInArg.SPLUNK_CLIENT.value in self._required_args
+        ):
             kwargs[BuiltInArg.SPLUNK_CLIENT.value] = splunk_client
-        if vendor_client and BuiltInArg.VENDOR_CLIENT.value in self._required_args:
+        if (
+            vendor_client
+            and BuiltInArg.VENDOR_CLIENT.value in self._required_args
+        ):
             kwargs[BuiltInArg.VENDOR_CLIENT.value] = vendor_client
         logger.debug(
             f"Finish collect_required_kwargs for test {self.key}: kwargs={kwargs}"

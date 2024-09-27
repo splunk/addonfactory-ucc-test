@@ -1,6 +1,6 @@
-from splunk_add_on_ucc_modinput_test.functional import logger
-from splunk_add_on_ucc_modinput_test.functional.entities.executable import ExecutableBase
-
+from splunk_add_on_ucc_modinput_test.functional.entities.executable import (
+    ExecutableBase,
+)
 
 
 class FrmwrkFunctionCollection(dict):
@@ -15,7 +15,9 @@ class FrmwrkFunctionCollection(dict):
         elif isinstance(item, str):
             return item
 
-        assert True, "Instance of FrameworkTest or str is expected as test argument"
+        assert (
+            True
+        ), "Instance of FrameworkTest or str is expected as test argument"
 
     def lookup_by_function(self, fn):
         function = ExecutableBase(fn)

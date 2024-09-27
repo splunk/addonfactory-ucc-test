@@ -1,7 +1,11 @@
 import pytest
 from splunk_add_on_ucc_modinput_test.functional import logger
-from splunk_add_on_ucc_modinput_test.functional.exceptions import SplTaFwkBaseException
-from splunk_add_on_ucc_modinput_test.functional.manager import dependency_manager
+from splunk_add_on_ucc_modinput_test.functional.exceptions import (
+    SplTaFwkBaseException,
+)
+from splunk_add_on_ucc_modinput_test.functional.manager import (
+    dependency_manager,
+)
 from splunk_add_on_ucc_modinput_test.functional.pytest_plugin.utils import (
     _adjust_test_order,
     _debug_log_test_order,
@@ -23,7 +27,9 @@ def pytest_collection_modifyitems(session, config, items):
     for test_key, param_tests in parametrized_tests.items():
         logger.debug(f"test: {test_key}")
         for test_name, test_kwargs in param_tests:
-            logger.debug(f"\ttest name: {test_name}, test kwargs: {test_kwargs}")
+            logger.debug(
+                f"\ttest name: {test_name}, test kwargs: {test_kwargs}"
+            )
 
     skipped_tests = _collect_skipped_tests(items)
 

@@ -5,7 +5,9 @@ logFormatter = logging.Formatter(
     datefmt="%Y-%m-%d %H:%M:%S",
 )
 
-fileHandler = logging.FileHandler("splunk-add-on-ucc-modinput-test-functional.log")
+fileHandler = logging.FileHandler(
+    "splunk-add-on-ucc-modinput-test-functional.log"
+)
 fileHandler.setFormatter(logFormatter)
 
 logger = logging.getLogger("splunk-add-on-ucc-modinput-test-functional")

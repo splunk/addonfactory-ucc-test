@@ -75,7 +75,8 @@ def generate(
     docker_run_command = []
     if platform:
         docker_run_command.extend(["--platform", platform])
-    docker_run_command.extend([       
+    docker_run_command.extend(
+        [
             "generate",
             "-i",
             f"/local/{openapi.name}",
@@ -85,7 +86,8 @@ def generate(
             f"/local/{RESTAPI_CLIENT}",
             "-t",
             f"/local/{GENERATOR}/",
-        ])    
+        ]
+    )
 
     docker.run(
         f"swaggerapi/swagger-codegen-cli-v3:{SWAGGER_CODEGEN_CLI_VERSION}",

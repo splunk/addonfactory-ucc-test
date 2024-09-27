@@ -1,5 +1,6 @@
 import inspect
 
+
 class ExecutableBase:
     def __init__(self, function):
         assert callable(function)
@@ -40,12 +41,14 @@ class ExecutableBase:
                 self._fn_name = res[0]
             self._fn_source_file = inspect.getfile(self._function)
         else:
-            self._fn_name = f"__call__"
+            self._fn_name = "__call__"
             self._fn_bound_class = self._function.__class__.__name__
             self._fn_source_file = inspect.getfile(self._function.__class__)
 
         self._original_name = self._fn_name
-        self._is_generatorfunction = inspect.isgeneratorfunction(self._function)
+        self._is_generatorfunction = inspect.isgeneratorfunction(
+            self._function
+        )
 
         sig = inspect.signature(self._function)
         self._required_args = list(sig.parameters.keys())

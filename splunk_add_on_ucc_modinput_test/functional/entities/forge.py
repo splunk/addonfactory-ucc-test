@@ -3,8 +3,14 @@ import inspect
 import contextlib
 from dataclasses import dataclass, replace
 from splunk_add_on_ucc_modinput_test.functional import logger
-from splunk_add_on_ucc_modinput_test.functional.entities.executable import ExecutableBase
-from splunk_add_on_ucc_modinput_test.functional.entities.collections import TestCollection
+from splunk_add_on_ucc_modinput_test.functional.entities.executable import (
+    ExecutableBase,
+)
+from splunk_add_on_ucc_modinput_test.functional.entities.collections import (
+    TestCollection,
+)
+
+
 @dataclass
 class ForgeExecData:
     id: str
@@ -127,7 +133,11 @@ class FrameworkForge(ExecutableBase):
         self._executions.add(id, teardown, kwargs, result)
 
     def reuse_execution(self, prev_exec):
-        id = prev_exec._id if isinstance(prev_exec, ForgeExecData) else prev_exec
+        id = (
+            prev_exec._id
+            if isinstance(prev_exec, ForgeExecData)
+            else prev_exec
+        )
         self._executions.reuse(id)
 
     @property
@@ -151,7 +161,7 @@ class FrameworkForge(ExecutableBase):
 
     def __repr__(self):
         s = repr(self._function)
-        return s.replace("<function", f"<dependency function")
+        return s.replace("<function", "<dependency function")
 
     @property
     def all_tests_executed(self):

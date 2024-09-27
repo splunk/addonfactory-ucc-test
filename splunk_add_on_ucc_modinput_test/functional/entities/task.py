@@ -3,8 +3,14 @@ import time
 import types
 import uuid
 from splunk_add_on_ucc_modinput_test.functional import logger
-from splunk_add_on_ucc_modinput_test.functional.constants import BuiltInArg, ForgeProbe
-from splunk_add_on_ucc_modinput_test.functional.exceptions import SplTaFwkWaitForProbeTimeout
+from splunk_add_on_ucc_modinput_test.functional.constants import (
+    BuiltInArg,
+    ForgeProbe,
+)
+from splunk_add_on_ucc_modinput_test.functional.exceptions import (
+    SplTaFwkWaitForProbeTimeout,
+)
+
 
 class FrameworkTask:
     def __init__(self, test, dependency, dep_kwargs={}, probe_fn=None):
@@ -126,20 +132,26 @@ class FrameworkTask:
     def get_probe_args(self, extra_args={}):
         available_kwargs = self.collect_available_kwargs()
         available_kwargs.update(extra_args)
-        
+
         return {
-            k: v for k, v in available_kwargs.items() if k in self._probe_required_args
+            k: v
+            for k, v in available_kwargs.items()
+            if k in self._probe_required_args
         }
 
     def wait_for_probe(self, last_result):
-        logger.debug(f"WAIT FOR PROBE started\n\ttest {self.test_key}\n\tforge {self.dep_key}\n\tprobe {self._probe_fn}")
+        logger.debug(
+            f"WAIT FOR PROBE started\n\ttest {self.test_key}\n\tforge {self.dep_key}\n\tprobe {self._probe_fn}"
+        )
         if not self._probe_gen:
             return
 
         extra_args = self.make_kwarg(last_result)
         probe_args = self.get_probe_args(extra_args)
         expire_time = time.time() + ForgeProbe.MAX_WAIT_TIME.value
-        logger.debug(f"WAIT FOR PROBE\n\ttest {self.test_key}\n\tforge {self.dep_key}\n\tprobe {self._probe_fn}\n\tprobe_gen {self._probe_gen}\n\tprobe_args {probe_args}")
+        logger.debug(
+            f"WAIT FOR PROBE\n\ttest {self.test_key}\n\tforge {self.dep_key}\n\tprobe {self._probe_fn}\n\tprobe_gen {self._probe_gen}\n\tprobe_args {probe_args}"
+        )
         for interval in self._probe_gen(**probe_args):
             if time.time() > expire_time:
                 msg = f"Test {self.test_key}, forge {self.dep_key}: probe {self._probe_fn} exceeted {ForgeProbe.MAX_WAIT_TIME.value} seconds timeout"

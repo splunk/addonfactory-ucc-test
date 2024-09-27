@@ -31,15 +31,19 @@ class DefaultSubcommandArgumentParser(argparse.ArgumentParser):
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
-
     class Platform:
         #   https://docs.docker.com/build/building/multi-platform/
         DEFAULT = None
-        SUPPORTED = ["windows/amd64","linux/amd64","linux/arm64","linux/arm/v7","linux/arm64/v8"]
+        SUPPORTED = [
+            "windows/amd64",
+            "linux/amd64",
+            "linux/arm64",
+            "linux/arm/v7",
+            "linux/arm64/v8",
+        ]
 
         @staticmethod
         def validate(value: Optional[str]) -> Optional[str]:
-
             if value in {Platform.DEFAULT, *Platform.SUPPORTED}:
                 return value
             raise argparse.ArgumentTypeError(
