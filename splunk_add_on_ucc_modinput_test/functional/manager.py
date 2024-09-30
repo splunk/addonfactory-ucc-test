@@ -110,10 +110,6 @@ class TestDependencyManager:
 
     def find_test(self, test_fn, parametrized_name):
         test_obj = FrameworkTest(test_fn, parametrized_name)
-        dependency_manager.dump_tests()
-        logger.debug(
-            f"find_test {test_obj.key}, {test_obj} ==>> {test_fn}, {parametrized_name} ==>> {test_obj}"
-        )
         return self.tests.get(test_obj.key)
 
     def dump_tests(self):

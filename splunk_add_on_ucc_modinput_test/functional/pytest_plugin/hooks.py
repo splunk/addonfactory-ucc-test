@@ -13,12 +13,18 @@ from splunk_add_on_ucc_modinput_test.functional.pytest_plugin.utils import (
     _collect_skipped_tests,
     _collect_parametrized_tests,
     _extract_parametrized_data,
+    _map_items_to_forged_tests
 )
 
 
 @pytest.hookimpl
 def pytest_collection_modifyitems(session, config, items):
-    logger.debug(f"start pytest_collection_modifyitems hook: {items}")
+    logger.debug(f"Lookung for forged tests in: {items}")
+    tests2items = _map_items_to_forged_tests(items)
+    if not tests2items:
+        logger.debug(f"No forged tests found, exiting")
+        return
+    
     parametrized_tests = _collect_parametrized_tests(items)
     dependency_manager.expand_parametrized_tests(parametrized_tests)
     dependency_manager.dump_tests()
@@ -48,12 +54,12 @@ def pytest_collection_modifyitems(session, config, items):
 
 @pytest.hookimpl
 def pytest_runtest_setup(item: pytest.Item) -> None:
-    logger.info(f"pytest_runtest_setup: STARTED {item}")
     pytest_funcname, _ = _extract_parametrized_data(item)
     test = dependency_manager.find_test(item._obj, pytest_funcname)
     if not test:
-        logger.info(f"pytest_runtest_setup: {item} NOT FOUND")
         return
+
+    logger.info(f"Executing pytest runtest setup step for forged test : {test}")
 
     try:
         test.wait_for_dependencies()
@@ -68,24 +74,20 @@ def pytest_runtest_setup(item: pytest.Item) -> None:
 
 @pytest.hookimpl
 def pytest_runtest_call(item: pytest.Item) -> None:
-    logger.info(f"pytest_runtest_call: STARTED {item}")
     pytest_funcname, _ = _extract_parametrized_data(item)
     test = dependency_manager.find_test(item._obj, pytest_funcname)
     if not test:
-        logger.info(f"pytest_runtest_call: {item} NOT FOUND")
         return
 
-    logger.info(f"pytest_runtest_call: {item} ==>> {test}")
+    logger.info(f"Executing pytest runtest call step for forged test : {test}")
 
 
 @pytest.hookimpl
 def pytest_runtest_teardown(item: pytest.Item) -> None:
-    logger.info(f"pytest_runtest_teardown: STARTED {item}")
     pytest_funcname, _ = _extract_parametrized_data(item)
     test = dependency_manager.find_test(item._obj, pytest_funcname)
     if not test:
-        logger.info(f"pytest_runtest_teardown: {item} NOT FOUND")
         return
 
-    logger.info(f"pytest_runtest_teardown: {item} ==>> {test}")
+    logger.info(f"Executing pytest runtest teardown step for forged test : {test}")
     dependency_manager.teardown_test(test)
