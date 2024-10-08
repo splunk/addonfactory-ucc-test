@@ -1,4 +1,5 @@
 import pytest
+import traceback
 from splunk_add_on_ucc_modinput_test.functional import logger
 from splunk_add_on_ucc_modinput_test.functional.exceptions import (
     SplTaFwkBaseException,
@@ -44,10 +45,10 @@ def pytest_collection_modifyitems(session, config, items):
     _debug_log_test_order(items)
     _log_test_order(items)
 
-    deps_mtx = dependency_manager.build_dep_exec_matrix(skipped_tests)
+    deps_mtx = dependency_manager.build_bootstrap_matrix(skipped_tests)
     sequential_execution = config.getvalue("sequential_execution")
     number_of_threads = config.getvalue("number_of_threads")
-    dependency_manager.start_dependency_execution(
+    dependency_manager.start_bootstrap_execution(
         deps_mtx, sequential_execution, number_of_threads
     )
 
@@ -62,8 +63,10 @@ def pytest_runtest_setup(item: pytest.Item) -> None:
     logger.info(f"Executing pytest runtest setup step for forged test : {test}")
 
     try:
-        dependency_manager.wait_for_test_dependencies(test)
+        dependency_manager.wait_for_test_bootstrap(test)
+        dependency_manager.execute_test_inplace_forges(test)
     except SplTaFwkBaseException as e:
+        logger.error(f"Error during test setup: {e}\n{traceback.format_exc()}")
         pytest.fail(str(e))
 
     item.funcargs.update(test.collect_required_kwargs())
@@ -94,3 +97,7 @@ def pytest_runtest_teardown(item: pytest.Item) -> None:
     
     for error in dependency_manager.test_error_report(test):
         item.add_report_section("call", "error", error)  
+
+@pytest.hookimpl
+def pytest_sessionfinish(session, exitstatus):
+    dependency_manager.shutdown()

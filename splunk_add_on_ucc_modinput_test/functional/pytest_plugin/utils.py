@@ -72,7 +72,7 @@ def _adjust_test_order(items):
         test = dependency_manager.find_test(item._obj, pytest_funcname)
         if test:
             logger.debug(f"Item: {item} -> {test.key}")
-            count = len(dependency_manager.tasks.get_by_test(test.key))
+            count = len(dependency_manager.tasks.get_bootstrap_tasks(test.key))
             tests.append((item, count))
         else:
             tests.append((item, 0))
@@ -102,7 +102,7 @@ def _log_test_order(items):
         test = dependency_manager.find_test(item._obj, pytest_funcname)
         if test:
             order += f"{index}. {'::'.join(test.key)}\n"
-            test_tasks = dependency_manager.tasks.get_by_test(test.key)
+            test_tasks = dependency_manager.tasks.get_bootstrap_tasks(test.key)
             for level, tasks in enumerate(test_tasks):
                 order += f"\tLevel {level}\n"
                 for task in tasks:

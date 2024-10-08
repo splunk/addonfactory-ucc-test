@@ -4,6 +4,7 @@ import time
 import types
 import random
 import traceback
+from typing import Tuple, Optional
 from splunk_add_on_ucc_modinput_test.functional import logger
 from splunk_add_on_ucc_modinput_test.functional.constants import (
     BuiltInArg,
@@ -14,9 +15,10 @@ from splunk_add_on_ucc_modinput_test.functional.exceptions import (
 )
 
 class FrameworkTask:
-    def __init__(self, test, forge, forge_kwargs={}, probe_fn=None):
+    def __init__(self, test, forge, is_bootstrap, forge_kwargs, probe_fn):
         self._test = test
         self._forge = forge
+        self._is_bootstrap = is_bootstrap
         self._forge_initial_kwargs = forge_kwargs
         self._probe_kwargs = {}
         self._exec_id = None
@@ -30,6 +32,10 @@ class FrameworkTask:
 
     def __repr__(self):
         return f"{id(self)} - {super().__repr__()}, is_executed={self.is_executed} , dep: {id(self._forge)} - {self._forge} - {self.forge_key}"
+
+    @property
+    def is_bootstrap(self):
+        return self._is_bootstrap
 
     @property
     def is_executed(self):
@@ -56,6 +62,10 @@ class FrameworkTask:
         return self._forge.key
 
     @property
+    def forge_test_keys(self):
+        return list(self._forge.tests)
+
+    @property
     def test_key(self):
         return self._test.key
 
@@ -75,6 +85,14 @@ class FrameworkTask:
     @property
     def default_artifact_name(self):
         return self._forge.original_name
+
+    def block_forge_teardown(self):
+        logger.debug(f"BLOCK teardown for forge {self._forge.key}")
+        self._forge.block_teardown()
+
+    def unblock_forge_teardown(self):       
+        logger.debug(f"UNBLOCK teardown for forge {self._forge.key}")
+        self._forge.unblock_teardown()
 
     def make_kwarg(self, test_result):
         if test_result is None:
@@ -235,15 +253,15 @@ class FrameworkTask:
         self._result = result
         self.errors = errors
 
-    def use_previous_executions(self, args):
+    def use_previous_executions(self, args_to_match) -> Tuple[bool, Optional[object]]:
         logger.debug(
             f"Dep {self.forge_key}: look for {self._forge_kwargs} in {self._forge.executions}"
         )
         for prev_exec in self._forge.executions:
             logger.debug(
-                f"EXECTASK: COMPARE ARGS:\n\tprev exec: {prev_exec.kwargs}\n\tcurrent args {args}"
+                f"EXECTASK: COMPARE ARGS:\n\tprev exec: {prev_exec.kwargs}\n\tcurrent args {args_to_match}"
             )
-            if self.same_args(prev_exec.kwargs, args):
+            if self.same_args(prev_exec.kwargs, args_to_match):
                 self.reuse_forge_execution(prev_exec.id, prev_exec.result, prev_exec.errors)
                 logger.info(
                     f"EXECTASK self id: {id(self)}: skip execution {self}, take previous res: {prev_exec.result}, {type(prev_exec.result)}"
@@ -287,6 +305,8 @@ class FrameworkTask:
             self._forge.register_execution(
                 self._exec_id, self._teardown, comp_kwargs, result, self._errors
             )
+            if not self.is_bootstrap:
+                self.block_forge_teardown()
 
         try:
             if not self.failed:

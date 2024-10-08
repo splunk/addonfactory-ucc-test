@@ -1,10 +1,13 @@
 import threading
 import queue
 import traceback
+import time
 from typing import Any
 from dataclasses import dataclass
 from splunk_add_on_ucc_modinput_test.functional import logger
 from splunk_add_on_ucc_modinput_test.functional.entities.task import FrameworkTask
+from splunk_add_on_ucc_modinput_test.functional.exceptions import SplTaFwkWaitForDependenciesTimeout
+from splunk_add_on_ucc_modinput_test.functional.constants import TasksWait
 
 
 def log_exceptions_traceback(fn):
@@ -49,8 +52,7 @@ class TaskGroupProcessor:
             )
             if test_tasks is not None:
                 self._result_collector[test_index] = [None] * len(test_tasks)
-                if test_tasks is not None:
-                    self._jobs += self._process_test_tasks(test_index, test_tasks)
+                self._jobs += self._process_test_tasks(test_index, test_tasks)
         
         for job in self._jobs:
             self._done[job.id] = False
@@ -128,7 +130,7 @@ class TaskGroupProcessor:
         finished_task = self._task_group[job.test_index][job.task_index]
         assert finished_task is job.task, "Task is not the same!"
         logger.debug(
-            f"monitor got finished task {job.id}, TEST KEY: {finished_task.test_key}, DEP KEY: {finished_task.forge_key}, DEP RES: {finished_task.result}, RES {job.task.result}"
+            f"manager got finished task {job.id}, TEST KEY: {finished_task.test_key}, DEP KEY: {finished_task.forge_key}, DEP RES: {finished_task.result}, RES {job.task.result}"
         )
 
         self._result_collector[job.test_index][job.task_index] = job.task.result
@@ -136,22 +138,12 @@ class TaskGroupProcessor:
         self._copy_result_to_matching_tasks(job.test_index, job.task_index)
         self._done[job.id] = True
         logger.debug(
-            f"monitor is waiting for tasks {self._done}, results: {self._result_collector}"
+            f"manager is waiting for tasks {self._done}, results: {self._result_collector}"
         )
 
 class FrmwkExecutorBase:
     def __init__(self, manager):
-        self.manager = manager
-        self._started = False
-
-    @property
-    def is_started(self):
-        return self._started
-
-    def start(self, tasks):
-        self._tasks = tasks
-        self._started = True
-        logger.debug("started")
+        self._manager = manager
 
     def shutdown(self):
         pass
@@ -161,8 +153,8 @@ class FrmwkExecutorBase:
 
     def clients_factory(self):
         return dict(
-            splunk_client=self.manager.create_splunk_client(),
-            vendor_client=self.manager.create_vendor_client(),
+            splunk_client=self._manager.create_splunk_client(),
+            vendor_client=self._manager.create_vendor_client(),
         )
 
     def _execute_request(self, job, worker_id=0):
@@ -184,16 +176,14 @@ class FrmwkExecutorBase:
 
 class FrmwkSequentialExecutor(FrmwkExecutorBase):
     def start(self, tasks):
-        super().start(tasks)
-
-        logger.debug("monitor has started")
+        logger.debug(f"sequential executor has started with tasks {tasks}")
         for task_group in tasks:
             proc = TaskGroupProcessor(task_group, self.clients_factory)
             for job in proc.jobs:
                 self._execute_request(job)
                 proc.process_response(job)
 
-        logger.debug("monitor has finished")
+        logger.debug("sequential executor has finished")
 
 
 class FrmwkParallelExecutor(FrmwkExecutorBase):
@@ -201,66 +191,96 @@ class FrmwkParallelExecutor(FrmwkExecutorBase):
         super().__init__(manager)
         self.worker_count = worker_count
         self.task_queue = queue.Queue()
-        self.monitor_queue = queue.Queue()
+        self._manager_queue = queue.Queue()
+        self._is_free = threading.Event()
+        self.deploy()
 
-    def start(self, tasks):
-        super().start(tasks)
+    def deploy(self):
         self.threads = [
-            threading.Thread(target=self.worker, args=(index,))
+            threading.Thread(target=self.worker_thread, args=(index,))
             for index in range(self.worker_count)
         ]
         [thread.start() for thread in self.threads]
 
-        self.monitor_thread = threading.Thread(
-            target=self.monitor, args=(tasks,)
-        )
-        self.monitor_thread.start()
+        self._manager_thread = threading.Thread(target=self.manager_thread)
+        self._manager_thread.start()
 
-        self._started = True
+        logger.debug("deployed")
+        self._is_free.set()
+
+    def wait(self):
+        expiration = time.time() + TasksWait.TIMEOUT.value
+        while not self._is_free.wait(TasksWait.CHECK_FREQUENCY.value):
+            if time.time() > expiration:
+                msg = f"Waiting for executor to process all tasks exceeded timeout {TasksWait.TIMEOUT.value} seconds."
+                logger.error(msg)
+                raise SplTaFwkWaitForDependenciesTimeout(msg)            
+            logger.debug("Still waiting for executor to process all tasks")
+
+    def start(self, tasks):
+        logger.debug("FrmwkParallelExecutor::start - wait for previoues tasks")        
+        self.wait()
+        logger.debug("FrmwkParallelExecutor::start - executer is about to set busy")        
+        self._is_free.clear()
+        logger.debug("FrmwkParallelExecutor::start - sending tasks to manager")        
+        self._manager_queue.put(tasks)
         logger.debug("started")
 
     def shutdown(self):
-        self.monitor_queue.put(None)
-        self.wait()
+        self._manager_queue.put(None)
+        self._manager_thread.join()
 
-    def wait(self):
-        self.monitor_thread.join()
-
+    def _receive_tasks(self):
+        logger.debug("FrmwkParallelExecutor::_receive_tasks - set waiting for tasks")        
+        tasks = self._manager_queue.get()
+        logger.debug(f"FrmwkParallelExecutor::_receive_tasks - got tasks: {tasks}")        
+        self._manager_queue.task_done()
+        logger.debug(f"FrmwkParallelExecutor::_receive_tasks - queue task done")        
+        if tasks is None:                
+            return True, []
+        return False, tasks
+        
     def _collect_results(self, proc):
         while not proc.all_tasks_done:
-            job = self.monitor_queue.get()
-            logger.debug(f"monitor got finished task {job}")
+            job = self._manager_queue.get()
+            logger.debug(f"manager got finished task {job}")
             if job is None:
-                logger.debug("monitor is interrupted")
+                logger.debug("manager is interrupted")
                 return True
 
             proc.process_response(job)
-            self.monitor_queue.task_done()
+            self._manager_queue.task_done()
             
         return False
 
     @log_exceptions_traceback
-    def monitor(self, tasks):
-        logger.debug("monitor has started")
-        for task_group in tasks:
-            proc = TaskGroupProcessor(task_group, self.clients_factory)
-            for job in proc.jobs:
-                self.task_queue.put(job)
+    def manager_thread(self):
+        logger.debug("manager has started")
+        interrupted = False
+        while not interrupted:
+            interrupted, tasks = self._receive_tasks()
+            logger.debug(f"manager got tasks {tasks}")
+            for task_group in tasks:
+                proc = TaskGroupProcessor(task_group, self.clients_factory)
+                for job in proc.jobs:
+                    self.task_queue.put(job)
 
-            interrupted = self._collect_results(proc)
-            if interrupted:
-                break
+                interrupted = self._collect_results(proc)
+                if interrupted:
+                    break
 
+            self._is_free.set()
+            
         for _ in self.threads:
             self.task_queue.put(None)
 
         for thread in self.threads:
             thread.join()
 
-        logger.debug("monitor has finished")
+        logger.debug("manager has finished")
 
     @log_exceptions_traceback
-    def worker(self, wid):
+    def worker_thread(self, wid):
         while True:
             job = self.task_queue.get()
             logger.debug(f"worker {wid} task recieved {job}")
@@ -269,4 +289,4 @@ class FrmwkParallelExecutor(FrmwkExecutorBase):
 
             self._execute_request(job, wid)
             self.task_queue.task_done()
-            self.monitor_queue.put(job)
+            self._manager_queue.put(job)
