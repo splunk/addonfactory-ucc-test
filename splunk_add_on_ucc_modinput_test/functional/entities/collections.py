@@ -1,7 +1,15 @@
 from typing import List, Dict, Tuple
-from splunk_add_on_ucc_modinput_test.functional.entities.forge import FrameworkForge
-from splunk_add_on_ucc_modinput_test.functional.entities.test import FrameworkTest
-from splunk_add_on_ucc_modinput_test.functional.entities.task import FrameworkTask
+from splunk_add_on_ucc_modinput_test.functional.entities.forge import (
+    FrameworkForge,
+)
+from splunk_add_on_ucc_modinput_test.functional.entities.test import (
+    FrameworkTest,
+)
+from splunk_add_on_ucc_modinput_test.functional.entities.task import (
+    FrameworkTask,
+)
+from splunk_add_on_ucc_modinput_test.functional import logger
+
 
 class TestCollection(Dict[Tuple[str, str], FrameworkTest]):
     def add(self, item):
@@ -11,9 +19,8 @@ class TestCollection(Dict[Tuple[str, str], FrameworkTest]):
 
     def lookup_by_function(self, fn):
         test = FrameworkTest(fn)
-        if test.key in self:
-            return super().__getitem__(test.key)
-        return None
+        return self.get(test.key)
+
 
 class ForgeCollection(Dict[Tuple[str, str, str], FrameworkForge]):
     def add(self, item: FrameworkForge):
@@ -22,37 +29,68 @@ class ForgeCollection(Dict[Tuple[str, str, str], FrameworkForge]):
 
     def lookup_by_function(self, fn):
         forge = FrameworkForge(fn)
-        if forge.key in self:
-            return super().__getitem__(forge.key)
-        return None
+        return self.get(forge.key)
+
 
 class TaskCollection:
     def __init__(self):
-        self._tasks_by_test = {}
+        self._tasks = {}
 
     def remove_test_tasks(self, task_key):
-        return self._tasks_by_test.pop(task_key, None)
-        
+        return self._tasks.pop(task_key, None)
+
     def add(self, tasks: List[FrameworkTask]):
         if not tasks:
             return
         test_key = tasks[0].test_key
-        if test_key not in self._tasks_by_test:
-            self._tasks_by_test[test_key] = []
-        self._tasks_by_test[test_key].insert(0, tasks)
-                
-    def get_by_test(self, test_key):
-        return self._tasks_by_test.get(test_key, [])    
-    
+        if test_key not in self._tasks:
+            self._tasks[test_key] = []
+        self._tasks[test_key].insert(0, tasks)
+
+    def get_bootstrap_tasks(self, test_key):
+        all_tasks = self.get_tasks(test_key)
+        if all_tasks:
+            bootstrap_tasks = [t for t in all_tasks if t[0].is_bootstrap]
+        else:
+            bootstrap_tasks = []
+        logger.debug(f"get_bootstrap_tasks for {test_key}: {bootstrap_tasks}")
+        return bootstrap_tasks
+
+    def get_inplace_tasks(self, test_key):
+        all_tasks = self.get_tasks(test_key)
+        if all_tasks:
+            inplace_tasks = [t for t in all_tasks if not t[0].is_bootstrap]
+        else:
+            inplace_tasks = []
+        logger.debug(f"get_inplace_tasks for {test_key}: {inplace_tasks}")
+        return inplace_tasks
+
+    def get_tasks(self, test_key):
+        tasks = self._tasks.get(test_key, [])
+        logger.debug(f"get_tasks for {test_key}: {tasks}")
+        return tasks
+
     def enumerate_tasks(self, test_key):
-        test_tasks = self._tasks_by_test.get(test_key, [])
+        test_tasks = self.get_tasks(test_key)
         for i, parralel_tasks in enumerate(test_tasks):
             for j, task in enumerate(parralel_tasks):
                 yield i, j, task
-                
-    def tasks_by_state(self, test_key):
+
+    def enumerate_bootstrap_tasks(self, test_key):
+        bootstrap_tasks = self.get_bootstrap_tasks(test_key)
+        for i, parralel_tasks in enumerate(bootstrap_tasks):
+            for j, task in enumerate(parralel_tasks):
+                yield i, j, task
+
+    def enumerate_inplace_tasks(self, test_key):
+        inplace_tasks = self.get_inplace_tasks(test_key)
+        for i, parralel_tasks in enumerate(inplace_tasks):
+            for j, task in enumerate(parralel_tasks):
+                yield i, j, task
+
+    def bootstrap_tasks_by_state(self, test_key):
         done, pending = [], []
-        for _, _, task in self.enumerate_tasks(test_key):
+        for _, _, task in self.enumerate_bootstrap_tasks(test_key):
             if task.is_executed:
                 done.append(task)
             else:

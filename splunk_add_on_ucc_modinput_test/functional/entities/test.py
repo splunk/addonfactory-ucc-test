@@ -1,4 +1,3 @@
-from dataclasses import dataclass, replace
 from splunk_add_on_ucc_modinput_test.functional import logger
 from splunk_add_on_ucc_modinput_test.functional.constants import (
     BuiltInArg,
@@ -6,6 +5,7 @@ from splunk_add_on_ucc_modinput_test.functional.constants import (
 from splunk_add_on_ucc_modinput_test.functional.entities.executable import (
     ExecutableBase,
 )
+
 
 class FrameworkTest(ExecutableBase):
     def __init__(self, function, altered_name=None):
