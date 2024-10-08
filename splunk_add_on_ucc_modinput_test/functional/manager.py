@@ -1,8 +1,15 @@
 import time
-from typing import List, Tuple
+from copy import deepcopy
+from typing import List, Tuple, Optional, Union
 from splunk_add_on_ucc_modinput_test.functional import logger
-from splunk_add_on_ucc_modinput_test.functional.exceptions import ( SplTaFwkDependencyExecutionError, SplTaFwkWaitForDependenciesTimeout )
-from splunk_add_on_ucc_modinput_test.functional.constants import ForgeScope, TasksWait
+from splunk_add_on_ucc_modinput_test.functional.exceptions import (
+    SplTaFwkDependencyExecutionError,
+    SplTaFwkWaitForDependenciesTimeout,
+)
+from splunk_add_on_ucc_modinput_test.functional.constants import (
+    ForgeScope,
+    TasksWait,
+)
 from splunk_add_on_ucc_modinput_test.functional.entities import (
     TestCollection,
     ForgeCollection,
@@ -22,7 +29,18 @@ from splunk_add_on_ucc_modinput_test.functional.vendor.client import (
     VendorClientBase,
 )
 
+class forge:
+    def __init__(self, forge_fn, *, probe=None, scope:Optional[Union[ForgeScope, str]] = None, **kwargs):
+        self.forge_fn = forge_fn
+        self.probe = probe
+        self.scope = scope.value if isinstance(scope, ForgeScope) else scope
+        self.kwargs = kwargs
 
+class forges:
+    def __init__(self, *forge_list, scope:Optional[Union[ForgeScope, str]]=None):
+        self.forge_list = forge_list
+        self.scope = scope.value if isinstance(scope, ForgeScope) else scope
+        
 class TestDependencyManager:
     def __init__(self):
         self.tests = TestCollection()
@@ -46,28 +64,16 @@ class TestDependencyManager:
     def create_splunk_client(self):
         return self._splunk_client_class()
 
-    def _interpret_forge_data(self, frg_data):
-        if isinstance(frg_data, (tuple, list)):
-            frg_fn, probe_fn, scope, kwargs = None, None, None, None
-            assert len(frg_data) > 1
-            frg_fn = frg_data[0]
-            if len(frg_data) > 1:
-                probe_fn = frg_data[1]
-            if len(frg_data) > 2:
-                scope = frg_data[2]
-            if len(frg_data) > 3:
-                kwargs = frg_data[3]
-            return frg_fn, probe_fn, scope, kwargs
-
-        return frg_data, None, None, {}
-
-    def _interpret_scope(self, scope, test):
-        frg_scope = scope
-        if frg_scope is ForgeScope.FUNCTION:
-            frg_scope = "::".join(test.key)
-        elif frg_scope is ForgeScope.MODULE:
-            frg_scope = test.source_file
-        return frg_scope
+    def _interpret_scope(self, scope:Optional[str], test:FrameworkTest) -> Optional[str]:
+        if scope is None:
+            return None
+        
+        if scope == ForgeScope.FUNCTION.value:
+            scope = "::".join(test.key)
+        elif scope == ForgeScope.MODULE.value:
+            scope = test.source_file
+            
+        return scope
 
     def bind(self, test_fn, scope, frg_fns, is_bootstrap):
         logger.debug(f"bind: {test_fn} -> {frg_fns}")
@@ -80,34 +86,36 @@ class TestDependencyManager:
         frg_group_scope = self._interpret_scope(scope, test)
 
         frg_list = []
-        for frg_data in frg_fns:
-            (
-                frg_fn,
-                frg_probe,
-                frg_scope,
-                frg_kwargs,
-            ) = self._interpret_forge_data(frg_data)
-            if frg_scope:
-                frg_scope = self._interpret_scope(frg_scope, test)
+        for f in frg_fns:                        
+            if frg_group_scope is None and f.scope is None:
+                frg_scope = ForgeScope.SESSION.value
+            elif f.scope is not None:
+                frg_scope = self._interpret_scope(f.scope, test)
             else:
                 frg_scope = frg_group_scope
 
-            frg = FrameworkForge(frg_fn, frg_scope)
+            frg = FrameworkForge(f.forge_fn, frg_scope)
             found = self.forges.get(frg.key)
             if not found:
                 self.forges.add(frg)
-                logger.debug(f"BIND created frg {id(frg)} - {frg} - {frg.key}, is_bootstrap: {is_bootstrap}")
+                logger.debug(
+                    f"BIND created frg {id(frg)} - {frg} - {frg.key}, is_bootstrap: {is_bootstrap}"
+                )
             else:
                 frg = found
-                logger.debug(f"BIND found frg {id(frg)} - {frg} - {frg.key}, is_bootstrap: {is_bootstrap}")
-            
-            frg_list.append(FrameworkTask(test, frg, is_bootstrap, frg_kwargs, frg_probe))
-            
+                logger.debug(
+                    f"BIND found frg {id(frg)} - {frg} - {frg.key}, is_bootstrap: {is_bootstrap}"
+                )
+
+            frg_list.append(
+                FrameworkTask(test, frg, is_bootstrap, f.kwargs, f.probe)
+            )
+
             frg.link_test(test.key)
             test.link_forge(frg.key)
 
         self.tasks.add(frg_list)
-        
+
         return test
 
     def unregister_test(self, test_key):
@@ -131,30 +139,28 @@ class TestDependencyManager:
     def copy_task_for_parametrized_test(self, test, kwargs, src_task):
         frg = src_task._forge
         frg.link_test(test.key)
-        test.link_forge(frg.key)                        
+        test.link_forge(frg.key)
         probe = src_task.get_probe_fn()
         is_bootstrap = src_task.is_bootstrap
-        kwargs = src_task.get_forge_kwargs().copy()
+        kwargs = src_task.get_forge_kwargs_copy()
         kwargs.update(kwargs)
         return FrameworkTask(test, frg, is_bootstrap, kwargs, probe)
-        
+
     def expand_parametrized_tests(self, parametrized_tests):
         for test_key, param_tests in parametrized_tests.items():
             test = self.unregister_test(test_key)
             if not test:
                 logger.debug(f"TEST NOT FOUND: {test.key}")
                 continue
-                            
+
             logger.debug(f"Test found: {test.key}")
             test_tasks = self.tasks.remove_test_tasks(test_key)
-            assert(test_tasks)
+            assert test_tasks
             for test_name, parametrized_kwargs in param_tests:
                 logger.debug(
                     f"adding test: {test.key} => test_name: {test_name}, kwargs: {parametrized_kwargs}"
                 )
-                parametrized_test = FrameworkTest(
-                    test._function, test_name
-                )
+                parametrized_test = FrameworkTest(test._function, test_name)
                 logger.debug(
                     f"create parametrized test: {parametrized_test.key}, {vars(parametrized_test)}"
                 )
@@ -163,17 +169,23 @@ class TestDependencyManager:
                 for parallel_tasks in test_tasks[::-1]:
                     frg_list = []
                     for src_task in parallel_tasks:
-                        parametrized_task = self.copy_task_for_parametrized_test(parametrized_test, parametrized_kwargs, src_task)
+                        parametrized_task = (
+                            self.copy_task_for_parametrized_test(
+                                parametrized_test,
+                                parametrized_kwargs,
+                                src_task,
+                            )
+                        )
                         frg_list.append(parametrized_task)
-                    
+
                     self.tasks.add(frg_list)
-                    
+
                     logger.debug(
                         f"parametrized_test.link_forge: {parametrized_test.key}: {frg_list} => {parametrized_test}"
                     )
 
     def _log_dep_exec_matrix(self, tests, dep_mtx):
-        matrix = "\nDependency execution matrix:\n"
+        matrix = "\nBootstrap Dependency execution matrix:\n"
         for step_index, group in enumerate(dep_mtx):
             matrix += f"Step {step_index}:\n"
             for test_index, test_tasks in enumerate(group):
@@ -218,7 +230,7 @@ class TestDependencyManager:
             else:
                 self.executor = FrmwkParallelExecutor(self, number_of_threads)
 
-        if not deps_exec_mtx:
+        if deps_exec_mtx:
             self._execution_timeout = time.time() + TasksWait.TIMEOUT.value
             self.executor.start(deps_exec_mtx)
 
@@ -226,24 +238,32 @@ class TestDependencyManager:
         logger.debug(f"start inplace_tasks_execution:{deps_exec_mtx}")
         if not deps_exec_mtx:
             return
-        assert self.executor is not None        
+        assert self.executor is not None
         logger.debug("inplace_tasks_execution is about to start")
         self._execution_timeout = time.time() + TasksWait.TIMEOUT.value
         self.executor.start(deps_exec_mtx)
         self.executor.wait()
-    
+
     def shutdown(self):
+        logger.info("Shutting down dependency manager...")
+
         if self.executor is not None:
             self.executor.shutdown()
 
-    def check_all_tests_executed(self, tests_keys:List[Tuple[str,...]]):        
-        executed = [self.tests.get(test_key).is_executed for test_key in tests_keys]
+    def check_all_tests_executed(self):
+        executed = [test.is_executed for test in self.tests.values()]
         return all(executed)
-    
+
+    def check_tests_executed(self, tests_keys: List[Tuple[str, ...]]):
+        executed = [
+            self.tests.get(test_key).is_executed for test_key in tests_keys
+        ]
+        return all(executed)
+
     def try_to_unblock_inplace_teardowns(self, test):
         inplace_tasks = self.tasks.enumerate_inplace_tasks(test.key)
         for _, _, task in inplace_tasks:
-            if self.check_all_tests_executed(task.forge_test_keys):
+            if self.check_tests_executed(task.forge_test_keys):
                 task.unblock_forge_teardown()
 
     def teardown_test_dependencies(self, test):
@@ -257,10 +277,12 @@ class TestDependencyManager:
         test.mark_executed()
         self.teardown_test_dependencies(test)
 
-
     def wait_for_test_bootstrap(self, test):
         while True:
             done, pending = self.tasks.bootstrap_tasks_by_state(test.key)
+            failed_tasks = [task.key for task in done if task._errors]
+            logger.debug(f"DONE TASKS for {test.key}: {[task.forge_key for task in done]}")
+            logger.debug(f"FAILED TASKS for {test.key}: {failed_tasks}")
             for task in done:
                 if task.failed:
                     forge_path = "::".join(task.forge_key[:2])
@@ -271,25 +293,26 @@ class TestDependencyManager:
 
             if not pending:
                 break
-
-            if time.time() > self._execution_timeout:
+            elif time.time() > self._execution_timeout:
                 msg = f"{test} exceeded {TasksWait.TIMEOUT.value} seconds timeout while waiting for dependencies:"
                 for task in pending:
                     forge_path = "::".join(task.forge_key[:2])
                     msg += f"\n\t{forge_path}, self id: {id(task)}, scope: {task.forge_key[2]}, exec_id: {task._exec_id} is_executed: {task.is_executed}, is_failed: {task.failed}"
                 logger.error(msg)
                 raise SplTaFwkWaitForDependenciesTimeout(msg)
-            
+
             logger.debug(f"{test} is waiting for dependencies")
             time.sleep(TasksWait.CHECK_FREQUENCY.value)
-        
+
         logger.debug(f"{test} dependencies are ready")
 
     def execute_test_inplace_forges(self, test):
         logger.debug(f"Executing inplace forges for test {test}")
         exec_steps = []
         inplace_tasks = self.tasks.get_inplace_tasks(test.key)
-        dump = f"Execution matrix for inplace tasks for {test}: {inplace_tasks}"
+        dump = (
+            f"Execution matrix for inplace tasks for {test}: {inplace_tasks}"
+        )
         for tasks in inplace_tasks:
             dump += f"\t{[tasks]}"
             exec_steps.append([tasks])
@@ -300,5 +323,8 @@ class TestDependencyManager:
         for _, _, task in self.tasks.enumerate_tasks(test.key):
             if task.failed:
                 yield task.error
+
+
+
 
 dependency_manager = TestDependencyManager()

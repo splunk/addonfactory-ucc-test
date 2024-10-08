@@ -10,6 +10,7 @@ def _extract_parametrized_data(pyfuncitem):
         callspec_params = pyfuncitem.callspec.params
     return pyfuncitem.keywords.node.name, callspec_params
 
+
 def _map_items_to_forged_tests(items):
     forged_tests = {}
     for item in items:
@@ -72,15 +73,13 @@ def _adjust_test_order(items):
         test = dependency_manager.find_test(item._obj, pytest_funcname)
         if test:
             logger.debug(f"Item: {item} -> {test.key}")
-            count = len(dependency_manager.tasks.get_bootstrap_tasks(test.key))
-            tests.append((item, count))
+            ip_tasks, bs_tasks = dependency_manager.tasks.get_tasks_by_type(test.key)
+            tests.append((item, (int(len(ip_tasks)>0), len(bs_tasks))))
         else:
-            tests.append((item, 0))
+            tests.append((item, (-1, 0)))
 
     sorted_items = sorted(tests, key=lambda v: v[1])
-
-    reordered_items = [item for item, _ in sorted_items]
-    return reordered_items
+    return [item for item, _ in sorted_items]
 
 
 def _debug_log_test_order(items):

@@ -8,6 +8,7 @@ from splunk_add_on_ucc_modinput_test.functional.entities.executable import (
     ExecutableBase,
 )
 
+
 @dataclass
 class ForgeExecData:
     id: str
@@ -37,7 +38,7 @@ class ForgePostExec:
 
     def block_teardown(self):
         self._teardown_is_blocked = True
-        
+
     def unblock_teardown(self):
         self._teardown_is_blocked = False
 
@@ -104,7 +105,6 @@ class ForgePostExec:
             pass
         data.is_teardown_executed = True
 
-
     def dereference_teardown(self, id):
         data = self._exec_store.get(id)
         assert data
@@ -114,7 +114,11 @@ class ForgePostExec:
         data.lock.acquire()
         try:
             data.count -= 1
-            if data.count == 0 and not self._teardown_is_blocked and not data.is_teardown_executed:
+            if (
+                data.count == 0
+                and not self._teardown_is_blocked
+                and not data.is_teardown_executed
+            ):
                 self.execute_teardown(data)
         finally:
             data.lock.release()
@@ -124,7 +128,7 @@ class ForgePostExec:
 
 
 class FrameworkForge(ExecutableBase):
-    def __init__(self, function, scope):
+    def __init__(self, function, scope:str):
         super().__init__(function)
         self._scope = scope
         self.tests = set()
@@ -145,14 +149,14 @@ class FrameworkForge(ExecutableBase):
 
     def block_teardown(self):
         self._executions.block_teardown()
-        
+
     def unblock_teardown(self):
         self._executions.unblock_teardown()
 
     def teardown(self, id):
         self._executions.dereference_teardown(id)
 
-    def register_execution(self, id, teardown, kwargs, result, errors):
+    def register_execution(self, id, *, teardown, kwargs, result, errors):
         self._executions.add(id, teardown, kwargs, result, errors)
 
     def reuse_execution(self, prev_exec):

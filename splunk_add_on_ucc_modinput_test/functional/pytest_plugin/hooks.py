@@ -14,7 +14,7 @@ from splunk_add_on_ucc_modinput_test.functional.pytest_plugin.utils import (
     _collect_skipped_tests,
     _collect_parametrized_tests,
     _extract_parametrized_data,
-    _map_items_to_forged_tests
+    _map_items_to_forged_tests,
 )
 
 
@@ -23,9 +23,9 @@ def pytest_collection_modifyitems(session, config, items):
     logger.debug(f"Lookung for forged tests in: {items}")
     tests2items = _map_items_to_forged_tests(items)
     if not tests2items:
-        logger.debug(f"No forged tests found, exiting")
+        logger.debug("No forged tests found, exiting")
         return
-    
+
     parametrized_tests = _collect_parametrized_tests(items)
     dependency_manager.expand_parametrized_tests(parametrized_tests)
     dependency_manager.dump_tests()
@@ -60,7 +60,9 @@ def pytest_runtest_setup(item: pytest.Item) -> None:
     if not test:
         return
 
-    logger.info(f"Executing pytest runtest setup step for forged test : {test}")
+    logger.info(
+        f"Executing pytest runtest setup step for forged test : {test}"
+    )
 
     try:
         dependency_manager.wait_for_test_bootstrap(test)
@@ -92,12 +94,13 @@ def pytest_runtest_teardown(item: pytest.Item) -> None:
     if not test:
         return
 
-    logger.info(f"Executing pytest runtest teardown step for forged test : {test}")
+    logger.info(
+        f"Executing pytest runtest teardown step for forged test : {test}"
+    )
     dependency_manager.teardown_test(test)
-    
-    for error in dependency_manager.test_error_report(test):
-        item.add_report_section("call", "error", error)  
 
-@pytest.hookimpl
-def pytest_sessionfinish(session, exitstatus):
-    dependency_manager.shutdown()
+    for error in dependency_manager.test_error_report(test):
+        item.add_report_section("call", "error", error)
+
+    if dependency_manager.check_all_tests_executed():
+        dependency_manager.shutdown()

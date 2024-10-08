@@ -3,9 +3,6 @@ from splunk_add_on_ucc_modinput_test.functional import logger
 from splunk_add_on_ucc_modinput_test.functional.manager import (
     dependency_manager,
 )
-from splunk_add_on_ucc_modinput_test.functional.pytest_plugin.utils import (
-    _extract_parametrized_data,
-)
 
 
 @pytest.fixture
