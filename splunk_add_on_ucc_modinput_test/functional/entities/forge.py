@@ -1,15 +1,12 @@
 import threading
 import inspect
 import contextlib
+from typing import List
 from dataclasses import dataclass, replace
 from splunk_add_on_ucc_modinput_test.functional import logger
 from splunk_add_on_ucc_modinput_test.functional.entities.executable import (
     ExecutableBase,
 )
-from splunk_add_on_ucc_modinput_test.functional.entities.collections import (
-    TestCollection,
-)
-
 
 @dataclass
 class ForgeExecData:
@@ -17,12 +14,19 @@ class ForgeExecData:
     teardown: object
     kwargs: dict
     result: object
+    errors: List[str]
     count: int
     lock = threading.Lock
     is_teardown_executed: bool = False
 
-    def __post_init__(self):
+    def __init__(self, id, teardown, kwargs, result, errors, count):
         self.lock = threading.Lock()
+        self.id = id
+        self.teardown = teardown
+        self.kwargs = kwargs
+        self.result = result
+        self.errors = errors
+        self.count = count
 
 
 class ForgePostExec:
@@ -30,12 +34,14 @@ class ForgePostExec:
         self.lock = threading.Lock()
         self._exec_store = {}
 
-    def add(self, id, teardown, kwargs, result):
+    def add(self, id, teardown, kwargs, result, errors):
         if id not in self._exec_store:
             self.lock.acquire()
-            data = ForgeExecData(id, teardown, kwargs, result, 1)
-            self._exec_store[id] = data
-            self.lock.release()
+            try:
+                data = ForgeExecData(id, teardown, kwargs, result, errors, 1)
+                self._exec_store[id] = data
+            finally:
+                self.lock.release()
             logger.debug(
                 f"REGISTER TEARDOWN {id}:\n\tdata.id: {data.id}\n\tdata.count={data.count},\n\tdata.is_teardown_executed={data.is_teardown_executed}\n\tdata.teardown={data.teardown}\n\tdata.kwargs={data.kwargs}\n\tdata.result={data.result}"
             )
@@ -110,7 +116,7 @@ class FrameworkForge(ExecutableBase):
     def __init__(self, function, scope):
         super().__init__(function)
         self._scope = scope
-        self._tests = TestCollection()
+        self.tests = set()
         self._executions = ForgePostExec()
 
     @property
@@ -129,8 +135,8 @@ class FrameworkForge(ExecutableBase):
     def teardown(self, id):
         self._executions.execute_teardown(id)
 
-    def register_execution(self, id, teardown, kwargs, result):
-        self._executions.add(id, teardown, kwargs, result)
+    def register_execution(self, id, teardown, kwargs, result, errors):
+        self._executions.add(id, teardown, kwargs, result, errors)
 
     def reuse_execution(self, prev_exec):
         id = (
@@ -141,36 +147,19 @@ class FrameworkForge(ExecutableBase):
         self._executions.reuse(id)
 
     @property
-    def bound_tests(self):
-        return self._tests.values()
-
-    @property
     def is_executed(self):
         return self._is_executed
 
-    def __contains__(self, test):
-        return test in self._tests
+    def __contains__(self, test_key):
+        return test_key in self.tests
 
-    def unlink_test(self, test):
-        return self._tests.pop(test.key, None)
+    def unlink_test(self, test_key):
+        self.tests.discard(test_key)
 
-    def link_test(self, test):
-        assert isinstance(test, ExecutableBase)
-        if test.key not in self._tests:
-            self._tests[test.key] = test
+    def link_test(self, test_key):
+        if test_key not in self.tests:
+            self.tests.add(test_key)
 
     def __repr__(self):
         s = repr(self._function)
         return s.replace("<function", "<dependency function")
-
-    @property
-    def all_tests_executed(self):
-        return not self.not_executed_tests
-
-    @property
-    def not_executed_tests(self):
-        return [test for test in self.bound_tests if not test.is_executed]
-
-    @property
-    def executed_deps(self):
-        return [test for test in self.bound_tests if test.is_executed]

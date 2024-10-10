@@ -72,8 +72,8 @@ def _adjust_test_order(items):
         test = dependency_manager.find_test(item._obj, pytest_funcname)
         if test:
             logger.debug(f"Item: {item} -> {test.key}")
-            test.dump()
-            tests.append((item, len(test.dep_tasks)))
+            count = len(dependency_manager.tasks.get_by_test(test.key))
+            tests.append((item, count))
         else:
             tests.append((item, 0))
 
@@ -90,8 +90,7 @@ def _debug_log_test_order(items):
         test = dependency_manager.find_test(item._obj, pytest_funcname)
         logger.debug(f"{type(item)}, {item} => {vars(item)}")
         if test:
-            logger.debug(f"{item} -> {test.key}: {test.bound_deps}")
-            test.dump()
+            logger.debug(f"{item} -> {test.key}: {test.forges}")
         else:
             logger.debug(f"NOT FOUND: {item}, {pytest_funcname} ")
 
@@ -103,10 +102,11 @@ def _log_test_order(items):
         test = dependency_manager.find_test(item._obj, pytest_funcname)
         if test:
             order += f"{index}. {'::'.join(test.key)}\n"
-            for level, tasks in enumerate(test.dep_tasks):
+            test_tasks = dependency_manager.tasks.get_by_test(test.key)
+            for level, tasks in enumerate(test_tasks):
                 order += f"\tLevel {level}\n"
                 for task in tasks:
-                    order += f"\t\t{'::'.join(task.dep_key[:2])}\n"
+                    order += f"\t\t{'::'.join(task.forge_key[:2])}\n"
         else:
             logger.debug(f"NOT FOUND: {item}, {pytest_funcname} ")
 

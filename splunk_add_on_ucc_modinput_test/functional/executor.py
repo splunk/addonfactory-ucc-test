@@ -1,7 +1,10 @@
 import threading
 import queue
 import traceback
+from typing import Any
+from dataclasses import dataclass
 from splunk_add_on_ucc_modinput_test.functional import logger
+from splunk_add_on_ucc_modinput_test.functional.entities.task import FrameworkTask
 
 
 def log_exceptions_traceback(fn):
@@ -16,6 +19,125 @@ def log_exceptions_traceback(fn):
 
     return wrapper
 
+class TaskGroupProcessor:
+    @dataclass
+    class Job:
+        test_index: int
+        task_index: int
+        task: FrameworkTask
+
+        @property
+        def id(self):
+            return self.test_index, self.task_index
+
+    def __init__(self, group, clients_factory):
+        self._clients_factory = clients_factory
+        self._task_group = group
+        self._jobs = []
+        self._matched_tasks = {}
+        self._result_collector = [None] * len(self._task_group)
+        self._done = {}
+        
+        self._build_task_list()
+        
+    def _build_task_list(self):
+        logger.debug(f"\npush task group {self._task_group}")
+        
+        for test_index, test_tasks in enumerate(self._task_group):
+            logger.debug(
+                f"test_index={test_index} push parallel_task {test_tasks}"
+            )
+            if test_tasks is not None:
+                self._result_collector[test_index] = [None] * len(test_tasks)
+                if test_tasks is not None:
+                    self._jobs += self._process_test_tasks(test_index, test_tasks)
+        
+        for job in self._jobs:
+            self._done[job.id] = False
+
+    @property
+    def jobs(self):
+        return self._jobs
+
+    @property
+    def all_tasks_done(self):
+        return all(self._done.values())
+
+    def _process_test_tasks(self, test_index, test_tasks):
+        processed_tasks = []
+        for task_index, task in enumerate(test_tasks):
+            task.prepare_forge_call_args(**self._clients_factory())
+
+            if not self._try_skip_task(test_index, task_index):
+                job = self.Job(test_index, task_index, task)
+                processed_tasks.append(job)
+
+        return processed_tasks
+
+    def _try_skip_task(self, test_index, task_index):
+        task = self._task_group[test_index][task_index]
+        same_task = self._find_same_task(task)
+        logger.debug(f"{task.forge_key} SAME TASK IS  {same_task}")
+        if same_task:
+            logger.debug(
+                f"task_index={task_index} skip task {task.forge_key} execution"
+            )
+            self._matched_tasks[(test_index, task_index)] = same_task
+        return same_task
+
+    def _find_same_task(self, task):
+        for i, test_tasks in enumerate(self._task_group):
+            if test_tasks is None:
+                continue
+            for j, t in enumerate(test_tasks):
+                if task is t:
+                    return None
+                if task.same_tasks(t):
+                    return i, j
+        return None
+
+    def _update_test_artifacts(self, test_index):
+        test_results = self._result_collector[test_index]
+        if test_results:
+            for task_index, test_result in enumerate(test_results):
+                task = self._task_group[test_index][task_index]
+                logger.debug(
+                    f"TEST RESULT {test_result} is dict - {isinstance(test_result, dict)}, test {task.test_key}, dep: {task.forge_key}, result {task.result}"
+                )
+                test_result = task.make_kwarg(test_result)
+                task.update_test_artifacts(test_result)
+                logger.debug(
+                    f"ARTIFACTS UPDATED dep: {task.forge_key}, test {task.test_key}, artifacts: {task._test.artifacts}"
+                )
+
+    def _copy_result_to_matching_tasks(self, src_test_i, src_task_j):
+        src_task = self._task_group[src_test_i][src_task_j]
+        for dst, src in self._matched_tasks.items():
+            if src == (src_test_i, src_task_j):
+                dst_test_i, dst_task_j = dst
+                self._result_collector[dst_test_i][dst_task_j] = src_task._result
+                dst_task = self._task_group[dst_test_i][dst_task_j]
+                dst_task.reuse_forge_execution(
+                    src_task._exec_id, src_task._result, src_task._errors
+                )
+                dst_task.mark_as_executed()
+                self._update_test_artifacts(dst_test_i)
+                
+
+    def process_response(self, job):
+        finished_task = self._task_group[job.test_index][job.task_index]
+        assert finished_task is job.task, "Task is not the same!"
+        logger.debug(
+            f"monitor got finished task {job.id}, TEST KEY: {finished_task.test_key}, DEP KEY: {finished_task.forge_key}, DEP RES: {finished_task.result}, RES {job.task.result}"
+        )
+
+        self._result_collector[job.test_index][job.task_index] = job.task.result
+        self._update_test_artifacts(job.test_index)
+        self._copy_result_to_matching_tasks(job.test_index, job.task_index)
+        self._done[job.id] = True
+        logger.debug(
+            f"monitor is waiting for tasks {self._done}, results: {self._result_collector}"
+        )
 
 class FrmwkExecutorBase:
     def __init__(self, manager):
@@ -37,137 +159,27 @@ class FrmwkExecutorBase:
     def wait(self):
         pass
 
-    def _find_same_task(self, task_group, task):
-        for i, test_tasks in enumerate(task_group):
-            if test_tasks is None:
-                continue
-            for j, t in enumerate(test_tasks):
-                if task is t:
-                    return None
-                if task.same_tasks(t):
-                    return i, j
-        return None
+    def clients_factory(self):
+        return dict(
+            splunk_client=self.manager.create_splunk_client(),
+            vendor_client=self.manager.create_vendor_client(),
+        )
 
-    def _try_skip_task(
-        self, task_group, test_index, task_index, matched_tasks
-    ):
-        task = task_group[test_index][task_index]
-        same_task = self._find_same_task(task_group, task)
-        logger.debug(f"{task.dep_key} SAME TASK IS  {same_task}")
-        if same_task:
-            logger.debug(
-                f"task_index={task_index} skip task {task.dep_key} execution"
-            )
-            matched_tasks[(test_index, task_index)] = same_task
-        return same_task
-
-    def _process_test_tasks(
-        self, task_group, test_index, test_tasks, matched_tasks
-    ):
-        processed_tasks = []
-        for task_index, task in enumerate(test_tasks):
-            task.prepare_forge_call_args(
-                splunk_client=self.manager.create_splunk_client(),
-                vendor_client=self.manager.create_vendor_client(),
-            )
-
-            if not self._try_skip_task(
-                task_group, test_index, task_index, matched_tasks
-            ):
-                request = (test_index, task_index, task)
-                processed_tasks.append(request)
-
-        return processed_tasks
-
-    def _process_task_group(self, task_group):
-        tasks_to_run = []
-        logger.debug(f"\npush task group {task_group}")
-        matched_tasks = {}
-        result_collector = [None] * len(task_group)
-
-        for test_index, test_tasks in enumerate(task_group):
-            logger.debug(
-                f"test_index={test_index} push parallel_task {test_tasks}"
-            )
-            if test_tasks is not None:
-                result_collector[test_index] = [None] * len(test_tasks)
-                if test_tasks is not None:
-                    tasks_to_run += self._process_test_tasks(
-                        task_group, test_index, test_tasks, matched_tasks
-                    )
-
-        return result_collector, matched_tasks, tasks_to_run
-
-    def _update_test_artifacts(self, task_group, test_index, result_collector):
-        test_results = result_collector[test_index]
-        if test_results:
-            for test_tasks, test_result in enumerate(test_results):
-                task = task_group[test_index][test_tasks]
-                logger.debug(
-                    f"TEST RESULT {test_result} is dict - {isinstance(test_result, dict)}, test {task.test_key}, dep: {task.dep_key}, result {task.result}"
-                )
-                test_result = task.make_kwarg(test_result)
-                task.update_test_artifacts(test_result)
-                logger.debug(
-                    f"ARTIFACTS UPDATED dep: {task.dep_key}, test {task.test_key}, artifacts: {task._test.artifacts}"
-                )
-
-    def _execute_request(self, request, executor_id):
+    def _execute_request(self, job, worker_id=0):
         try:
-            test_index, task_index, task = request
+            task_info = f"{job.id}, task: {id(job.task)} - {job.task}, dep: {id(job.task._forge)} - {job.task._forge} - {job.task.forge_key}, call_args: {job.task._forge_kwargs}"
             logger.debug(
-                f"worker {executor_id} task started {test_index}:{task_index}, task: {id(task)} - {task}, dep: {id(task._dep)} - {task._dep} - {task.dep_key}, call_args: {task._call_args}"
+                f"worker {worker_id}, task started {task_info}"
             )
-            task.execute()
-            logger.debug(
-                f"worker {executor_id} task finished {test_index}:{task_index}, task: {id(task)} - {task}, dep: {id(task._dep)} - {task._dep} - {task.dep_key}, call_args: {task._call_args}, result: {task.result}"
-            )
+            job.task.execute()
         except Exception as e:
-            logger.debug(traceback.format_exc())
-            logger.error(
-                f"worker {executor_id} task FAILED {test_index}:{task_index}, {e}"
+            logger.debug(
+                f"worker {worker_id}, task failed {task_info} with error {e}\n{traceback.format_exc()}"
             )
-            task.completed_with_error(e)
-
-    def _copy_result_to_matching_tasks(
-        self,
-        task_group,
-        src_test_i,
-        src_task_j,
-        result_collector,
-        matched_tasks,
-    ):
-        src_task = task_group[src_test_i][src_task_j]
-        for dst, src in matched_tasks.items():
-            if src == (src_test_i, src_task_j):
-                dst_test_i, dst_task_j = dst
-                result_collector[dst_test_i][dst_task_j] = src_task._result
-                task_group[dst_test_i][dst_task_j].reuse_execution(
-                    src_task._exec_id, src_task._result
-                )
-                self._update_test_artifacts(
-                    task_group, dst_test_i, result_collector
-                )
-
-    def _process_response(
-        self, response, result_collector, task_group, matched_tasks, done=None
-    ):
-        test_index, task_index, result = response
-        finished_task = task_group[test_index][task_index]
-        logger.debug(
-            f"monitor got finished task {test_index}, {task_index}, TEST KEY: {finished_task.test_key}, DEP KEY: {finished_task.dep_key}, DEP RES: {finished_task.result}, RES {result}"
-        )
-
-        result_collector[test_index][task_index] = result
-        self._update_test_artifacts(task_group, test_index, result_collector)
-        self._copy_result_to_matching_tasks(
-            task_group, test_index, task_index, result_collector, matched_tasks
-        )
-        if done:
-            done[(test_index, task_index)] = True
-        logger.debug(
-            f"monitor is waiting for tasks {done}, results: {result_collector}"
-        )
+        else:
+            logger.debug(
+                f"worker {worker_id}, task finished {task_info} with result: {job.task.result}"
+            )
 
 
 class FrmwkSequentialExecutor(FrmwkExecutorBase):
@@ -176,18 +188,10 @@ class FrmwkSequentialExecutor(FrmwkExecutorBase):
 
         logger.debug("monitor has started")
         for task_group in tasks:
-            (
-                result_collector,
-                matched_tasks,
-                tasks_to_run,
-            ) = self._process_task_group(task_group)
-            for request in tasks_to_run:
-                test_index, task_index, task = request
-                self._execute_request(request, 0)
-                response = (test_index, task_index, task.result)
-                self._process_response(
-                    response, result_collector, task_group, matched_tasks
-                )
+            proc = TaskGroupProcessor(task_group, self.clients_factory)
+            for job in proc.jobs:
+                self._execute_request(job)
+                proc.process_response(job)
 
         logger.debug("monitor has finished")
 
@@ -222,40 +226,28 @@ class FrmwkParallelExecutor(FrmwkExecutorBase):
     def wait(self):
         self.monitor_thread.join()
 
-    def _collect_results(
-        self, done, result_collector, task_group, matched_tasks
-    ):
-        while not all(done.values()):
-            response = self.monitor_queue.get()
-            logger.debug(f"monitor got finished task {response}")
-            if response is None:
+    def _collect_results(self, proc):
+        while not proc.all_tasks_done:
+            job = self.monitor_queue.get()
+            logger.debug(f"monitor got finished task {job}")
+            if job is None:
                 logger.debug("monitor is interrupted")
                 return True
 
-            self._process_response(
-                response, result_collector, task_group, matched_tasks, done
-            )
+            proc.process_response(job)
             self.monitor_queue.task_done()
+            
         return False
 
     @log_exceptions_traceback
     def monitor(self, tasks):
         logger.debug("monitor has started")
         for task_group in tasks:
-            (
-                result_collector,
-                matched_tasks,
-                tasks_to_run,
-            ) = self._process_task_group(task_group)
-            done = {}
-            for request in tasks_to_run:
-                test_index, task_index, _ = request
-                done[(test_index, task_index)] = False
-                self.task_queue.put(request)
+            proc = TaskGroupProcessor(task_group, self.clients_factory)
+            for job in proc.jobs:
+                self.task_queue.put(job)
 
-            interrupted = self._collect_results(
-                done, result_collector, task_group, matched_tasks
-            )
+            interrupted = self._collect_results(proc)
             if interrupted:
                 break
 
@@ -270,12 +262,11 @@ class FrmwkParallelExecutor(FrmwkExecutorBase):
     @log_exceptions_traceback
     def worker(self, wid):
         while True:
-            request = self.task_queue.get()
-            logger.debug(f"worker {wid} task recieved {request}")
-            if request is None:
+            job = self.task_queue.get()
+            logger.debug(f"worker {wid} task recieved {job}")
+            if job is None:
                 break
 
-            test_index, task_index, task = request
-            self._execute_request(request, wid)
+            self._execute_request(job, wid)
             self.task_queue.task_done()
-            self.monitor_queue.put((test_index, task_index, task.result))
+            self.monitor_queue.put(job)

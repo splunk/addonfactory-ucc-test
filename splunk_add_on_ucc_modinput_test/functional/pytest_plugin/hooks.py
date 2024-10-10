@@ -62,7 +62,7 @@ def pytest_runtest_setup(item: pytest.Item) -> None:
     logger.info(f"Executing pytest runtest setup step for forged test : {test}")
 
     try:
-        test.wait_for_dependencies()
+        dependency_manager.wait_for_test_dependencies(test)
     except SplTaFwkBaseException as e:
         pytest.fail(str(e))
 
@@ -91,3 +91,6 @@ def pytest_runtest_teardown(item: pytest.Item) -> None:
 
     logger.info(f"Executing pytest runtest teardown step for forged test : {test}")
     dependency_manager.teardown_test(test)
+    
+    for error in dependency_manager.test_error_report(test):
+        item.add_report_section("call", "error", error)  
