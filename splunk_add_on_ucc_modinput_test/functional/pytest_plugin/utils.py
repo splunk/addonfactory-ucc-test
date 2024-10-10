@@ -73,8 +73,10 @@ def _adjust_test_order(items):
         test = dependency_manager.find_test(item._obj, pytest_funcname)
         if test:
             logger.debug(f"Item: {item} -> {test.key}")
-            ip_tasks, bs_tasks = dependency_manager.tasks.get_tasks_by_type(test.key)
-            tests.append((item, (int(len(ip_tasks)>0), len(bs_tasks))))
+            ip_tasks, bs_tasks = dependency_manager.tasks.get_tasks_by_type(
+                test.key
+            )
+            tests.append((item, (int(len(ip_tasks) > 0), len(bs_tasks))))
         else:
             tests.append((item, (-1, 0)))
 
@@ -105,7 +107,7 @@ def _log_test_order(items):
             for level, tasks in enumerate(test_tasks):
                 order += f"\tLevel {level}\n"
                 for task in tasks:
-                    order += f"\t\t{'::'.join(task.forge_key[:2])}\n"
+                    order += f"\t\t{task.forge_full_path}\n"
         else:
             logger.debug(f"NOT FOUND: {item}, {pytest_funcname} ")
 

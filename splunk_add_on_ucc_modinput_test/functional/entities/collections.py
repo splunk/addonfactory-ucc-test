@@ -36,8 +36,8 @@ class TaskCollection:
     def __init__(self):
         self._tasks = {}
 
-    def remove_test_tasks(self, task_key):
-        return self._tasks.pop(task_key, None)
+    def remove_test_tasks(self, test_key):
+        return self._tasks.pop(test_key, None)
 
     def add(self, tasks: List[FrameworkTask]):
         if not tasks:

@@ -46,11 +46,8 @@ def pytest_collection_modifyitems(session, config, items):
     _log_test_order(items)
 
     deps_mtx = dependency_manager.build_bootstrap_matrix(skipped_tests)
-    sequential_execution = config.getvalue("sequential_execution")
-    number_of_threads = config.getvalue("number_of_threads")
-    dependency_manager.start_bootstrap_execution(
-        deps_mtx, sequential_execution, number_of_threads
-    )
+    dependency_manager.link_pytest_config(config)
+    dependency_manager.start_bootstrap_execution(deps_mtx)
 
 
 @pytest.hookimpl
@@ -99,8 +96,16 @@ def pytest_runtest_teardown(item: pytest.Item) -> None:
     )
     dependency_manager.teardown_test(test)
 
-    for error in dependency_manager.test_error_report(test):
-        item.add_report_section("call", "error", error)
-
     if dependency_manager.check_all_tests_executed():
         dependency_manager.shutdown()
+
+    if dependency_manager.fail_with_teardown:
+        msg = ""
+        for task, error in dependency_manager.test_error_report(test):
+            item.add_report_section("call", "error", error)
+            msg += (
+                f"\n\tforge: {task.forge_full_path}, scope: {task.forge_scope}"
+            )
+
+        if msg:
+            pytest.fail(f"teardown failed:\n\ttest: {test.key}{msg}")

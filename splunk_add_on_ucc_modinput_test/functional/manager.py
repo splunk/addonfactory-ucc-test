@@ -29,18 +29,30 @@ from splunk_add_on_ucc_modinput_test.functional.vendor.client import (
     VendorClientBase,
 )
 
+
 class forge:
-    def __init__(self, forge_fn, *, probe=None, scope:Optional[Union[ForgeScope, str]] = None, **kwargs):
+    def __init__(
+        self,
+        forge_fn,
+        *,
+        probe=None,
+        scope: Optional[Union[ForgeScope, str]] = None,
+        **kwargs,
+    ):
         self.forge_fn = forge_fn
         self.probe = probe
         self.scope = scope.value if isinstance(scope, ForgeScope) else scope
         self.kwargs = kwargs
 
+
 class forges:
-    def __init__(self, *forge_list, scope:Optional[Union[ForgeScope, str]]=None):
+    def __init__(
+        self, *forge_list, scope: Optional[Union[ForgeScope, str]] = None
+    ):
         self.forge_list = forge_list
         self.scope = scope.value if isinstance(scope, ForgeScope) else scope
-        
+
+
 class TestDependencyManager:
     def __init__(self):
         self.tests = TestCollection()
@@ -49,6 +61,7 @@ class TestDependencyManager:
         self.executor = None
         self._vendor_client_class = VendorClientBase
         self._splunk_client_class = SplunkClientBase
+        self._pytest_config = None
 
     def set_vendor_client_class(self, cls):
         assert issubclass(cls, VendorClientBase)
@@ -64,15 +77,32 @@ class TestDependencyManager:
     def create_splunk_client(self):
         return self._splunk_client_class()
 
-    def _interpret_scope(self, scope:Optional[str], test:FrameworkTest) -> Optional[str]:
+    def link_pytest_config(self, pytest_config):
+        self._pytest_config = pytest_config
+
+    @property
+    def fail_with_teardown(self):
+        return self._pytest_config.getvalue("fail_with_teardown")
+
+    @property
+    def sequential_execution(self):
+        return self._pytest_config.getvalue("sequential_execution")
+
+    @property
+    def number_of_threads(self):
+        return self._pytest_config.getvalue("number_of_threads")
+
+    def _interpret_scope(
+        self, scope: Optional[str], test: FrameworkTest
+    ) -> Optional[str]:
         if scope is None:
             return None
-        
+
         if scope == ForgeScope.FUNCTION.value:
             scope = "::".join(test.key)
         elif scope == ForgeScope.MODULE.value:
             scope = test.source_file
-            
+
         return scope
 
     def bind(self, test_fn, scope, frg_fns, is_bootstrap):
@@ -86,7 +116,7 @@ class TestDependencyManager:
         frg_group_scope = self._interpret_scope(scope, test)
 
         frg_list = []
-        for f in frg_fns:                        
+        for f in frg_fns:
             if frg_group_scope is None and f.scope is None:
                 frg_scope = ForgeScope.SESSION.value
             elif f.scope is not None:
@@ -192,7 +222,7 @@ class TestDependencyManager:
                 matrix += f"\ttest: {'::'.join(tests[test_index].key)}\n"
                 if test_tasks is not None:
                     for task in test_tasks:
-                        matrix += f"\t\tDependency {'::'.join(task.forge_key[:2])}, scope {task.forge_key[2]}\n"
+                        matrix += f"\t\tDependency {task.forge_full_path}, scope {task.forge_scope}\n"
                 else:
                     matrix += "\t\tNo depemdemcies at this step\n"
         logger.info(matrix)
@@ -221,14 +251,14 @@ class TestDependencyManager:
         self._log_dep_exec_matrix(tests, exec_steps)
         return exec_steps
 
-    def start_bootstrap_execution(
-        self, deps_exec_mtx, sequential_execution, number_of_threads
-    ):
+    def start_bootstrap_execution(self, deps_exec_mtx):
         if self.executor is None:
-            if sequential_execution:
+            if self.sequential_execution:
                 self.executor = FrmwkSequentialExecutor(self)
             else:
-                self.executor = FrmwkParallelExecutor(self, number_of_threads)
+                self.executor = FrmwkParallelExecutor(
+                    self, self.number_of_threads
+                )
 
         if deps_exec_mtx:
             self._execution_timeout = time.time() + TasksWait.TIMEOUT.value
@@ -277,29 +307,35 @@ class TestDependencyManager:
         test.mark_executed()
         self.teardown_test_dependencies(test)
 
+    def _check_failed_tasks(self, test, done_tasks):
+        failed_tasks = [task.forge_key for task in done_tasks if task._errors]
+        logger.debug(
+            f"DONE TASKS for {test.key}: {[task.forge_key for task in done_tasks]}"
+        )
+        logger.debug(f"FAILED TASKS for {test.key}: {failed_tasks}")
+        for task in done_tasks:
+            if task.failed:
+                test_path = "::".join(test.key)
+                msg = f"Dependency {task.forge_full_path} failed to execute for test {test_path} with error:\n{task.error}"
+                logger.error(msg)
+                raise SplTaFwkDependencyExecutionError(msg)
+
+    def _report_timeout(self, test, pending_tasks):
+        msg = f"{test} exceeded {TasksWait.TIMEOUT.value} seconds timeout while waiting for dependencies:"
+        for task in pending_tasks:
+            msg += f"\n\t{task.forge_full_path}, self id: {id(task)}, scope: {task.forge_scope}, exec_id: {task._exec_id} is_executed: {task.is_executed}, is_failed: {task.failed}"
+        logger.error(msg)
+        raise SplTaFwkWaitForDependenciesTimeout(msg)
+
     def wait_for_test_bootstrap(self, test):
         while True:
             done, pending = self.tasks.bootstrap_tasks_by_state(test.key)
-            failed_tasks = [task.key for task in done if task._errors]
-            logger.debug(f"DONE TASKS for {test.key}: {[task.forge_key for task in done]}")
-            logger.debug(f"FAILED TASKS for {test.key}: {failed_tasks}")
-            for task in done:
-                if task.failed:
-                    forge_path = "::".join(task.forge_key[:2])
-                    test_path = "::".join(test.key)
-                    msg = f"Dependency {forge_path} failed to execute for test {test_path} with error:\n{task.error}"
-                    logger.error(msg)
-                    raise SplTaFwkDependencyExecutionError(msg)
+            self._check_failed_tasks(test, done)
 
             if not pending:
                 break
             elif time.time() > self._execution_timeout:
-                msg = f"{test} exceeded {TasksWait.TIMEOUT.value} seconds timeout while waiting for dependencies:"
-                for task in pending:
-                    forge_path = "::".join(task.forge_key[:2])
-                    msg += f"\n\t{forge_path}, self id: {id(task)}, scope: {task.forge_key[2]}, exec_id: {task._exec_id} is_executed: {task.is_executed}, is_failed: {task.failed}"
-                logger.error(msg)
-                raise SplTaFwkWaitForDependenciesTimeout(msg)
+                self._report_timeout(test, pending)
 
             logger.debug(f"{test} is waiting for dependencies")
             time.sleep(TasksWait.CHECK_FREQUENCY.value)
@@ -322,9 +358,7 @@ class TestDependencyManager:
     def test_error_report(self, test):
         for _, _, task in self.tasks.enumerate_tasks(test.key):
             if task.failed:
-                yield task.error
-
-
+                yield task, task.error
 
 
 dependency_manager = TestDependencyManager()

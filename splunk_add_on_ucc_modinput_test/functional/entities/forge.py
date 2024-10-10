@@ -107,28 +107,32 @@ class ForgePostExec:
 
     def dereference_teardown(self, id):
         data = self._exec_store.get(id)
-        assert data
+        if data is None:
+            return False
+
         logger.debug(
             f"BEFORE EXECUTE TEARDOWN {id}:\n\t_teardown_is_blocked={self._teardown_is_blocked}\n\tdata.id: {data.id}\n\tdata.count={data.count},\n\tdata.is_teardown_executed={data.is_teardown_executed}\n\tdata.teardown={data.teardown}\n\tdata.kwargs={data.kwargs}\n\tdata.result={data.result}"
         )
         data.lock.acquire()
         try:
             data.count -= 1
-            if (
+            can_execute = (
                 data.count == 0
                 and not self._teardown_is_blocked
                 and not data.is_teardown_executed
-            ):
+            )
+            if can_execute:
                 self.execute_teardown(data)
         finally:
             data.lock.release()
         logger.debug(
             f"AFTER EXECUTE TEARDOWN {id}:\n\tdata.id: {data.id}\n\tdata.count={data.count},\n\tdata.is_teardown_executed={data.is_teardown_executed}\n\tdata.teardown={data.teardown}\n\tdata.kwargs={data.kwargs}\n\tdata.result={data.result}"
         )
+        return can_execute
 
 
 class FrameworkForge(ExecutableBase):
-    def __init__(self, function, scope:str):
+    def __init__(self, function, scope: str):
         super().__init__(function)
         self._scope = scope
         self.tests = set()
@@ -144,6 +148,10 @@ class FrameworkForge(ExecutableBase):
         self._scope = scope
 
     @property
+    def scope(self):
+        return self._scope
+
+    @property
     def executions(self):
         return self._executions.list()
 
@@ -154,7 +162,7 @@ class FrameworkForge(ExecutableBase):
         self._executions.unblock_teardown()
 
     def teardown(self, id):
-        self._executions.dereference_teardown(id)
+        return self._executions.dereference_teardown(id)
 
     def register_execution(self, id, *, teardown, kwargs, result, errors):
         self._executions.add(id, teardown, kwargs, result, errors)
