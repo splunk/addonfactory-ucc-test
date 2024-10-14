@@ -40,25 +40,27 @@ logger.debug("Logger set")
 def get_from_environment_variable(
     environment_variable: str,
     *,
-    string_function: Optional[Callable[[str], str]] = None,
+    default_value: Optional[str] = None,
     is_optional: bool = False,
+    string_function: Optional[Callable[[str], str]] = None,
 ) -> Optional[str]:
     def use_string_function_if_needed(
         *, variable: str, function: Callable[[str], str]
     ) -> str:
         return variable if function is None else function(variable)
 
-    if environment_variable not in os.environ and is_optional:
+    if environment_variable not in os.environ and default_value is None and is_optional:
         return None
-    if environment_variable not in os.environ:
+    if environment_variable not in os.environ and default_value is None:
         logger.critical(40 * "*")
         logger.critical(f"{environment_variable} environment variable not set")
         logger.critical("run below in terminal:")
         logger.critical(f"export {environment_variable}=[your value]")
         logger.critical(40 * "*")
         exit(1)
+    variable = os.environ[environment_variable] if environment_variable in os.environ else default_value
     return use_string_function_if_needed(
-        variable=os.environ[environment_variable],
+        variable=variable,
         function=string_function,  # type: ignore
     )
 
