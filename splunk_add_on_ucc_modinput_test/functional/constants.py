@@ -10,7 +10,8 @@ class ForgeProbe(Enum):
 
 class TasksWait(Enum):
     TIMEOUT = 1000
-    CHECK_FREQUENCY = 1
+    CHECK_FREQUENCY = 5
+
 
 class BuiltInArg(Enum):
     SPLUNK_CLIENT = "splunk_client"

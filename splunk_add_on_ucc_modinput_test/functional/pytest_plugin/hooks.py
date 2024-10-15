@@ -1,4 +1,5 @@
 import pytest
+import traceback
 from splunk_add_on_ucc_modinput_test.functional import logger
 from splunk_add_on_ucc_modinput_test.functional.exceptions import (
     SplTaFwkBaseException,
@@ -13,7 +14,7 @@ from splunk_add_on_ucc_modinput_test.functional.pytest_plugin.utils import (
     _collect_skipped_tests,
     _collect_parametrized_tests,
     _extract_parametrized_data,
-    _map_items_to_forged_tests
+    _map_items_to_forged_tests,
 )
 
 
@@ -22,9 +23,9 @@ def pytest_collection_modifyitems(session, config, items):
     logger.debug(f"Lookung for forged tests in: {items}")
     tests2items = _map_items_to_forged_tests(items)
     if not tests2items:
-        logger.debug(f"No forged tests found, exiting")
+        logger.debug("No forged tests found, exiting")
         return
-    
+
     parametrized_tests = _collect_parametrized_tests(items)
     dependency_manager.expand_parametrized_tests(parametrized_tests)
     dependency_manager.dump_tests()
@@ -44,12 +45,9 @@ def pytest_collection_modifyitems(session, config, items):
     _debug_log_test_order(items)
     _log_test_order(items)
 
-    deps_mtx = dependency_manager.build_dep_exec_matrix(skipped_tests)
-    sequential_execution = config.getvalue("sequential_execution")
-    number_of_threads = config.getvalue("number_of_threads")
-    dependency_manager.start_dependency_execution(
-        deps_mtx, sequential_execution, number_of_threads
-    )
+    deps_mtx = dependency_manager.build_bootstrap_matrix(skipped_tests)
+    dependency_manager.link_pytest_config(config)
+    dependency_manager.start_bootstrap_execution(deps_mtx)
 
 
 @pytest.hookimpl
@@ -59,11 +57,15 @@ def pytest_runtest_setup(item: pytest.Item) -> None:
     if not test:
         return
 
-    logger.info(f"Executing pytest runtest setup step for forged test : {test}")
+    logger.info(
+        f"Executing pytest runtest setup step for forged test : {test}"
+    )
 
     try:
-        dependency_manager.wait_for_test_dependencies(test)
+        dependency_manager.wait_for_test_bootstrap(test)
+        dependency_manager.execute_test_inplace_forges(test)
     except SplTaFwkBaseException as e:
+        logger.error(f"Error during test setup: {e}\n{traceback.format_exc()}")
         pytest.fail(str(e))
 
     item.funcargs.update(test.collect_required_kwargs())
@@ -89,8 +91,21 @@ def pytest_runtest_teardown(item: pytest.Item) -> None:
     if not test:
         return
 
-    logger.info(f"Executing pytest runtest teardown step for forged test : {test}")
+    logger.info(
+        f"Executing pytest runtest teardown step for forged test : {test}"
+    )
     dependency_manager.teardown_test(test)
-    
-    for error in dependency_manager.test_error_report(test):
-        item.add_report_section("call", "error", error)  
+
+    if dependency_manager.check_all_tests_executed():
+        dependency_manager.shutdown()
+
+    if dependency_manager.fail_with_teardown:
+        msg = ""
+        for task, error in dependency_manager.test_error_report(test):
+            item.add_report_section("call", "error", error)
+            msg += (
+                f"\n\tforge: {task.forge_full_path}, scope: {task.forge_scope}"
+            )
+
+        if msg:
+            pytest.fail(f"teardown failed:\n\ttest: {test.key}{msg}")

@@ -8,6 +8,7 @@ from splunk_add_on_ucc_modinput_test.functional.entities.executable import (
     ExecutableBase,
 )
 
+
 @dataclass
 class ForgeExecData:
     id: str
@@ -33,6 +34,13 @@ class ForgePostExec:
     def __init__(self):
         self.lock = threading.Lock()
         self._exec_store = {}
+        self._teardown_is_blocked = False
+
+    def block_teardown(self):
+        self._teardown_is_blocked = True
+
+    def unblock_teardown(self):
+        self._teardown_is_blocked = False
 
     def add(self, id, teardown, kwargs, result, errors):
         if id not in self._exec_store:
@@ -86,34 +94,45 @@ class ForgePostExec:
     def list(self):
         return tuple(self._exec_store.values())
 
-    def execute_teardown(self, id):
+    def execute_teardown(self, data):
+        teardown = data.teardown
+        if inspect.isgenerator(teardown):
+            with contextlib.suppress(StopIteration):
+                next(teardown)
+        elif callable(teardown):
+            teardown()
+        else:
+            pass
+        data.is_teardown_executed = True
+
+    def dereference_teardown(self, id):
         data = self._exec_store.get(id)
-        assert data
+        if data is None:
+            return False
+
         logger.debug(
-            f"BEFORE EXECUTE TEARDOWN {id}:\n\tdata.id: {data.id}\n\tdata.count={data.count},\n\tdata.is_teardown_executed={data.is_teardown_executed}\n\tdata.teardown={data.teardown}\n\tdata.kwargs={data.kwargs}\n\tdata.result={data.result}"
+            f"BEFORE EXECUTE TEARDOWN {id}:\n\t_teardown_is_blocked={self._teardown_is_blocked}\n\tdata.id: {data.id}\n\tdata.count={data.count},\n\tdata.is_teardown_executed={data.is_teardown_executed}\n\tdata.teardown={data.teardown}\n\tdata.kwargs={data.kwargs}\n\tdata.result={data.result}"
         )
         data.lock.acquire()
         try:
             data.count -= 1
-            if data.count == 0 and not data.is_teardown_executed:
-                teardown = data.teardown
-                if inspect.isgenerator(teardown):
-                    with contextlib.suppress(StopIteration):
-                        next(teardown)
-                elif callable(teardown):
-                    teardown()
-                else:
-                    pass
-                data.is_teardown_executed = True
+            can_execute = (
+                data.count == 0
+                and not self._teardown_is_blocked
+                and not data.is_teardown_executed
+            )
+            if can_execute:
+                self.execute_teardown(data)
         finally:
             data.lock.release()
         logger.debug(
             f"AFTER EXECUTE TEARDOWN {id}:\n\tdata.id: {data.id}\n\tdata.count={data.count},\n\tdata.is_teardown_executed={data.is_teardown_executed}\n\tdata.teardown={data.teardown}\n\tdata.kwargs={data.kwargs}\n\tdata.result={data.result}"
         )
+        return can_execute
 
 
 class FrameworkForge(ExecutableBase):
-    def __init__(self, function, scope):
+    def __init__(self, function, scope: str):
         super().__init__(function)
         self._scope = scope
         self.tests = set()
@@ -129,13 +148,23 @@ class FrameworkForge(ExecutableBase):
         self._scope = scope
 
     @property
+    def scope(self):
+        return self._scope
+
+    @property
     def executions(self):
         return self._executions.list()
 
-    def teardown(self, id):
-        self._executions.execute_teardown(id)
+    def block_teardown(self):
+        self._executions.block_teardown()
 
-    def register_execution(self, id, teardown, kwargs, result, errors):
+    def unblock_teardown(self):
+        self._executions.unblock_teardown()
+
+    def teardown(self, id):
+        return self._executions.dereference_teardown(id)
+
+    def register_execution(self, id, *, teardown, kwargs, result, errors):
         self._executions.add(id, teardown, kwargs, result, errors)
 
     def reuse_execution(self, prev_exec):

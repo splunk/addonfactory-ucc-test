@@ -1,37 +1,43 @@
-from splunk_add_on_ucc_modinput_test.functional import logger
+from dataclasses import dataclass
+from typing import Any, Dict, Union, Tuple, Callable, List
 from splunk_add_on_ucc_modinput_test.functional.constants import ForgeScope
 from splunk_add_on_ucc_modinput_test.functional.manager import (
     dependency_manager,
-)
-from splunk_add_on_ucc_modinput_test.functional.splunk.client import (
-    SplunkClientBase,
-)
-from splunk_add_on_ucc_modinput_test.functional.vendor.client import (
-    VendorClientBase,
+    forge,
+    forges,
 )
 
 
-def forge(forge_fn, *, probe=None, scope=ForgeScope.SESSION, **kwargs):
-    def forge_dec(fn, *, act_as_decorator=True):
-        if act_as_decorator:
-            forge_descriptors = [(forge_fn, probe, scope, kwargs)]
-            dependency_manager.bind(fn, scope, forge_descriptors)
-            return fn
+def bind(
+    fn: Callable[..., Any],
+    forges: Tuple[Union[forge, forges], ...],
+    is_bootstrap: bool,
+) -> None:
+    for item in forges:
+        if isinstance(item, forge):
+            scope = item.scope
+            step_forges = [item]
+        else:
+            scope = item.scope
+            step_forges = item.forge_list
 
-        return (forge_fn, probe, scope, kwargs)
-
-    return forge_dec
+        dependency_manager.bind(fn, scope, step_forges, is_bootstrap)
 
 
-def forges(*forge_list, scope=ForgeScope.SESSION):
-    def forges_dec(fn):
-        forge_descriptors = [
-            frg(fn, act_as_decorator=False) for frg in forge_list
-        ]
-        dependency_manager.bind(fn, scope, forge_descriptors)
+def bootstrap(*forges: Tuple[Union[forge, forges], ...]) -> Callable[..., Any]:
+    def bootstrap_dec(fn: Callable[..., Any]) -> Callable[..., Any]:
+        bind(fn, forges, is_bootstrap=True)
         return fn
 
-    return forges_dec
+    return bootstrap_dec
+
+
+def attach(*forges: Tuple[Union[forge, forges], ...]) -> Callable[..., Any]:
+    def attach_dec(fn: Callable[..., Any]) -> Callable[..., Any]:
+        bind(fn, forges, is_bootstrap=False)
+        return fn
+
+    return attach_dec
 
 
 def register_vendor_class(cls):
