@@ -24,6 +24,18 @@ class FrameworkTest(ExecutableBase):
     def artifacts(self):
         return self._artifacts
 
+    @property
+    def name(self):
+        return self.key[1]
+
+    @property
+    def path(self):
+        return self.source_file
+
+    @property
+    def full_path(self):
+        return "::".join(self.key)
+
     def update_artifacts(self, artifacts):
         assert isinstance(artifacts, dict)
         return self._artifacts.update(artifacts)

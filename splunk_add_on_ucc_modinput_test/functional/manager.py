@@ -227,13 +227,20 @@ class TestDependencyManager:
                     matrix += "\t\tNo depemdemcies at this step\n"
         logger.info(matrix)
 
-    def build_bootstrap_matrix(self, skip_tests):
-        skipped_test_keys = [test.key for test, _ in skip_tests]
-        tests = [
-            test
-            for test in self.tests.values()
-            if test.key not in skipped_test_keys
+    def remove_skipped_tests(self, skipped_tests_keys):
+        for test_key in skipped_tests_keys:
+            self.unregister_test(test_key)
+    
+    def synch_tests_with_pytest_list(self, pytest_test_set_keys):
+        tests_to_remove = [
+            test_key
+            for test_key in self.tests.keys()
+            if test_key not in pytest_test_set_keys
         ]
+        self.remove_skipped_tests(tests_to_remove)
+
+    def build_bootstrap_matrix(self):
+        tests = list(self.tests.values())
 
         exec_steps = []
         step_index = 0
@@ -251,7 +258,10 @@ class TestDependencyManager:
         self._log_dep_exec_matrix(tests, exec_steps)
         return exec_steps
 
-    def start_bootstrap_execution(self, deps_exec_mtx):
+    def start_bootstrap_execution(self):
+        if not self.tasks:
+            return
+
         if self.executor is None:
             if self.sequential_execution:
                 self.executor = FrmwkSequentialExecutor(self)
@@ -260,6 +270,7 @@ class TestDependencyManager:
                     self, self.number_of_threads
                 )
 
+        deps_exec_mtx = dependency_manager.build_bootstrap_matrix()
         if deps_exec_mtx:
             self._execution_timeout = time.time() + TasksWait.TIMEOUT.value
             self.executor.start(deps_exec_mtx)

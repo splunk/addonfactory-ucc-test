@@ -152,6 +152,22 @@ class FrameworkForge(ExecutableBase):
         return self._scope
 
     @property
+    def tests_keys(self):
+        return list(self.tests)
+
+    @property
+    def name(self):
+        return self.key[1]
+
+    @property
+    def path(self):
+        return self.source_file
+
+    @property
+    def full_path(self):
+        return "::".join(self.key[:2])
+
+    @property
     def executions(self):
         return self._executions.list()
 

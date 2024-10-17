@@ -74,7 +74,7 @@ class FrameworkTask:
 
     @property
     def forge_test_keys(self):
-        return list(self._forge.tests)
+        return list(self.tests_keys)
 
     @property
     def forge_name(self):
@@ -94,15 +94,15 @@ class FrameworkTask:
 
     @property
     def test_name(self):
-        return self.test_key[1]
+        return self._test.name
 
     @property
     def test_path(self):
-        return self.test_key[0]
+        return self._test.path
 
     @property
     def test_full_path(self):
-        return "::".join(self.test_key)
+        return self._test.full_path
 
     @property
     def probe_name(self):

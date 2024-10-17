@@ -11,7 +11,7 @@ def _extract_parametrized_data(pyfuncitem):
     return pyfuncitem.keywords.node.name, callspec_params
 
 
-def _map_items_to_forged_tests(items):
+def _map_forged_tests_to_pytest_items(items):
     forged_tests = {}
     for item in items:
         test = dependency_manager.tests.lookup_by_function(item._obj)
