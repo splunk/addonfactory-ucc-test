@@ -14,17 +14,33 @@ from splunk_add_on_ucc_modinput_test.functional.pytest_plugin.utils import (
     _collect_skipped_tests,
     _collect_parametrized_tests,
     _extract_parametrized_data,
-    _map_items_to_forged_tests,
+    _map_forged_tests_to_pytest_items,
 )
+
+@pytest.hookimpl
+def pytest_deselected(items):    
+    logger.debug(f"Processing deselected items: {items}")
+    if not items:
+        return
+    
+    for item in items:
+        test = dependency_manager.tests.lookup_by_function(item._obj)
+        if test:
+            dependency_manager.unregister_test(test.key)
+            logger.info(f"Test {test.full_path} is deselected")        
 
 
 @pytest.hookimpl
 def pytest_collection_modifyitems(session, config, items):
     logger.debug(f"Lookung for forged tests in: {items}")
-    tests2items = _map_items_to_forged_tests(items)
+    dependency_manager.link_pytest_config(config)
+    tests2items = _map_forged_tests_to_pytest_items(items)
     if not tests2items:
         logger.debug("No forged tests found, exiting")
         return
+
+    pytest_test_set_keys = set(tests2items.keys())
+    dependency_manager.synch_tests_with_pytest_list(pytest_test_set_keys)
 
     parametrized_tests = _collect_parametrized_tests(items)
     dependency_manager.expand_parametrized_tests(parametrized_tests)
@@ -39,16 +55,18 @@ def pytest_collection_modifyitems(session, config, items):
             )
 
     skipped_tests = _collect_skipped_tests(items)
+    skipped_tests_keys = [test.key for test, _ in skipped_tests]
+    dependency_manager.remove_skipped_tests(skipped_tests_keys)
 
     items[:] = _adjust_test_order(items)
 
     _debug_log_test_order(items)
     _log_test_order(items)
 
-    deps_mtx = dependency_manager.build_bootstrap_matrix(skipped_tests)
-    dependency_manager.link_pytest_config(config)
-    dependency_manager.start_bootstrap_execution(deps_mtx)
-
+@pytest.hookimpl
+def pytest_collection_finish(session):
+    logger.debug(f"Starting bootstrap forges execution.")
+    dependency_manager.start_bootstrap_execution()
 
 @pytest.hookimpl
 def pytest_runtest_setup(item: pytest.Item) -> None:
