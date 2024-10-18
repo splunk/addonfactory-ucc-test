@@ -65,7 +65,6 @@ def pytest_collection_modifyitems(session, config, items):
 
 @pytest.hookimpl
 def pytest_collection_finish(session):
-    logger.debug(f"Starting bootstrap forges execution.")
     dependency_manager.start_bootstrap_execution()
 
 @pytest.hookimpl
@@ -86,7 +85,8 @@ def pytest_runtest_setup(item: pytest.Item) -> None:
         logger.error(f"Error during test setup: {e}\n{traceback.format_exc()}")
         pytest.fail(str(e))
 
-    item.funcargs.update(test.collect_required_kwargs())
+    custom_args = test.collect_required_kwargs(session_id=dependency_manager.session_id)
+    item.funcargs.update(custom_args)
     logger.info(
         f"pytest_runtest_setup: {item} ==>> {test},\n\tartifacts: {test.artifacts},\n\t_fixtureinfo: {item._fixtureinfo.argnames},\n\tfuncargs={item.funcargs},\n\tvars: {vars(item)}"
     )

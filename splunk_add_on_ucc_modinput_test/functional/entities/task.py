@@ -74,7 +74,7 @@ class FrameworkTask:
 
     @property
     def forge_test_keys(self):
-        return list(self.tests_keys)
+        return list(self._forge.tests_keys)
 
     @property
     def forge_name(self):
@@ -182,13 +182,16 @@ class FrameworkTask:
     def collect_available_kwargs(self):
         available_kwargs = self.get_forge_kwargs_copy()
         available_kwargs.update(self._test.artifacts)
+        available_kwargs[BuiltInArg.TEST_ID.value] = self._test.test_id
+        available_kwargs[BuiltInArg.SESSION_ID.value] = self._session_id
         available_kwargs[BuiltInArg.SPLUNK_CLIENT.value] = self._splunk_client
         available_kwargs[BuiltInArg.VENDOR_CLIENT.value] = self._vendor_client
         return available_kwargs
 
-    def prepare_forge_call_args(self, splunk_client, vendor_client):
+    def prepare_forge_call_args(self, session_id, splunk_client, vendor_client):
         logger.debug(f"EXECTASK: prepare_forge_call_args {self}")
 
+        self._session_id = session_id
         self._splunk_client = splunk_client
         self._vendor_client = vendor_client
 

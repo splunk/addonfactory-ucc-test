@@ -36,6 +36,10 @@ class TaskCollection:
     def __init__(self):
         self._tasks = {}
 
+    @property
+    def is_empty(self):
+        return not bool(self._tasks)
+    
     def remove_test_tasks(self, test_key):
         return self._tasks.pop(test_key, None)
 

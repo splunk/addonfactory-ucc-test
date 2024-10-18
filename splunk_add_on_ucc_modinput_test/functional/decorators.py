@@ -1,6 +1,4 @@
-from dataclasses import dataclass
-from typing import Any, Dict, Union, Tuple, Callable, List
-from splunk_add_on_ucc_modinput_test.functional.constants import ForgeScope
+from typing import Any, Union, Tuple, Callable
 from splunk_add_on_ucc_modinput_test.functional.manager import (
     dependency_manager,
     forge,
