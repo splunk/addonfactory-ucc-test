@@ -16,6 +16,8 @@ class TasksWait(Enum):
 class BuiltInArg(Enum):
     SPLUNK_CLIENT = "splunk_client"
     VENDOR_CLIENT = "vendor_client"
+    SESSION_ID = "session_id"
+    TEST_ID = "test_id"
 
 
 class ForgeScope(Enum):

@@ -1,3 +1,5 @@
+import time
+import random
 from splunk_add_on_ucc_modinput_test.functional import logger
 from splunk_add_on_ucc_modinput_test.functional.constants import (
     BuiltInArg,
@@ -15,6 +17,16 @@ class FrameworkTest(ExecutableBase):
         self._artifacts = {}
         if altered_name:
             self._fn_name = altered_name
+        self._test_id = self.generate_test_id()
+
+    @staticmethod
+    def generate_test_id():
+        time_based = int(time.time()*10**5)%10**10
+        return hex(time_based*10**3 + random.randint(0, 10**3))[2:]
+
+    @property
+    def test_id(self):
+        return self._test_id
 
     @property
     def is_executed(self):
@@ -51,22 +63,18 @@ class FrameworkTest(ExecutableBase):
     def __repr__(self):
         return f"<Test {'::'.join(self.key)}>"
 
-    def collect_required_kwargs(self, splunk_client=None, vendor_client=None):
+    def collect_required_kwargs(self, session_id):
         kwargs = {
             k: v
             for k, v in self._artifacts.items()
             if k in self._required_args
         }
-        if (
-            splunk_client
-            and BuiltInArg.SPLUNK_CLIENT.value in self._required_args
-        ):
-            kwargs[BuiltInArg.SPLUNK_CLIENT.value] = splunk_client
-        if (
-            vendor_client
-            and BuiltInArg.VENDOR_CLIENT.value in self._required_args
-        ):
-            kwargs[BuiltInArg.VENDOR_CLIENT.value] = vendor_client
+        if (BuiltInArg.TEST_ID.value in self._required_args):
+            kwargs[BuiltInArg.TEST_ID.value] = self._test_id
+            
+        if (BuiltInArg.SESSION_ID.value in self._required_args):
+            kwargs[BuiltInArg.SESSION_ID.value] = session_id
+
         logger.debug(
             f"Finish collect_required_kwargs for test {self.key}: kwargs={kwargs}"
         )

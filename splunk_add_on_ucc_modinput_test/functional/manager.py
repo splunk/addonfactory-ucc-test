@@ -1,5 +1,5 @@
 import time
-from copy import deepcopy
+import random
 from typing import List, Tuple, Optional, Union
 from splunk_add_on_ucc_modinput_test.functional import logger
 from splunk_add_on_ucc_modinput_test.functional.exceptions import (
@@ -62,6 +62,12 @@ class TestDependencyManager:
         self._vendor_client_class = VendorClientBase
         self._splunk_client_class = SplunkClientBase
         self._pytest_config = None
+        self._session_id = self.generate_session_id()
+
+    @staticmethod
+    def generate_session_id():
+        time_based = int(time.time() * 10**5) % 10**10
+        return hex(time_based * 10**3 + random.randint(0, 10**3))[2:]
 
     def set_vendor_client_class(self, cls):
         assert issubclass(cls, VendorClientBase)
@@ -79,6 +85,10 @@ class TestDependencyManager:
 
     def link_pytest_config(self, pytest_config):
         self._pytest_config = pytest_config
+
+    @property
+    def session_id(self):
+        return self._session_id
 
     @property
     def fail_with_teardown(self):
@@ -230,7 +240,7 @@ class TestDependencyManager:
     def remove_skipped_tests(self, skipped_tests_keys):
         for test_key in skipped_tests_keys:
             self.unregister_test(test_key)
-    
+
     def synch_tests_with_pytest_list(self, pytest_test_set_keys):
         tests_to_remove = [
             test_key
@@ -259,9 +269,10 @@ class TestDependencyManager:
         return exec_steps
 
     def start_bootstrap_execution(self):
-        if not self.tasks:
+        if self.tasks.is_empty:
             return
 
+        logger.info("Starting bootstrap forges execution.")
         if self.executor is None:
             if self.sequential_execution:
                 self.executor = FrmwkSequentialExecutor(self)
