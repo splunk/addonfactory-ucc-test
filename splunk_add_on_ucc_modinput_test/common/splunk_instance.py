@@ -1,5 +1,6 @@
 # mypy: disable-error-code="attr-defined,arg-type"
 
+from typing import List, Optional
 import time
 import pytest
 import requests  # type: ignore
@@ -275,6 +276,9 @@ class SearchState:
     def result_count(self) -> int:
         return self._result_count
 
+    @property
+    def results(self) -> Optional[List[object]]:
+        return self._results
 
 def search(*, service: Service, searchquery: str) -> SearchState:
     search_state = None

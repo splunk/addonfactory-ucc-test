@@ -1,31 +1,45 @@
-import os
-
+from typing import List, Optional, Tuple
+from splunk_add_on_ucc_modinput_test.common.splunk_instance import search, Configuration, SearchState
+from splunk_add_on_ucc_modinput_test.common.utils import logger
 
 class SplunkClientBase:
-    def __init__(self) -> None:
-        self._auto_config()
+    def __init__(self, splunk_configuration:Optional[Configuration]=None) -> None:
+        self.ta_service = None
+        self._splunk_configuration = splunk_configuration or Configuration()
+        self._bind_swager_client()
 
-    def _auto_config(self) -> None:
-        self.splunk_version = os.environ.get("SPLUNK_VERSION", "latest")
-        self.splunk_app_version = os.environ.get(
-            "SPLUNK_APP_VERSION", "latest"
-        )
-        self.splunk_app_id = os.environ.get("SPLUNK_APP_ID", "")
-        self.splunk_home = os.environ.get("SPLUNK_HOME", "/opt/splunk")
-        self.splunk_host = os.environ.get("SPLUNK_HOST", "")
-        self.splunk_user = os.environ.get("SPLUNK_USER", "admin")
-        self.splunk_password = os.environ.get("SPLUNK_PASSWORD", "")
-        self.splunk_hec_token = os.environ.get("SPLUNK_HEC_TOKEN", "")
-        self.custom_config()
-
-        # logger.debug(f"self.splunk_version: {self.splunk_version}")
-        # logger.debug(f"self.splunk_app_version: {self.splunk_app_version}")
-        # logger.debug(f"self.splunk_app_id: {self.splunk_app_id}")
-        # logger.debug(f"self.splunk_home: {self.splunk_home}")
-        # logger.debug(f"self.splunk_host: {self.splunk_host}")
-        # logger.debug(f"self.splunk_user: {self.splunk_user}")
-        # logger.debug(f"self.splunk_password: {self.splunk_password}")
-        # logger.debug(f"self.splunk_hec_token: {self.splunk_hec_token}")
-
-    def custom_config(self) -> None:
+    def _bind_swager_client(self):
+        # this method is replaced in inherited class by the decorator
+        # splunk_add_on_ucc_modinput_test.functional.decorators.register_splunk_class 
         pass
+    
+    @property
+    def splunk_configuration(self):
+        assert self.ta_service is not None, "Make sure you have decorated inherited client class with @register_splunk_class"
+        return self.ta_service.splunk_configuration
+    
+    @property
+    def splunk(self):
+        assert self.ta_service is not None, "Make sure you have decorated inherited client class with @register_splunk_class"
+        return self.ta_service.splunk_configuration.service
+
+    @property
+    def ta_api(self):
+        assert self.ta_service is not None, "Make sure you have decorated inherited client class with @register_splunk_class"
+        return self.ta_service.api_instance
+
+    def search(self, searchquery:str) -> SearchState:
+        return search(service=self.splunk, searchquery=searchquery)
+
+    def run_saved_search(self, saved_search_name:str) -> Tuple[int, Optional[List[object]]]:
+        saved_search = self.splunk.saved_searches[
+            saved_search_name
+        ]
+        state = search(
+            service=self.splunk,
+            searchquery=saved_search.content["search"],
+        )
+        logger.debug(
+            f"Executed saved search {saved_search_name}, count: {state.result_count}, query: {saved_search.content['search']}"
+        )
+        return state.result_count, state.results
