@@ -1,14 +1,9 @@
 from typing import Dict, List
+from types import ModuleType
 from splunk_add_on_ucc_modinput_test.common import utils
 from splunk_add_on_ucc_modinput_test.common.splunk_instance import (
     Configuration as SplunkConfiguration,
 )
-from tests.modinput_functional.vendor_product import (
-    Configuration as VendorProductConfiguration,
-)
-import swagger_client
-from swagger_client.api.default_api import DefaultApi
-
 
 class InputConfigurationBase:
     def __init__(self, *, name_prefix: str, interval: int = 60):
@@ -33,11 +28,10 @@ class ConfigurationBase:
     def __init__(
         self,
         *,
+        swagger_client: ModuleType,
         splunk_configuration: SplunkConfiguration,
-        vendor_product_configuration: VendorProductConfiguration,
     ):
         self.splunk_configuration = splunk_configuration
-        self.vendor_product_configuration = vendor_product_configuration
 
         configuration = swagger_client.Configuration()
         configuration.host = configuration.host.replace(
@@ -56,9 +50,10 @@ class ConfigurationBase:
         )
         self._inputs: Dict[str, InputConfigurationBase] = {}
 
-    @property
-    def api_instance(self) -> DefaultApi:
-        return self._api_instance
+        def api_instance(self) -> swagger_client.api.default_api.DefaultApi:
+            return self._api_instance
+        
+        ConfigurationBase.api_instance = property(api_instance)
 
     @property
     def dedicated_index_name(self) -> str:
