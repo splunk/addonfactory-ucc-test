@@ -180,8 +180,8 @@ class FrameworkTask:
             self._probe_required_args = []
 
     def collect_available_kwargs(self):
-        available_kwargs = self.get_forge_kwargs_copy()
-        available_kwargs.update(self._test.artifacts)
+        available_kwargs = deepcopy(self._test.artifacts)
+        available_kwargs.update(self.get_forge_kwargs_copy())
         available_kwargs[BuiltInArg.TEST_ID.value] = self._test.test_id
         available_kwargs[BuiltInArg.SESSION_ID.value] = self._session_id
         available_kwargs[BuiltInArg.SPLUNK_CLIENT.value] = self._splunk_client
