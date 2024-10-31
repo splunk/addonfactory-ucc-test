@@ -6,16 +6,16 @@ import random
 import traceback
 from copy import deepcopy
 from splunk_add_on_ucc_modinput_test.functional import logger
-from splunk_add_on_ucc_modinput_test.functional.constants import (
-    BuiltInArg,
-    ForgeProbe,
-)
+from splunk_add_on_ucc_modinput_test.functional.constants import ForgeProbe
+
 from splunk_add_on_ucc_modinput_test.functional.exceptions import (
     SplTaFwkWaitForProbeTimeout,
 )
 from splunk_add_on_ucc_modinput_test.functional.entities.executable import (
     ExecutableBase,
 )
+from splunk_add_on_ucc_modinput_test.functional.splunk import SplunkClientBase
+from splunk_add_on_ucc_modinput_test.functional.vendor import VendorClientBase
 
 
 class FrameworkTask:
@@ -29,8 +29,7 @@ class FrameworkTask:
         self._teardown = None
         self._errors = []
         self._result = None
-        self._splunk_client = None
-        self._vendor_client = None
+        self._global_builtin_args = {}
         self._probe = None
         self._probe_fn = None
         self._probe_gen = None
@@ -180,20 +179,16 @@ class FrameworkTask:
             self._probe_required_args = []
 
     def collect_available_kwargs(self):
-        available_kwargs = deepcopy(self._test.artifacts)
+        available_kwargs = self._test.artifacts_copy
         available_kwargs.update(self.get_forge_kwargs_copy())
-        available_kwargs[BuiltInArg.TEST_ID.value] = self._test.test_id
-        available_kwargs[BuiltInArg.SESSION_ID.value] = self._session_id
-        available_kwargs[BuiltInArg.SPLUNK_CLIENT.value] = self._splunk_client
-        available_kwargs[BuiltInArg.VENDOR_CLIENT.value] = self._vendor_client
+        available_kwargs.update(self._global_builtin_args)
+        available_kwargs.update(self._test.builtin_args)
         return available_kwargs
 
-    def prepare_forge_call_args(self, session_id, splunk_client, vendor_client):
+    def prepare_forge_call_args(self, global_builtin_args):
         logger.debug(f"EXECTASK: prepare_forge_call_args {self}")
 
-        self._session_id = session_id
-        self._splunk_client = splunk_client
-        self._vendor_client = vendor_client
+        self._global_builtin_args = global_builtin_args
 
         available_kwargs = self.collect_available_kwargs()
         self._forge_kwargs = self._forge.filter_requied_kwargs(
@@ -205,10 +200,11 @@ class FrameworkTask:
         )
 
     def _get_comparable_args(self):
-        args_without_clients = self._forge_kwargs.copy()
-        args_without_clients.pop(BuiltInArg.SPLUNK_CLIENT.value, None)
-        args_without_clients.pop(BuiltInArg.VENDOR_CLIENT.value, None)
-        return args_without_clients
+        return {
+            k: v
+            for k, v in self._forge_kwargs.items()
+            if not isinstance(v, (SplunkClientBase, VendorClientBase))
+        }
 
     def get_forge_kwargs_copy(self):
         return deepcopy(self._forge_initial_kwargs)

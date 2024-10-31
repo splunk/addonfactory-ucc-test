@@ -6,9 +6,9 @@ class SplunkClientBase:
     def __init__(self, splunk_configuration:Optional[Configuration]=None) -> None:
         self.ta_service = None
         self._splunk_configuration = splunk_configuration or Configuration()
-        self._bind_swager_client()
+        self._bind_swagger_client()
 
-    def _bind_swager_client(self):
+    def _bind_swagger_client(self):
         # this method is replaced in inherited class by the decorator
         # splunk_add_on_ucc_modinput_test.functional.decorators.register_splunk_class 
         pass

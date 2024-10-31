@@ -1,13 +1,13 @@
-import time
-import random
+from copy import deepcopy
 from splunk_add_on_ucc_modinput_test.functional import logger
-from splunk_add_on_ucc_modinput_test.functional.constants import (
-    BuiltInArg,
-)
+from splunk_add_on_ucc_modinput_test.functional.constants import BuiltInArg
 from splunk_add_on_ucc_modinput_test.functional.entities.executable import (
     ExecutableBase,
 )
-
+from splunk_add_on_ucc_modinput_test.functional.common.identifier_factory import (
+    create_identifier,
+    IdentifierType
+)
 
 class FrameworkTest(ExecutableBase):
     def __init__(self, function, altered_name=None):
@@ -21,8 +21,7 @@ class FrameworkTest(ExecutableBase):
 
     @staticmethod
     def generate_test_id():
-        time_based = int(time.time()*10**5)%10**10
-        return hex(time_based*10**3 + random.randint(0, 10**3))[2:]
+        return create_identifier(id_type=IdentifierType.ALPHA, in_uppercase=True)
 
     @property
     def test_id(self):
@@ -63,19 +62,22 @@ class FrameworkTest(ExecutableBase):
     def __repr__(self):
         return f"<Test {'::'.join(self.key)}>"
 
-    def collect_required_kwargs(self, session_id):
-        kwargs = {
-            k: v
-            for k, v in self._artifacts.items()
-            if k in self._required_args
+    @property
+    def builtin_args(self):
+        return {
+            BuiltInArg.TEST_ID.value: self.test_id
         }
-        if (BuiltInArg.TEST_ID.value in self._required_args):
-            kwargs[BuiltInArg.TEST_ID.value] = self._test_id
-            
-        if (BuiltInArg.SESSION_ID.value in self._required_args):
-            kwargs[BuiltInArg.SESSION_ID.value] = session_id
 
+    @property
+    def artifacts_copy(self):
+        return deepcopy(self._artifacts)   
+    
+    def collect_required_kwargs(self, global_builtin_args):
+        all_args = self.artifacts_copy
+        all_args.update(self.builtin_args)
+        all_args.update(global_builtin_args)
+        required_args = {k: v for k, v in all_args.items() if k in self._required_args}
         logger.debug(
-            f"Finish collect_required_kwargs for test {self.key}: kwargs={kwargs}"
+            f"Finish collect_required_kwargs for test {self.key}: kwargs={required_args}"
         )
-        return kwargs
+        return required_args

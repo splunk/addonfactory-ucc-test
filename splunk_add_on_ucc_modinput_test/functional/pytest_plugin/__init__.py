@@ -9,7 +9,3 @@ from splunk_add_on_ucc_modinput_test.functional.pytest_plugin.hooks import (
 from splunk_add_on_ucc_modinput_test.functional.pytest_plugin.options import (
     pytest_addoption,
 )
-from splunk_add_on_ucc_modinput_test.functional.pytest_plugin.fixtures import (
-    splunk_client,
-    vendor_client,
-)

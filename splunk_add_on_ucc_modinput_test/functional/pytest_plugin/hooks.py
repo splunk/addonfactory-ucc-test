@@ -85,7 +85,8 @@ def pytest_runtest_setup(item: pytest.Item) -> None:
         logger.error(f"Error during test setup: {e}\n{traceback.format_exc()}")
         pytest.fail(str(e))
 
-    custom_args = test.collect_required_kwargs(session_id=dependency_manager.session_id)
+    global_builtin_args=dependency_manager.get_global_builtin_args(test.key)
+    custom_args = test.collect_required_kwargs(global_builtin_args)
     item.funcargs.update(custom_args)
     logger.info(
         f"pytest_runtest_setup: {item} ==>> {test},\n\tartifacts: {test.artifacts},\n\t_fixtureinfo: {item._fixtureinfo.argnames},\n\tfuncargs={item.funcargs},\n\tvars: {vars(item)}"

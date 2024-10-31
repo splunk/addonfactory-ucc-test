@@ -1,12 +1,22 @@
 from types import ModuleType
-from typing import Any, Union, Tuple, Callable
+from typing import Any, Union, Tuple, Callable, Type
 from splunk_add_on_ucc_modinput_test.common import ta_base
+from splunk_add_on_ucc_modinput_test.functional import logger
 from splunk_add_on_ucc_modinput_test.functional.manager import (
     dependency_manager,
     forge,
     forges,
 )
+from splunk_add_on_ucc_modinput_test.functional.splunk import (
+    SplunkClientBase,
+    SplunkConfigurationBase,
+)
+from splunk_add_on_ucc_modinput_test.functional.vendor import (
+    VendorClientBase,
+    VendorConfigurationBase,
+)
 
+from .constants import BuiltInArg
 
 def bind(
     fn: Callable[..., Any],
@@ -40,22 +50,43 @@ def attach(*forges: Tuple[Union[forge, forges], ...]) -> Callable[..., Any]:
     return attach_dec
 
 
-def register_vendor_class(cls):
-    dependency_manager.set_vendor_client_class(cls)
-    return cls
+def define_vendor_client_argument(vendor_client_class:VendorClientBase, vendor_class_argument_name:str = BuiltInArg.VENDOR_CLIENT.value) -> Callable[..., Any]:
+    logger.debug(f"attach_vendor_client_config vendor_client_class: {vendor_client_class} with vendor_class_argument_name {vendor_class_argument_name}")
+    def register_vendor_class_decorator(vendor_configuration_class):
+        dependency_manager.set_vendor_client_class(vendor_configuration_class, vendor_client_class, vendor_class_argument_name)
+        return vendor_configuration_class
+    
+    return register_vendor_class_decorator
 
+def register_vendor_class(vendor_configuration_class:Type[VendorConfigurationBase]=VendorConfigurationBase) -> Callable[...,Any]:
+    logger.debug(f"register_vendor_class {vendor_configuration_class}")
+    def register_vendor_class_decorator(vendor_client_class):    
+        dependency_manager.set_vendor_client_class(vendor_configuration_class, vendor_client_class, BuiltInArg.VENDOR_CLIENT.value)
+        return vendor_client_class
 
-def register_splunk_class(swagger_client:ModuleType):
-    def _bind_swager_client(self):
+    return register_vendor_class_decorator
+
+def define_splunk_client_argument(splunk_client_class:SplunkClientBase, splunk_class_argument_name:str = BuiltInArg.SPLUNK_CLIENT.value) -> Callable[..., Any]:
+    logger.debug(f"attach_splunk_client_config splunk_client_class:{splunk_client_class} with splunk_class_argument_name {splunk_class_argument_name}")
+    
+    def register_splunk_class_decorator(splunk_configuration_class):
+        dependency_manager.set_splunk_client_class(splunk_configuration_class, splunk_client_class, splunk_class_argument_name)
+        return splunk_configuration_class
+    
+    return register_splunk_class_decorator
+
+def register_splunk_class(swagger_client:ModuleType, splunk_configuration_class:Type[SplunkConfigurationBase]=SplunkConfigurationBase) -> Callable[...,Any]:
+    logger.debug(f"register_splunk_class swagger_client:{swagger_client} with configuration {splunk_configuration_class}")
+    
+    def _bind_swagger_client(self):
         self.ta_service = ta_base.ConfigurationBase(
             swagger_client = swagger_client,
-            splunk_configuration=self._splunk_configuration,
+            splunk_configuration = self._splunk_configuration,
         )
 
-
-    def register_splunk_class_decorator(cls):    
-        cls._bind_swager_client = _bind_swager_client
-        dependency_manager.set_splunk_client_class(cls)
-        return cls
+    def register_splunk_class_decorator(splunk_client_class):    
+        splunk_client_class._bind_swagger_client = _bind_swagger_client        
+        dependency_manager.set_splunk_client_class(splunk_configuration_class, splunk_client_class, BuiltInArg.SPLUNK_CLIENT.value)
+        return splunk_client_class
     
     return register_splunk_class_decorator

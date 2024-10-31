@@ -37,8 +37,8 @@ class TaskGroupProcessor:
         def id(self):
             return self.test_index, self.task_index
 
-    def __init__(self, group, global_args_factory):
-        self._global_args_factory = global_args_factory
+    def __init__(self, group, global_builtin_args_factory):
+        self._global_builtin_args_factory = global_builtin_args_factory
         self._task_group = group
         self._jobs = []
         self._matched_tasks = {}
@@ -72,7 +72,7 @@ class TaskGroupProcessor:
     def _process_test_tasks(self, test_index, test_tasks):
         processed_tasks = []
         for task_index, task in enumerate(test_tasks):
-            task.prepare_forge_call_args(**self._global_args_factory())
+            task.prepare_forge_call_args(self._global_builtin_args_factory(task.test_key))
 
             if not self._try_skip_task(test_index, task_index):
                 job = self.Job(test_index, task_index, task)
@@ -159,12 +159,8 @@ class FrmwkExecutorBase:
     def wait(self):
         pass
 
-    def global_args_factory(self):
-        return dict(
-            session_id=self._manager.session_id,
-            splunk_client=self._manager.create_splunk_client(),
-            vendor_client=self._manager.create_vendor_client(),
-        )
+    def global_builtin_args_factory(self, test_key):
+        return self._manager.get_global_builtin_args(test_key)
 
     def _execute_request(self, job, worker_id=0):
         try:
@@ -185,7 +181,7 @@ class FrmwkSequentialExecutor(FrmwkExecutorBase):
     def start(self, tasks):
         logger.debug(f"sequential executor has started with tasks {tasks}")
         for task_group in tasks:
-            proc = TaskGroupProcessor(task_group, self.global_args_factory)
+            proc = TaskGroupProcessor(task_group, self.global_builtin_args_factory)
             for job in proc.jobs:
                 self._execute_request(job)
                 proc.process_response(job)
@@ -279,7 +275,7 @@ class FrmwkParallelExecutor(FrmwkExecutorBase):
             interrupted, tasks = self._receive_tasks()
             logger.debug(f"manager got tasks {tasks}")
             for task_group in tasks:
-                proc = TaskGroupProcessor(task_group, self.global_args_factory)
+                proc = TaskGroupProcessor(task_group, self.global_builtin_args_factory)
                 for job in proc.jobs:
                     self.task_queue.put(job)
 

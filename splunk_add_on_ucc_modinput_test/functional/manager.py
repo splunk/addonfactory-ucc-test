@@ -1,5 +1,6 @@
 import time
 import random
+import string
 from typing import List, Tuple, Optional, Union
 from splunk_add_on_ucc_modinput_test.functional import logger
 from splunk_add_on_ucc_modinput_test.functional.exceptions import (
@@ -22,13 +23,22 @@ from splunk_add_on_ucc_modinput_test.functional.executor import (
     FrmwkParallelExecutor,
     FrmwkSequentialExecutor,
 )
-from splunk_add_on_ucc_modinput_test.functional.splunk.client import (
+from splunk_add_on_ucc_modinput_test.functional.splunk import (
     SplunkClientBase,
+    SplunkConfigurationBase,
 )
-from splunk_add_on_ucc_modinput_test.functional.vendor.client import (
+from splunk_add_on_ucc_modinput_test.common import splunk_instance
+from splunk_add_on_ucc_modinput_test.functional.vendor import (
     VendorClientBase,
+    VendorConfigurationBase,
 )
 
+from splunk_add_on_ucc_modinput_test.functional.constants import BuiltInArg
+from splunk_add_on_ucc_modinput_test.functional.common.pytest_config_adapter import PytestConfigAdapter
+from splunk_add_on_ucc_modinput_test.functional.common.identifier_factory import (
+    create_identifier,
+    IdentifierType
+)
 
 class forge:
     def __init__(
@@ -53,54 +63,63 @@ class forges:
         self.scope = scope.value if isinstance(scope, ForgeScope) else scope
 
 
-class TestDependencyManager:
+class TestDependencyManager(PytestConfigAdapter):
     def __init__(self):
+        super().__init__()
         self.tests = TestCollection()
         self.forges = ForgeCollection()
         self.tasks = TaskCollection()
         self.executor = None
-        self._vendor_client_class = VendorClientBase
-        self._splunk_client_class = SplunkClientBase
+        self._vendor_clients = {BuiltInArg.VENDOR_CLIENT.value: (VendorClientBase, VendorConfigurationBase)}
+        self._splunk_clients = {BuiltInArg.SPLUNK_CLIENT.value: (SplunkClientBase, SplunkConfigurationBase)}
         self._pytest_config = None
         self._session_id = self.generate_session_id()
+        self._global_builtin_args_pool = {}
 
     @staticmethod
     def generate_session_id():
-        time_based = int(time.time() * 10**5) % 10**10
-        return hex(time_based * 10**3 + random.randint(0, 10**3))[2:]
+        return create_identifier(id_type=IdentifierType.ALPHA, in_uppercase=True)
 
-    def set_vendor_client_class(self, cls):
-        assert issubclass(cls, VendorClientBase)
-        self._vendor_client_class = cls
+    def set_vendor_client_class(self, vendor_configuration_class, vendor_client_class, vendor_class_argument_name):
+        logger.debug(f"set_vendor_client_class: {vendor_client_class}, {vendor_configuration_class}, {vendor_class_argument_name}")
+        assert issubclass(vendor_client_class, VendorClientBase)
+        assert issubclass(vendor_configuration_class, VendorConfigurationBase)
+        self._vendor_clients[vendor_class_argument_name] = (vendor_client_class, vendor_configuration_class)
 
     def create_vendor_client(self):
         return self._vendor_client_class()
 
-    def set_splunk_client_class(self, cls):
-        assert issubclass(cls, SplunkClientBase)
-        self._splunk_client_class = cls
+    def set_splunk_client_class(self, splunk_configuration_class, splunk_client_class, splunk_class_argument_name):
+        logger.debug(f"set_splunk_client_class: {splunk_configuration_class}, {splunk_client_class}, {splunk_class_argument_name}")
+        assert issubclass(splunk_client_class, SplunkClientBase)
+        assert issubclass(splunk_configuration_class, SplunkConfigurationBase)
+        self._splunk_clients[splunk_class_argument_name] = (splunk_client_class, splunk_configuration_class)
 
     def create_splunk_client(self):
         return self._splunk_client_class()
 
-    def link_pytest_config(self, pytest_config):
-        self._pytest_config = pytest_config
-
+    def create_global_builtin_args(self):
+        global_builtin_args = {
+            BuiltInArg.SESSION_ID.value: self.session_id,
+        }
+        
+        for prop, (client, config) in self._vendor_clients.items():
+            global_builtin_args[prop] = client(config(self._pytest_config))
+        
+        for prop, (client, config) in self._splunk_clients.items():
+            global_builtin_args[prop] = client(config(self._pytest_config))
+            
+        return global_builtin_args
+                    
+    def get_global_builtin_args(self, test_key):
+        if test_key not in self._global_builtin_args_pool:
+            self._global_builtin_args_pool[test_key] = self.create_global_builtin_args()
+        
+        return self._global_builtin_args_pool[test_key]
+        
     @property
     def session_id(self):
         return self._session_id
-
-    @property
-    def fail_with_teardown(self):
-        return self._pytest_config.getvalue("fail_with_teardown")
-
-    @property
-    def sequential_execution(self):
-        return self._pytest_config.getvalue("sequential_execution")
-
-    @property
-    def number_of_threads(self):
-        return self._pytest_config.getvalue("number_of_threads")
 
     def _interpret_scope(
         self, scope: Optional[str], test: FrameworkTest
