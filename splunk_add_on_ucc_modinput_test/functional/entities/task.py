@@ -30,6 +30,7 @@ class FrameworkTask:
         self._errors = []
         self._result = None
         self._global_builtin_args = {}
+        self._forge_kwargs = {}
         self._probe = None
         self._probe_fn = None
         self._probe_gen = None
@@ -253,6 +254,17 @@ class FrameworkTask:
         logger.info(
             f"Forge probe has been executed successfully, time taken {time.time() - probe_start_time} seconds:{self.summary}"
         )
+
+
+    def mark_as_failed(self, error, prefix):
+        if isinstance(error, Exception):
+            traceback_info = traceback.format_exc()
+            report = f"{prefix}: {error}{self.summary}\n{traceback_info}"
+        else:
+            report = f"{prefix}: {error}{self.summary}"
+        logger.error(report)
+        self._errors.append(report)
+        self._is_executed = True
 
     def mark_as_executed(self):
         self._is_executed = True

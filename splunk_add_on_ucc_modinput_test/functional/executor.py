@@ -72,11 +72,14 @@ class TaskGroupProcessor:
     def _process_test_tasks(self, test_index, test_tasks):
         processed_tasks = []
         for task_index, task in enumerate(test_tasks):
-            task.prepare_forge_call_args(self._global_builtin_args_factory(task.test_key))
-
-            if not self._try_skip_task(test_index, task_index):
-                job = self.Job(test_index, task_index, task)
-                processed_tasks.append(job)
+            try:
+                task.prepare_forge_call_args(self._global_builtin_args_factory(task.test_key))
+            except Exception as e:
+                task.mark_as_failed(e, "Failed to prepare forge call args")
+            else: 
+                if not self._try_skip_task(test_index, task_index):
+                    job = self.Job(test_index, task_index, task)
+                    processed_tasks.append(job)
 
         return processed_tasks
 

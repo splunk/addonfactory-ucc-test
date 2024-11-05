@@ -13,6 +13,9 @@ from typing import Callable, Optional
 
 global logger
 
+class SplunkClientConfigurationException(Exception):
+    pass
+
 
 def init_logger() -> logging.Logger:
     """
@@ -57,7 +60,9 @@ def get_from_environment_variable(
         logger.critical("run below in terminal:")
         logger.critical(f"export {environment_variable}=[your value]")
         logger.critical(40 * "*")
-        exit(1)
+
+        error = f"Mandatory environment variable {environment_variable} is missing and does not have a default value specified."
+        raise SplunkClientConfigurationException(error)
     variable = os.environ[environment_variable] if environment_variable in os.environ else default_value
     return use_string_function_if_needed(
         variable=variable,
