@@ -104,15 +104,20 @@ class TestDependencyManager(PytestConfigAdapter):
         }
         
         for prop, (client, config) in self._vendor_clients.items():
-            global_builtin_args[prop] = client(config(self._pytest_config))
+            conf_instance = config(self._pytest_config)
+            global_builtin_args[prop] = client(conf_instance)
+            logger.debug(f"create_global_builtin_args, vendor: {prop}, config={conf_instance} config_id={id(conf_instance)}, client: {global_builtin_args[prop]}")
         
         for prop, (client, config) in self._splunk_clients.items():
-            global_builtin_args[prop] = client(config(self._pytest_config))
+            conf_instance = config(self._pytest_config)
+            global_builtin_args[prop] = client(conf_instance)
+            logger.debug(f"create_global_builtin_args, splunk: {prop}, config={conf_instance} config_id={id(conf_instance)}, client: {global_builtin_args[prop]}")
             
         return global_builtin_args
                     
     def get_global_builtin_args(self, test_key):
         if test_key not in self._global_builtin_args_pool:
+            logger.debug(f"create_global_builtin_args for test {test_key}:")
             self._global_builtin_args_pool[test_key] = self.create_global_builtin_args()
         
         return self._global_builtin_args_pool[test_key]
@@ -195,14 +200,14 @@ class TestDependencyManager(PytestConfigAdapter):
         for key, test in self.tests.items():
             logger.debug(f"test key:{key} value: {test}")
 
-    def copy_task_for_parametrized_test(self, test, kwargs, src_task):
+    def copy_task_for_parametrized_test(self, test, extra_kwargs, src_task):
         frg = src_task._forge
         frg.link_test(test.key)
         test.link_forge(frg.key)
         probe = src_task.get_probe_fn()
         is_bootstrap = src_task.is_bootstrap
         kwargs = src_task.get_forge_kwargs_copy()
-        kwargs.update(kwargs)
+        kwargs.update(extra_kwargs)
         return FrameworkTask(test, frg, is_bootstrap, kwargs, probe)
 
     def expand_parametrized_tests(self, parametrized_tests):
