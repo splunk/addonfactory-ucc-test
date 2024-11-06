@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 # mypy: disable-error-code="attr-defined,arg-type"
 
-from typing import List, Optional
+from typing import List, Optional, Dict, Tuple
 import time
 import pytest
 import requests  # type: ignore
@@ -14,6 +16,7 @@ from splunk_add_on_ucc_modinput_test.common import utils
 
 
 MODINPUT_TEST_SPLUNK_INDEX_LOCK = "MODINPUT_TEST_SPLUNK_INDEX_LOCK"
+MODINPUT_TEST_SPLUNK_DEDICATED_INDEX = "MODINPUT_TEST_SPLUNK_DEDICATED_INDEX"
 
 
 class Configuration:
@@ -75,140 +78,168 @@ class Configuration:
             utils.logger.critical(idx_not_created_msg)
             pytest.exit(idx_not_created_msg)
 
-    __instance = None
+    __instances: dict[tuple[str, str, str], Configuration] = {}
+
+    @classmethod
+    def collect_host(cls) -> str:
+        return utils.get_from_environment_variable(
+            "MODINPUT_TEST_SPLUNK_HOST"
+        )
+
+    @classmethod
+    def collect_port(cls) -> str:
+        return utils.get_from_environment_variable(
+            "MODINPUT_TEST_SPLUNK_PORT"
+        )
+
+    @classmethod
+    def collect_username(cls) -> str:
+        return utils.get_from_environment_variable(
+            "MODINPUT_TEST_SPLUNK_USERNAME"
+        )
+
+    @classmethod
+    def collect_password(cls) -> str:
+        return utils.get_from_environment_variable(
+            "MODINPUT_TEST_SPLUNK_PASSWORD_BASE64",
+            string_function=utils.Base64.decode,
+        )
+
+    @classmethod
+    def collect_splunk_dedicated_index(cls) -> str | None:
+        return utils.get_from_environment_variable(
+            MODINPUT_TEST_SPLUNK_DEDICATED_INDEX,
+            is_optional=True,
+        )
+
+    @classmethod
+    def collect_splunk_index_lock(cls) -> str | None:
+        return utils.get_from_environment_variable(
+            MODINPUT_TEST_SPLUNK_INDEX_LOCK,
+            is_optional=True,
+        )
+
+    @classmethod
+    def collect_splunk_token(cls, is_optional) -> str | None:
+        return utils.get_from_environment_variable(
+            "MODINPUT_TEST_SPLUNK_TOKEN_BASE64",
+            string_function=utils.Base64.decode,
+            is_optional=is_optional,
+        )
+
+    @classmethod
+    def collect_acs_server(cls, is_optional) -> str | None:
+        return utils.get_from_environment_variable(
+            "MODINPUT_TEST_ACS_SERVER",
+            is_optional=is_optional,
+        )
+
+    @classmethod
+    def collect_acs_stack(cls, is_optional) -> str | None:
+        return utils.get_from_environment_variable(
+            "MODINPUT_TEST_ACS_STACK",
+            is_optional=is_optional,
+        )
 
     def __new__(cls, *args, **kwargs):  # type: ignore
-        if not Configuration.__instance:
-            Configuration.__instance = object.__new__(cls)
-            Configuration.__instance._host = (
-                utils.get_from_environment_variable(
-                    "MODINPUT_TEST_SPLUNK_HOST"
-                )
-            )
-            Configuration.__instance._port = (
-                utils.get_from_environment_variable(
-                    "MODINPUT_TEST_SPLUNK_PORT"
-                )
-            )
-            Configuration.__instance._username = (
-                utils.get_from_environment_variable(
-                    "MODINPUT_TEST_SPLUNK_USERNAME"
-                )
-            )
-            Configuration.__instance._password = (
-                utils.get_from_environment_variable(
-                    "MODINPUT_TEST_SPLUNK_PASSWORD_BASE64",
-                    string_function=utils.Base64.decode,
-                )
-            )
-            dedicated_index_name = utils.get_from_environment_variable(
-                "MODINPUT_TEST_SPLUNK_DEDICATED_INDEX",
-                is_optional=True,
-            )
-            index_lock = utils.get_from_environment_variable(
-                MODINPUT_TEST_SPLUNK_INDEX_LOCK,
-                is_optional=True,
-            )
-            existing_index = (
-                dedicated_index_name if index_lock is None else index_lock
-            )
-            Configuration.__instance._is_cloud = (
-                "splunkcloud.com"
-                in Configuration.__instance._host.lower()  # type: ignore
-            )
-            create_index_in_cloud = (
-                Configuration.__instance._is_cloud and not existing_index
-            )
-            Configuration.__instance._token = (
-                utils.get_from_environment_variable(
-                    "MODINPUT_TEST_SPLUNK_TOKEN_BASE64",
-                    string_function=utils.Base64.decode,
-                    is_optional=not create_index_in_cloud,
-                )
-            )
-            Configuration.__instance._acs_server = (
-                utils.get_from_environment_variable(
-                    "MODINPUT_TEST_ACS_SERVER",
-                    is_optional=not create_index_in_cloud,
-                )
-            )
-            Configuration.__instance._acs_stack = (
-                utils.get_from_environment_variable(
-                    "MODINPUT_TEST_ACS_STACK",
-                    is_optional=not create_index_in_cloud,
-                )
-            )
-            Configuration.__instance._service = client.connect(
-                host=Configuration.__instance._host,
-                port=Configuration.__instance._port,
-                username=Configuration.__instance._username,
-                password=Configuration.__instance._password,
-            )
+        host = cls.collect_host()
+        port = cls.collect_port()
+        username = cls.collect_username()
+        connection_key = (host, port, username)
+        if connection_key in cls.__instances:
+            return cls.__instances[connection_key]
 
-            if existing_index:
-                Configuration.__instance._dedicated_index = (
-                    Configuration.get_index(
-                        existing_index, Configuration.__instance._service
-                    )
+        instance = object.__new__(cls)
+        instance._host = host
+        instance._port = port
+        instance._username = username
+        instance._password = cls.collect_password()
+
+        dedicated_index_name = cls.collect_splunk_dedicated_index()
+
+        index_lock = cls.collect_splunk_index_lock()
+        existing_index = (
+            dedicated_index_name if index_lock is None else index_lock
+        )
+        instance._is_cloud = (
+            "splunkcloud.com" in instance._host.lower()  # type: ignore
+        )
+        create_index_in_cloud = instance._is_cloud and not existing_index
+        instance._token = cls.collect_splunk_token(
+            is_optional=not create_index_in_cloud
+        )
+        instance._acs_server = cls.collect_acs_server(
+            is_optional=not create_index_in_cloud
+        )
+        instance._acs_stack = cls.collect_acs_stack(
+            is_optional=not create_index_in_cloud
+        )
+        instance._service = client.connect(
+            host=instance._host,
+            port=instance._port,
+            username=instance._username,
+            password=instance._password,
+        )
+
+        if existing_index:
+            instance._dedicated_index = cls.get_index(
+                existing_index, instance._service
+            )
+            if not instance._dedicated_index:
+                reason = f"Environment variable {MODINPUT_TEST_SPLUNK_INDEX_LOCK} or \
+                    {MODINPUT_TEST_SPLUNK_DEDICATED_INDEX} set to \
+                        {existing_index}, but Splunk instance \
+                            {instance._host} does not \
+                                contain such index. Remove the variable \
+                                    or create the index."
+                utils.logger.critical(reason)
+                pytest.exit(reason)
+            utils.logger.debug(
+                f"Existing index {existing_index} will be used for \
+                    test in splunk {instance._host}"
+            )
+        else:
+            created_index_name = f"idx_{utils.Common().sufix}"
+            if cls.get_index(created_index_name, instance._service):
+                reason = f"Index {created_index_name} already exists"
+                utils.logger.critical(reason)
+                pytest.exit(reason)
+            if create_index_in_cloud:
+                cls._victoria_create_index(
+                    created_index_name,
+                    acs_stack=instance._acs_stack,
+                    acs_server=instance._acs_server,
+                    splunk_token=instance._token,
                 )
-                if not Configuration.__instance._dedicated_index:
-                    reason = f"Environment variable {MODINPUT_TEST_SPLUNK_INDEX_LOCK} or \
-                        MODINPUT_TEST_SPLUNK_DEDICATED_INDEX set to \
-                            {existing_index}, but Splunk instance \
-                                {Configuration.__instance._host} does not \
-                                    contain such index. Remove the variable \
-                                        or create the index."
-                    utils.logger.critical(reason)
-                    pytest.exit(reason)
-                utils.logger.debug(
-                    f"Existing index {existing_index} will be used for \
-                        test in splunk {Configuration.__instance._host}"
+                instance._dedicated_index = cls.get_index(
+                    created_index_name,
+                    instance._service,
                 )
             else:
-                created_index_name = f"idx_{utils.Common().sufix}"
-                if Configuration.get_index(
-                    created_index_name, Configuration.__instance._service
-                ):
-                    reason = f"Index {created_index_name} already exists"
-                    utils.logger.critical(reason)
-                    pytest.exit(reason)
-                if create_index_in_cloud:
-                    Configuration._victoria_create_index(
+                instance._dedicated_index = (
+                    cls._enterprise_create_index(
                         created_index_name,
-                        acs_stack=Configuration.__instance._acs_stack,
-                        acs_server=Configuration.__instance._acs_server,
-                        splunk_token=Configuration.__instance._token,
+                        instance._service,
                     )
-                    Configuration.__instance._dedicated_index = (
-                        Configuration.get_index(
-                            created_index_name,
-                            Configuration.__instance._service,
-                        )
-                    )
-                else:
-                    Configuration.__instance._dedicated_index = (
-                        Configuration._enterprise_create_index(
-                            created_index_name,
-                            Configuration.__instance._service,
-                        )
-                    )
-                utils.logger.debug(
-                    f"Index {created_index_name} has just been created in \
-                        splunk {Configuration.__instance._host}"
                 )
+            utils.logger.debug(
+                f"Index {created_index_name} has just been created in \
+                    splunk {instance._host}"
+            )
 
-            utils.logger.info(
-                f"Splunk - host:port and user set to \
-                    {Configuration.__instance._host}:\
-                        {Configuration.__instance._port}, \
-                            {Configuration.__instance._username}"
-            )
-            utils.logger.info(
-                f"Splunk - index \
-                    {Configuration.__instance._dedicated_index.name} will be \
-                        used for the test run"
-            )
-        return Configuration.__instance
+        utils.logger.info(
+            f"Splunk - host:port and user set to \
+                {instance._host}:\
+                    {instance._port}, \
+                        {instance._username}"
+        )
+        utils.logger.info(
+            f"Splunk - index \
+                {instance._dedicated_index.name} will be \
+                    used for the test run"
+        )
+        cls.__instances[connection_key] = instance
+        return instance
 
     def __init__(self) -> None:
         pass
@@ -277,8 +308,9 @@ class SearchState:
         return self._result_count
 
     @property
-    def results(self) -> Optional[List[object]]:
+    def results(self) -> list[object] | None:
         return self._results
+
 
 def search(*, service: Service, searchquery: str) -> SearchState:
     search_state = None
