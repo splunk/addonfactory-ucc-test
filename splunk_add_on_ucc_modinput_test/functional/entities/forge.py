@@ -1,6 +1,7 @@
 import threading
 import inspect
 import contextlib
+import time
 from typing import List
 from dataclasses import dataclass, replace
 from splunk_add_on_ucc_modinput_test.functional import logger
@@ -28,6 +29,16 @@ class ForgeExecData:
         self.result = result
         self.errors = errors
         self.count = count
+        
+    def summary(self, offset="")->str:
+        s = f"\n{offset}Teardown summary:" 
+        s += f"\n{offset}\tdata.id: {self.id},"
+        s += f"\n{offset}\tdata.count={self.count},"
+        s += f"\n{offset}\tdata.is_teardown_executed={self.is_teardown_executed}"
+        s += f"\n{offset}\tdata.teardown={self.teardown}"
+        s += f"\n{offset}\tdata.kwargs={self.kwargs}"
+        s += f"\n{offset}\tdata.result={self.result}"
+        return s
 
 
 class ForgePostExec:
@@ -36,22 +47,40 @@ class ForgePostExec:
         self._exec_store = {}
         self._teardown_is_blocked = False
 
+    def summary(self, data):
+        s = data.summary()
+        s += f"\n\tteardown_is_blocked={self._teardown_is_blocked}"
+    
     def block_teardown(self):
         self._teardown_is_blocked = True
 
     def unblock_teardown(self):
         self._teardown_is_blocked = False
+        self.exec_ready_teardowns()
+
+    def exec_ready_teardowns(self):
+        for data in self._exec_store.values():
+            self.exec_teardown_if_ready(data)
+
+    def exec_teardown_if_ready(self, data):
+        with data.lock:
+            can_execute = (
+                data.count == 0
+                and not self._teardown_is_blocked
+                and not data.is_teardown_executed
+            )
+            logger.debug(f"CAN EXECUTE TEARDOWN {can_execute}:{self.summary(data)}")
+            if can_execute:
+                self.execute_teardown(data)
+        return can_execute
 
     def add(self, id, teardown, kwargs, result, errors):
         if id not in self._exec_store:
-            self.lock.acquire()
-            try:
+            with self.lock:
                 data = ForgeExecData(id, teardown, kwargs, result, errors, 1)
                 self._exec_store[id] = data
-            finally:
-                self.lock.release()
             logger.debug(
-                f"REGISTER TEARDOWN {id}:\n\tdata.id: {data.id}\n\tdata.count={data.count},\n\tdata.is_teardown_executed={data.is_teardown_executed}\n\tdata.teardown={data.teardown}\n\tdata.kwargs={data.kwargs}\n\tdata.result={data.result}"
+                f"REGISTER TEARDOWN {id}: {self.summary(data)}"
             )
         else:
             self.reuse(id)
@@ -64,12 +93,9 @@ class ForgePostExec:
     def reuse(self, id):
         data = self._exec_store.get(id)
         assert data
-        logger.debug(
-            f"REUSE TEARDOWN {id}:\n\tdata.id: {data.id}\n\tdata.count={data.count},\n\tdata.is_teardown_executed={data.is_teardown_executed}\n\tdata.teardown={data.teardown}\n\tdata.kwargs={data.kwargs}\n\tdata.result={data.result}"
-        )
-        data.lock.acquire()
-        data.count += 1
-        data.lock.release()
+        logger.debug(f"REUSE TEARDOWN {id}:{self.summary(data)}")
+        with data.lock:
+            data.count += 1
 
     def get_teardown(self, id):
         data = self._exec_store.get(id)
@@ -110,25 +136,17 @@ class ForgePostExec:
         if data is None:
             return False
 
-        logger.debug(
-            f"BEFORE EXECUTE TEARDOWN {id}:\n\t_teardown_is_blocked={self._teardown_is_blocked}\n\tdata.id: {data.id}\n\tdata.count={data.count},\n\tdata.is_teardown_executed={data.is_teardown_executed}\n\tdata.teardown={data.teardown}\n\tdata.kwargs={data.kwargs}\n\tdata.result={data.result}"
-        )
-        data.lock.acquire()
-        try:
+        logger.debug(f"BEFORE EXECUTE TEARDOWN {id}:{self.summary(data)}")
+
+        with data.lock:
             data.count -= 1
-            can_execute = (
-                data.count == 0
-                and not self._teardown_is_blocked
-                and not data.is_teardown_executed
-            )
-            if can_execute:
-                self.execute_teardown(data)
-        finally:
-            data.lock.release()
-        logger.debug(
-            f"AFTER EXECUTE TEARDOWN {id}:\n\tdata.id: {data.id}\n\tdata.count={data.count},\n\tdata.is_teardown_executed={data.is_teardown_executed}\n\tdata.teardown={data.teardown}\n\tdata.kwargs={data.kwargs}\n\tdata.result={data.result}"
-        )
-        return can_execute
+            
+        teardown_start_time = time.time()
+        executed = self.exec_teardown_if_ready(data)
+        if executed:
+            logger.info(f"Teardown has been executed successfully, time taken: {time.time() - teardown_start_time} seconds:{self.summary(data)}")
+        logger.debug(f"AFTER EXECUTE TEARDOWN {id}:{self.summary(data)}")
+        return executed
 
 
 class FrameworkForge(ExecutableBase):
