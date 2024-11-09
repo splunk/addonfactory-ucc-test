@@ -4,7 +4,7 @@ from enum import Enum
 class ForgeProbe(Enum):
     DEFAULT_INTERVAL = 5
     MAX_WAIT_TIME = 300
-    MAX_INTERWAL = 60
+    MAX_INTERVAL = 60
     MIN_INTERVAL = 1
 
 

@@ -13,7 +13,7 @@ from splunklib.client import Job
 from splunklib.client import Index
 import splunklib.results as results
 from splunk_add_on_ucc_modinput_test.common import utils
-
+from .splunk_service_pool import SplunkServicePool
 
 MODINPUT_TEST_SPLUNK_INDEX_LOCK = "MODINPUT_TEST_SPLUNK_INDEX_LOCK"
 MODINPUT_TEST_SPLUNK_DEDICATED_INDEX = "MODINPUT_TEST_SPLUNK_DEDICATED_INDEX"
@@ -174,7 +174,7 @@ class Configuration:
         instance._acs_stack = cls.collect_acs_stack(
             is_optional=not create_index_in_cloud
         )
-        instance._service = client.connect(
+        instance._service = SplunkServicePool(
             host=instance._host,
             port=instance._port,
             username=instance._username,
