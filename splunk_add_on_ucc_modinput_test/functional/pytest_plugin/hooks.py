@@ -118,7 +118,7 @@ def pytest_runtest_teardown(item: pytest.Item) -> None:
     if dependency_manager.check_all_tests_executed():
         dependency_manager.shutdown()
 
-    if dependency_manager.fail_with_teardown:
+    if not dependency_manager.do_not_fail_with_teardown:
         msg = ""
         for task, error in dependency_manager.test_error_report(test):
             item.add_report_section("call", "error", error)

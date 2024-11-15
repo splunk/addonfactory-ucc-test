@@ -10,8 +10,6 @@ from splunk_add_on_ucc_modinput_test.functional.entities.task import (
 from splunk_add_on_ucc_modinput_test.functional.exceptions import (
     SplTaFwkWaitForDependenciesTimeout,
 )
-from splunk_add_on_ucc_modinput_test.functional.constants import TasksWait
-
 
 def log_exceptions_traceback(fn):
     def wrapper(*args, **kwargs):
@@ -159,7 +157,7 @@ class FrmwkExecutorBase:
     def shutdown(self):
         pass
 
-    def wait(self):
+    def wait(self, is_bootstrap):
         pass
 
     def global_builtin_args_factory(self, test_key):
@@ -215,11 +213,13 @@ class FrmwkParallelExecutor(FrmwkExecutorBase):
         self._is_free.set()
         logger.debug("FrmwkParallelExecutor is set free")
 
-    def wait(self):
-        expiration = time.time() + TasksWait.TIMEOUT.value
-        while not self._is_free.wait(TasksWait.CHECK_FREQUENCY.value):
+    def wait(self, is_bootstrap=True):
+        wait_timeout = self._manager.bootstrap_wait_timeout if is_bootstrap else self._manager.attached_tasks_wait_timeout
+        
+        expiration = time.time() + wait_timeout
+        while not self._is_free.wait(self._manager.completion_check_frequency):
             if time.time() > expiration:
-                msg = f"Waiting for executor to process all tasks exceeded timeout {TasksWait.TIMEOUT.value} seconds."
+                msg = f"Waiting for executor to process all tasks exceeded timeout {wait_timeout} seconds."
                 logger.error(msg)
                 raise SplTaFwkWaitForDependenciesTimeout(msg)
             logger.debug("Still waiting for executor to process all tasks")

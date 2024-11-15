@@ -9,7 +9,7 @@ from splunk_add_on_ucc_modinput_test.functional.exceptions import (
 )
 from splunk_add_on_ucc_modinput_test.functional.constants import (
     ForgeScope,
-    TasksWait,
+    BuiltInArg,
 )
 from splunk_add_on_ucc_modinput_test.functional.entities import (
     TestCollection,
@@ -33,7 +33,6 @@ from splunk_add_on_ucc_modinput_test.functional.vendor import (
     VendorConfigurationBase,
 )
 
-from splunk_add_on_ucc_modinput_test.functional.constants import BuiltInArg
 from splunk_add_on_ucc_modinput_test.functional.common.pytest_config_adapter import PytestConfigAdapter
 from splunk_add_on_ucc_modinput_test.functional.common.identifier_factory import (
     create_identifier,
@@ -172,7 +171,7 @@ class TestDependencyManager(PytestConfigAdapter):
                 )
 
             frg_list.append(
-                FrameworkTask(test, frg, is_bootstrap, f.kwargs, f.probe)
+                FrameworkTask(test, frg, is_bootstrap, f.kwargs, f.probe, self)
             )
 
             frg.link_test(test.key)
@@ -208,7 +207,7 @@ class TestDependencyManager(PytestConfigAdapter):
         is_bootstrap = src_task.is_bootstrap
         kwargs = src_task.get_forge_kwargs_copy()
         kwargs.update(extra_kwargs)
-        return FrameworkTask(test, frg, is_bootstrap, kwargs, probe)
+        return FrameworkTask(test, frg, is_bootstrap, kwargs, probe, self)
 
     def expand_parametrized_tests(self, parametrized_tests):
         for test_key, param_tests in parametrized_tests.items():
@@ -307,7 +306,7 @@ class TestDependencyManager(PytestConfigAdapter):
 
         deps_exec_mtx = dependency_manager.build_bootstrap_matrix()
         if deps_exec_mtx:
-            self._execution_timeout = time.time() + TasksWait.TIMEOUT.value
+            self._execution_timeout = time.time() + self.bootstrap_wait_timeout
             self.executor.start(deps_exec_mtx)
 
     def inplace_tasks_execution(self, deps_exec_mtx):
@@ -316,9 +315,9 @@ class TestDependencyManager(PytestConfigAdapter):
             return
         assert self.executor is not None
         logger.debug("inplace_tasks_execution is about to start")
-        self._execution_timeout = time.time() + TasksWait.TIMEOUT.value
+        self._execution_timeout = time.time() + self.attached_tasks_wait_timeout
         self.executor.start(deps_exec_mtx)
-        self.executor.wait()
+        self.executor.wait(is_bootstrap=False)
 
     def shutdown(self):
         logger.info("Shutting down dependency manager...")
@@ -367,7 +366,7 @@ class TestDependencyManager(PytestConfigAdapter):
                 raise SplTaFwkDependencyExecutionError(msg)
 
     def _report_timeout(self, test, pending_tasks):
-        msg = f"{test} exceeded {TasksWait.TIMEOUT.value} seconds timeout while waiting for dependencies:"
+        msg = f"{test} exceeded {self.bootstrap_wait_timeout} seconds timeout while waiting for dependencies:"
         for task in pending_tasks:
             msg += f"\n\t{task.forge_full_path}, self id: {id(task)}, scope: {task.forge_scope}, exec_id: {task._exec_id} is_executed: {task.is_executed}, is_failed: {task.failed}"
         logger.error(msg)
@@ -384,7 +383,7 @@ class TestDependencyManager(PytestConfigAdapter):
                 self._report_timeout(test, pending)
 
             logger.debug(f"{test} is waiting for dependencies")
-            time.sleep(TasksWait.CHECK_FREQUENCY.value)
+            time.sleep(self.completion_check_frequency)
 
         logger.debug(f"{test} dependencies are ready")
 

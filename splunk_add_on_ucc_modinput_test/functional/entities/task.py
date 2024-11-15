@@ -6,6 +6,7 @@ import random
 import traceback
 from copy import deepcopy
 from splunk_add_on_ucc_modinput_test.functional import logger
+from splunk_add_on_ucc_modinput_test.functional.common.pytest_config_adapter import PytestConfigAdapter
 from splunk_add_on_ucc_modinput_test.functional.constants import ForgeProbe
 
 from splunk_add_on_ucc_modinput_test.functional.exceptions import (
@@ -19,7 +20,8 @@ from splunk_add_on_ucc_modinput_test.functional.vendor import VendorClientBase
 
 
 class FrameworkTask:
-    def __init__(self, test, forge, is_bootstrap, forge_kwargs, probe_fn):
+    def __init__(self, test, forge, is_bootstrap, forge_kwargs, probe_fn, config:PytestConfigAdapter):
+        self._config = config
         self._test = test
         self._forge = forge
         self._is_bootstrap = is_bootstrap
@@ -167,7 +169,7 @@ class FrameworkTask:
 
             def _probe_default_gen(**probe_args):
                 while not probe_fn(**probe_args):
-                    yield ForgeProbe.DEFAULT_INTERVAL.value
+                    yield self._config.probe_invoke_interval
 
             self._probe_gen = _probe_default_gen
         else:
@@ -236,13 +238,13 @@ class FrameworkTask:
         probe_start_time = time.time()
         extra_args = self.make_kwarg(last_result)
         self.prepare_probe_kwargs(extra_args)
-        expire_time = time.time() + ForgeProbe.MAX_WAIT_TIME.value
+        expire_time = time.time() + self._config.probe_wait_timeout
         logger.debug(
             f"WAIT FOR PROBE\n\ttest {self.test_key}\n\tforge {self.forge_key}\n\tprobe {self._probe_fn}\n\tprobe_gen {self._probe_gen}\n\tprobe_args {self._probe_kwargs}"
         )
         for interval in self.invoke_probe():
             if time.time() > expire_time:
-                msg = f"Test {self.test_key}, forge {self.forge_key}: probe {self._probe_fn} exceeded {ForgeProbe.MAX_WAIT_TIME.value} seconds timeout"
+                msg = f"Test {self.test_key}, forge {self.forge_key}: probe {self._probe_fn} exceeded {self._config.probe_wait_timeout} seconds timeout"
                 raise SplTaFwkWaitForProbeTimeout(msg)
 
             if interval > ForgeProbe.MAX_INTERVAL.value:

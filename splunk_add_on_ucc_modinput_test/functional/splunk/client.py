@@ -15,13 +15,11 @@ class SplunkClientBase:
     
     @property
     def splunk_configuration(self):
-        assert self.ta_service is not None, "Make sure you have decorated inherited client class with @register_splunk_class"
-        return self.ta_service.splunk_configuration
+        return self._splunk_configuration
     
     @property
     def splunk(self):
-        assert self.ta_service is not None, "Make sure you have decorated inherited client class with @register_splunk_class"
-        return self.ta_service.splunk_configuration.service
+        return self._splunk_configuration.service
 
     @property
     def ta_api(self):
