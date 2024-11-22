@@ -18,6 +18,10 @@ class SplunkClientBase:
         return self._splunk_configuration
     
     @property
+    def config(self): # short alias for splunk_configuration 
+        return self._splunk_configuration
+
+    @property
     def splunk(self):
         return self._splunk_configuration.service
 
