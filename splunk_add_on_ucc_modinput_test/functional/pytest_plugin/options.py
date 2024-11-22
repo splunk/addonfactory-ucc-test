@@ -29,7 +29,7 @@ def pytest_addoption(parser):
         dest="sequential_execution",
         action="store_true",
         default=False,
-        help="Use no threading (for debugging)",
+        help="Use no threading (for debugging).",
     )
 
     splunk_group.addoption(
@@ -37,7 +37,7 @@ def pytest_addoption(parser):
         dest="do_not_fail_with_teardown",
         action="store_true",
         default=False,
-        help="Do not fail test if test's teardown fails. By default a test will fail if any of it's forges teardowns fail, even if the test itself passed",
+        help="Do not fail test if test's teardown fails. By default a test will fail if any of it's forges teardowns fail, even if the test itself passed.",
     )
 
     allowed_range = [
@@ -50,7 +50,7 @@ def pytest_addoption(parser):
         dest="number_of_threads",
         type=int_range(*allowed_range),
         default=10,
-        help=f"Number of threads to use to execute forges. Allowed range: {allowed_range}. Default value: {default}",
+        help=f"Number of threads to use to execute forges. Allowed range: {allowed_range}. Default value: {default}.",
     )
 
     allowed_range = [
@@ -63,7 +63,7 @@ def pytest_addoption(parser):
         dest="probe_invoke_interval",
         type=int_range(*allowed_range),
         default=default,
-        help=f"Interval in seconds used to repeat invocation of yes/no type of probe. Allowed range: {allowed_range}. Default value: {default}",
+        help=f"Interval in seconds used to repeat invocation of yes/no type of probe. Allowed range: {allowed_range}. Default value: {default}.",
     )
 
     allowed_range = [
@@ -76,7 +76,7 @@ def pytest_addoption(parser):
         dest="probe_wait_timeout",
         type=int_range(*allowed_range),
         default=default,
-        help=f"Maximum time in seconds given to single probe to turn positive. Allowed range: {allowed_range}. Default value: {default}",
+        help=f"Maximum time in seconds given to single probe to turn positive. Allowed range: {allowed_range}. Default value: {default}.",
     )
 
     allowed_range = [
@@ -89,7 +89,7 @@ def pytest_addoption(parser):
         dest="bootstrap_wait_timeout",
         type=int_range(*allowed_range),
         default=default,
-        help=f"Maximum time in seconds given to all bootstrap tasks to finish. Allowed range: {allowed_range}. Default value: {default}",
+        help=f"Maximum time in seconds given to all bootstrap tasks to finish. Allowed range: {allowed_range}. Default value: {default}.",
     )
 
     allowed_range = [
@@ -102,7 +102,7 @@ def pytest_addoption(parser):
         dest="attached_tasks_wait_timeout",
         type=int_range(*allowed_range),
         default=default,
-        help=f"Maximum time in seconds given to finish all tasks attached to a test. Allowed range: {allowed_range}. Default value: {default}",
+        help=f"Maximum time in seconds given to finish all tasks attached to a test. Allowed range: {allowed_range}. Default value: {default}.",
     )
 
     allowed_range = [
@@ -115,5 +115,13 @@ def pytest_addoption(parser):
         dest="completion_check_frequency",
         type=int_range(*allowed_range),
         default=default,
-        help=f"Frequency to check that bootstrap or attached tasks bundle has finished to execute. Allowed range: {allowed_range}. Default value: {default}",
+        help=f"Frequency to check that bootstrap or attached tasks bundle has finished to execute. Allowed range: {allowed_range}. Default value: {default}.",
+    )
+
+    splunk_group.addoption(
+        "--disable-at-teardown",
+        dest="disable_at_teardown",
+        action="store_true",
+        default=False,
+        help="Disable resources on teardown instead of deleting them. This is only a flag that developers can use in forges to implement specific code path.",
     )
