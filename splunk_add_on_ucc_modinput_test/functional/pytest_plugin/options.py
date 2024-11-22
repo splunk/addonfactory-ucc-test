@@ -45,7 +45,7 @@ def pytest_addoption(parser):
         dest="do_not_delete_at_teardown",
         action="store_true",
         default=False,
-        help="Disable resources on teardown instead of deleting them. This is only a flag that developers can use in forges to implement specific code path.",
+        help="Do not delete created resoueces at teardown. This flag is for debug purposes. Based on this flag developers can add alternative code to forges, that, for example, would disable imputs instead of deletng them in order to study inputs after tests execution.",
     )
 
     allowed_range = [
