@@ -40,6 +40,14 @@ def pytest_addoption(parser):
         help="Do not fail test if test's teardown fails. By default a test will fail if any of it's forges teardowns fail, even if the test itself passed.",
     )
 
+    splunk_group.addoption(
+        "--do-not-delete-at-teardown",
+        dest="do_not_delete_at_teardown",
+        action="store_true",
+        default=False,
+        help="Disable resources on teardown instead of deleting them. This is only a flag that developers can use in forges to implement specific code path.",
+    )
+
     allowed_range = [
         Executor.MIN_THREAD_NUMBER.value,
         Executor.MAX_THREAD_NUMBER.value,
@@ -116,12 +124,4 @@ def pytest_addoption(parser):
         type=int_range(*allowed_range),
         default=default,
         help=f"Frequency to check that bootstrap or attached tasks bundle has finished to execute. Allowed range: {allowed_range}. Default value: {default}.",
-    )
-
-    splunk_group.addoption(
-        "--disable-at-teardown",
-        dest="disable_at_teardown",
-        action="store_true",
-        default=False,
-        help="Disable resources on teardown instead of deleting them. This is only a flag that developers can use in forges to implement specific code path.",
     )

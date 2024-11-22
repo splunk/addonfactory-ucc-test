@@ -42,5 +42,5 @@ class PytestConfigAdapter:
         return self._pytest_config.getvalue("completion_check_frequency")
 
     @property
-    def disable_at_teardown(self):
-        return self._pytest_config.getvalue("disable_at_teardown")
+    def do_not_delete_at_teardown(self):
+        return self._pytest_config.getvalue("do_not_delete_at_teardown")
