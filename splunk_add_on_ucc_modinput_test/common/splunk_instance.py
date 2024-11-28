@@ -78,6 +78,41 @@ class Configuration:
             utils.logger.critical(idx_not_created_msg)
             pytest.exit(idx_not_created_msg)
 
+    @staticmethod
+    def create_index(
+        index_name: str,
+        client_service: SplunkServicePool,
+        *,
+        is_cloud: bool = False,
+        acs_stack: str = None,
+        acs_server: str = None,
+        splunk_token: str = None,
+    ) -> Index:
+        if Configuration.get_index(index_name, client_service):
+            reason = f"Index {index_name} already exists"
+            utils.logger.critical(reason)
+            pytest.exit(reason)
+        if is_cloud:
+            Configuration._victoria_create_index(
+                index_name,
+                acs_stack=acs_stack,
+                acs_server=acs_server,
+                splunk_token=splunk_token,
+            )
+            created_index = Configuration.get_index(
+                index_name,
+                client_service,
+            )
+        else:
+            created_index = Configuration._enterprise_create_index(
+                index_name,
+                client_service,
+            )
+        utils.logger.debug(
+            f"Index {index_name} has just been created"
+        )
+        return created_index
+
     __instances: dict[tuple[str, str, str], Configuration] = {}
 
     @classmethod
@@ -199,32 +234,15 @@ class Configuration:
                     test in splunk {instance._host}"
             )
         else:
-            created_index_name = f"idx_{utils.Common().sufix}"
-            if cls.get_index(created_index_name, instance._service):
-                reason = f"Index {created_index_name} already exists"
-                utils.logger.critical(reason)
-                pytest.exit(reason)
-            if create_index_in_cloud:
-                cls._victoria_create_index(
-                    created_index_name,
+            instance._dedicated_index = (
+                instance.create_index(
+                    f"idx_{utils.Common().sufix}",
+                    instance._service,
+                    is_cloud=instance._is_cloud,
                     acs_stack=instance._acs_stack,
                     acs_server=instance._acs_server,
                     splunk_token=instance._token,
                 )
-                instance._dedicated_index = cls.get_index(
-                    created_index_name,
-                    instance._service,
-                )
-            else:
-                instance._dedicated_index = (
-                    cls._enterprise_create_index(
-                        created_index_name,
-                        instance._service,
-                    )
-                )
-            utils.logger.debug(
-                f"Index {created_index_name} has just been created in \
-                    splunk {instance._host}"
             )
 
         utils.logger.info(
