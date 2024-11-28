@@ -244,32 +244,6 @@ class Configuration:
                     splunk_token=instance._token,
                 )
             )
-            # if cls.get_index(created_index_name, instance._service):
-            #     reason = f"Index {created_index_name} already exists"
-            #     utils.logger.critical(reason)
-            #     pytest.exit(reason)
-            # if create_index_in_cloud:
-            #     cls._victoria_create_index(
-            #         created_index_name,
-            #         acs_stack=instance._acs_stack,
-            #         acs_server=instance._acs_server,
-            #         splunk_token=instance._token,
-            #     )
-            #     instance._dedicated_index = cls.get_index(
-            #         created_index_name,
-            #         instance._service,
-            #     )
-            # else:
-            #     instance._dedicated_index = (
-            #         cls._enterprise_create_index(
-            #             created_index_name,
-            #             instance._service,
-            #         )
-            #     )
-            # utils.logger.debug(
-            #     f"Index {created_index_name} has just been created in \
-            #         splunk {instance._host}"
-            # )
 
         utils.logger.info(
             f"Splunk - host:port and user set to \
