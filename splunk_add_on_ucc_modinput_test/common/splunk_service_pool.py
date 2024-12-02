@@ -33,8 +33,8 @@ class SplunkServicePool:
         username:str,
         password:str,
         *,
-        pool_initial_size=5,
-        pool_size_inc=1
+        pool_initial_size=3,
+        pool_size_inc=2
     ):
         logger.debug(f"SplunkServicePool init {username}@{host}:{port}")
         
@@ -56,7 +56,7 @@ class SplunkServicePool:
                         self._host, self._port, self._username, self._password
                     )
                 )
-        logger.debug(f"SplunkServicePool size has been increased to {len(self._pool)}")
+        logger.debug(f"SplunkServicePool has been sized to {len(self._pool)}")
 
     def __getattr__(self, name: str)->Any:
         while True:

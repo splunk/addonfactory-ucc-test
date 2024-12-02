@@ -127,7 +127,7 @@ class TaskGroupProcessor:
                 ] = src_task._result
                 dst_task = self._task_group[dst_test_i][dst_task_j]
                 dst_task.reuse_forge_execution(
-                    src_task._exec_id, src_task._result, src_task._errors
+                    src_task._exec_id, src_task._result, src_task._setup_errors
                 )
                 dst_task.mark_as_executed()
                 self._update_test_artifacts(dst_test_i)
@@ -214,15 +214,20 @@ class FrmwkParallelExecutor(FrmwkExecutorBase):
         logger.debug("FrmwkParallelExecutor is set free")
 
     def wait(self, is_bootstrap=True):
-        wait_timeout = self._manager.bootstrap_wait_timeout if is_bootstrap else self._manager.attached_tasks_wait_timeout
+        if is_bootstrap:
+            wait_timeout = self._manager.bootstrap_wait_timeout  
+            task_type = "bootstrap"
+        else:
+            wait_timeout = self._manager.attached_tasks_wait_timeout
+            task_type = "attached"
         
         expiration = time.time() + wait_timeout
         while not self._is_free.wait(self._manager.completion_check_frequency):
             if time.time() > expiration:
-                msg = f"Waiting for executor to process all tasks exceeded timeout {wait_timeout} seconds."
+                msg = f"Waiting for executor to process all {task_type} tasks exceeded timeout {wait_timeout} seconds."
                 logger.error(msg)
                 raise SplTaFwkWaitForDependenciesTimeout(msg)
-            logger.debug("Still waiting for executor to process all tasks")
+            logger.debug(f"Still waiting for executor to process all {task_type} tasks")
 
     def start(self, tasks):
         logger.debug("FrmwkParallelExecutor::start - wait for previoues tasks")

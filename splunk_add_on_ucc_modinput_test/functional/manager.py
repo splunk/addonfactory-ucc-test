@@ -132,11 +132,26 @@ class TestDependencyManager(PytestConfigAdapter):
             return None
 
         if scope == ForgeScope.FUNCTION.value:
-            scope = "::".join(test.key)
+            scope = test.full_path
         elif scope == ForgeScope.MODULE.value:
             scope = test.source_file
 
         return scope
+
+    def forge_find_or_make(self, forge_fn, scope, is_bootstrap):
+        frg = FrameworkForge(forge_fn, scope)
+        found = self.forges.get(frg.key)
+        if not found:
+            self.forges.add(frg)
+            logger.debug(
+                f"BIND created frg {id(frg)} - {frg} - {frg.key}, is_bootstrap: {is_bootstrap}"
+            )
+        else:
+            frg = found
+            logger.debug(
+                f"BIND found frg {id(frg)} - {frg} - {frg.key}, is_bootstrap: {is_bootstrap}"
+            )
+        return frg
 
     def bind(self, test_fn, scope, frg_fns, is_bootstrap):
         logger.debug(f"bind: {test_fn} -> {frg_fns}")
@@ -157,18 +172,7 @@ class TestDependencyManager(PytestConfigAdapter):
             else:
                 frg_scope = frg_group_scope
 
-            frg = FrameworkForge(f.forge_fn, frg_scope)
-            found = self.forges.get(frg.key)
-            if not found:
-                self.forges.add(frg)
-                logger.debug(
-                    f"BIND created frg {id(frg)} - {frg} - {frg.key}, is_bootstrap: {is_bootstrap}"
-                )
-            else:
-                frg = found
-                logger.debug(
-                    f"BIND found frg {id(frg)} - {frg} - {frg.key}, is_bootstrap: {is_bootstrap}"
-                )
+            frg = self.forge_find_or_make(f.forge_fn, frg_scope, is_bootstrap)
 
             frg_list.append(
                 FrameworkTask(test, frg, is_bootstrap, f.kwargs, f.probe, self)
@@ -199,8 +203,16 @@ class TestDependencyManager(PytestConfigAdapter):
         for key, test in self.tests.items():
             logger.debug(f"test key:{key} value: {test}")
 
-    def copy_task_for_parametrized_test(self, test, extra_kwargs, src_task):
-        frg = src_task._forge
+    def copy_task_for_parametrized_test(self, test, extra_kwargs, src_task, is_function_scope):
+        if is_function_scope:
+            frg = self.forge_find_or_make(
+                forge_fn = src_task._forge._function,
+                scope = test.full_path,
+                is_bootstrap = src_task.is_bootstrap
+            )
+        else:
+            frg = src_task._forge
+
         frg.link_test(test.key)
         test.link_forge(frg.key)
         probe = src_task.get_probe_fn()
@@ -229,14 +241,16 @@ class TestDependencyManager(PytestConfigAdapter):
                 )
                 self.tests.add(parametrized_test)
 
-                for parallel_tasks in test_tasks[::-1]:
+                for parallel_tasks in test_tasks:
                     frg_list = []
                     for src_task in parallel_tasks:
+                        is_function_scope = src_task._forge.scope == test.full_path
                         parametrized_task = (
                             self.copy_task_for_parametrized_test(
                                 parametrized_test,
                                 parametrized_kwargs,
                                 src_task,
+                                is_function_scope,
                             )
                         )
                         frg_list.append(parametrized_task)
@@ -353,22 +367,22 @@ class TestDependencyManager(PytestConfigAdapter):
         self.teardown_test_dependencies(test)
 
     def _check_failed_tasks(self, test, done_tasks):
-        failed_tasks = [task.forge_key for task in done_tasks if task._errors]
+        failed_tasks = [task.forge_key for task in done_tasks if task._setup_errors]
         logger.debug(
             f"DONE TASKS for {test.key}: {[task.forge_key for task in done_tasks]}"
         )
         logger.debug(f"FAILED TASKS for {test.key}: {failed_tasks}")
         for task in done_tasks:
-            if task.failed:
-                test_path = "::".join(test.key)
-                msg = f"Dependency {task.forge_full_path} failed to execute for test {test_path} with error:\n{task.error}"
+            if task.setup_failed:
+                test_path = test.full_path
+                msg = f"Dependency {task.forge_full_path} failed to execute for test {test_path} with error:\n{task.setup_error}"
                 logger.error(msg)
                 raise SplTaFwkDependencyExecutionError(msg)
 
     def _report_timeout(self, test, pending_tasks):
         msg = f"{test} exceeded {self.bootstrap_wait_timeout} seconds timeout while waiting for dependencies:"
         for task in pending_tasks:
-            msg += f"\n\t{task.forge_full_path}, self id: {id(task)}, scope: {task.forge_scope}, exec_id: {task._exec_id} is_executed: {task.is_executed}, is_failed: {task.failed}"
+            msg += f"\n\t{task.forge_full_path}, self id: {id(task)}, scope: {task.forge_scope}, exec_id: {task._exec_id} is_executed: {task.is_executed}, is_failed: {task.setup_failed}"
         logger.error(msg)
         raise SplTaFwkWaitForDependenciesTimeout(msg)
 
@@ -382,23 +396,34 @@ class TestDependencyManager(PytestConfigAdapter):
             elif time.time() > self._execution_timeout:
                 self._report_timeout(test, pending)
 
-            logger.debug(f"{test} is waiting for dependencies")
+            logger.debug(f"{test} is waiting for bootstrap dependencies")
             time.sleep(self.completion_check_frequency)
 
-        logger.debug(f"{test} dependencies are ready")
+        logger.debug(f"{test} bootstrap dependencies are ready")
 
     def execute_test_inplace_forges(self, test):
-        logger.debug(f"Executing inplace forges for test {test}")
+        logger.debug(f"Executing attached forges for test {test}")
         exec_steps = []
         inplace_tasks = self.tasks.get_inplace_tasks(test.key)
         dump = (
-            f"Execution matrix for inplace tasks for {test}: {inplace_tasks}"
+            f"Execution matrix for attached forges for {test}: {inplace_tasks}"
         )
         for tasks in inplace_tasks:
             dump += f"\t{[tasks]}"
             exec_steps.append([tasks])
         logger.debug(dump)
         self.inplace_tasks_execution(exec_steps)
+
+
+    def test_setup_error_report(self, test):
+        for _, _, task in self.tasks.enumerate_tasks(test.key):
+            if task.setup_failed:
+                yield task, task.setup_error
+
+    def test_teardown_error_report(self, test):
+        for _, _, task in self.tasks.enumerate_tasks(test.key):
+            if task.teardown_failed:
+                yield task, task.teardown_error
 
     def test_error_report(self, test):
         for _, _, task in self.tasks.enumerate_tasks(test.key):

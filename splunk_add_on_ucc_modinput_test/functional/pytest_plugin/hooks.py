@@ -118,10 +118,12 @@ def pytest_runtest_teardown(item: pytest.Item) -> None:
     if dependency_manager.check_all_tests_executed():
         dependency_manager.shutdown()
 
+    for task, error in dependency_manager.test_error_report(test):
+        item.add_report_section("call", "error", error)
+
     if not dependency_manager.do_not_fail_with_teardown:
         msg = ""
-        for task, error in dependency_manager.test_error_report(test):
-            item.add_report_section("call", "error", error)
+        for task, error in dependency_manager.test_teardown_error_report(test):
             msg += (
                 f"\n\tforge: {task.forge_full_path}, scope: {task.forge_scope}"
             )

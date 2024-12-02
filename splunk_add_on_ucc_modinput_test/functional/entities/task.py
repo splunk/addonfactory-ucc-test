@@ -29,7 +29,8 @@ class FrameworkTask:
         self._exec_id = None
         self._is_executed = False
         self._teardown = None
-        self._errors = []
+        self._setup_errors = []
+        self._teardown_errors = []
         self._result = None
         self._global_builtin_args = {}
         self._forge_kwargs = {}
@@ -52,11 +53,28 @@ class FrameworkTask:
 
     @property
     def error(self):
-        return "\n".join(self._errors)
+        errors = self._setup_errors + self._teardown_errors
+        return "\n".join(errors)
+
+    @property
+    def setup_error(self):
+        return "\n".join(self._setup_errors)
+
+    @property
+    def teardown_error(self):
+        return "\n".join(self._teardown_errors)
+
+    @property
+    def setup_failed(self):
+        return bool(self._setup_errors)
+
+    @property
+    def teardown_failed(self):
+        return bool(self._teardown_errors)
 
     @property
     def failed(self):
-        return bool(self._errors)
+        return self.setup_failed or self.teardown_failed
 
     @property
     def result(self):
@@ -265,13 +283,13 @@ class FrameworkTask:
         else:
             report = f"{prefix}: {error}{self.summary}"
         logger.error(report)
-        self._errors.append(report)
+        self._setup_errors.append(report)
         self._is_executed = True
 
     def mark_as_executed(self):
         self._is_executed = True
         logger.debug(
-            f"MARK TASK EXECUTED: {self.forge_full_path},\n\tself id: {id(self)},\n\tscope: {self.forge_scope},\n\texec_id: {self._exec_id},\n\ttest: {self.test_key},\n\tis_executed: {self.is_executed},\n\tis_failed: {self.failed},\n\terrors: {self._errors}"
+            f"MARK TASK EXECUTED: {self.forge_full_path},\n\tself id: {id(self)},\n\tscope: {self.forge_scope},\n\texec_id: {self._exec_id},\n\ttest: {self.test_key},\n\tis_executed: {self.is_executed},\n\tis_failed: {self.failed},\n\terrors: {self._setup_errors}"
         )
 
     def _save_generator_teardown(self, gen):
@@ -328,7 +346,7 @@ class FrameworkTask:
         self._forge.reuse_execution(exec_id)
         self._exec_id = exec_id
         self._result = result
-        self._errors = errors
+        self._setup_errors = errors
 
     def use_previous_executions(
         self, args_to_match
@@ -384,7 +402,7 @@ class FrameworkTask:
                 traceback_info = traceback.format_exc()
                 report = f"Forge has failed to execute: {e}{self.summary}\n{traceback_info}"
                 logger.error(report)
-                self._errors.append(report)
+                self._setup_errors.append(report)
 
             self._result = result
             self._forge.register_execution(
@@ -392,19 +410,19 @@ class FrameworkTask:
                 teardown=self._teardown,
                 kwargs=comp_kwargs,
                 result=result,
-                errors=self._errors,
+                errors=self._setup_errors,
             )
             if not self.is_bootstrap:
                 self.block_forge_teardown()
 
         try:
-            if not self.failed:
+            if not self.setup_failed:
                 self.wait_for_probe(result)
         except Exception as e:
             traceback_info = traceback.format_exc()
             report = f"Forge probe has failed to execute: {e}{self.summary}\n{traceback_info}"
             logger.error(report)
-            self._errors.append(report)
+            self._setup_errors.append(report)
 
         self.mark_as_executed()
 
@@ -422,4 +440,4 @@ class FrameworkTask:
             traceback_info = traceback.format_exc()
             report = f"Forge teardown has failed to execute: {e}{self.summary}\n{traceback_info}"
             logger.error(report)
-            self._errors.append(report)
+            self._teardown_errors.append(report)

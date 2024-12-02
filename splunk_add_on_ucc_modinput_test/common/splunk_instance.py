@@ -21,7 +21,7 @@ MODINPUT_TEST_SPLUNK_DEDICATED_INDEX = "MODINPUT_TEST_SPLUNK_DEDICATED_INDEX"
 
 class Configuration:
     @staticmethod
-    def get_index(index_name: str, client_service: Service) -> Index:
+    def get_index(index_name: str, client_service: SplunkServicePool) -> Index:
         if any(i.name == index_name for i in client_service.indexes):
             return client_service.indexes[index_name]
         else:
