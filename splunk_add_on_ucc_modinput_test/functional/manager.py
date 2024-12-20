@@ -192,6 +192,8 @@ class TestDependencyManager(PytestConfigAdapter):
                 frg = self.forges.get(frg_key)
                 if frg:
                     frg.unlink_test(test.key)
+            logger.debug(f"unregister_test: Test {test_key} has been unregistered")
+
         return test
 
     def find_test(self, test_fn, parametrized_name):
@@ -264,9 +266,9 @@ class TestDependencyManager(PytestConfigAdapter):
     def _log_dep_exec_matrix(self, tests, dep_mtx):
         matrix = "\nBootstrap Dependency execution matrix:\n"
         for step_index, group in enumerate(dep_mtx):
-            matrix += f"Step {step_index}:\n"
+            matrix += f"Step {step_index+1}:\n"
             for test_index, test_tasks in enumerate(group):
-                matrix += f"\ttest: {'::'.join(tests[test_index].key)}\n"
+                matrix += f"\ttest {test_index+1}: {'::'.join(tests[test_index].key)}\n"
                 if test_tasks is not None:
                     for task in test_tasks:
                         matrix += f"\t\tDependency {task.forge_full_path}, scope {task.forge_scope}\n"
@@ -306,7 +308,8 @@ class TestDependencyManager(PytestConfigAdapter):
         return exec_steps
 
     def start_bootstrap_execution(self):
-        if self.tasks.is_empty:
+
+        if self.tests.is_empty or self.tasks.is_empty:
             return
 
         logger.info("Starting bootstrap forges execution.")

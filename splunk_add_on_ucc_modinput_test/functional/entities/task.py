@@ -217,7 +217,7 @@ class FrameworkTask:
         )
 
         logger.debug(
-            f"EXECTASK: prepare_forge_call_args for {self.forge_key}:\n\t_test._required_args: {self._forge._required_args}\n\t_test._required_args: {self._test._required_args}\n\t_forge_kwargs: {self._forge_initial_kwargs}\n\t_test.artifacts: {self._test.artifacts}\n\tavailable_kwargs: {available_kwargs}\n\t_forge_kwargs: {self._forge_kwargs}"
+            f"EXECTASK: prepare_forge_call_args for {self.forge_key}:\n\ttest required args: {self._test.required_args_names}\n\ttest artifacts: {self._test.artifacts}\n\tforge initial kwargs: {self._forge_initial_kwargs}\n\tforge kwargs: {self._forge_kwargs}\n\ttask available kwargs: {available_kwargs}"
         )
 
     def _get_comparable_args(self):

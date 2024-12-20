@@ -16,6 +16,10 @@ class ExecutableBase:
         return (self._fn_source_file, self.fn_full_name)
 
     @property
+    def original_key(self):
+        return (self._fn_source_file, self.fn_original_full_name)
+
+    @property
     def original_name(self):
         if self._original_name == "__call__":
             return self._fn_bound_class.lower()
@@ -27,6 +31,13 @@ class ExecutableBase:
             return f"{self._fn_bound_class}::{self._fn_name}"
         else:
             return self._fn_name
+
+    @property
+    def fn_original_full_name(self):
+        if self._fn_bound_class:
+            return f"{self._fn_bound_class}::{self._original_name}"
+        else:
+            return self._original_name
 
     def _inspect(self):
         if inspect.ismethod(self._function):

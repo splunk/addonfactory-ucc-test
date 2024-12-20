@@ -24,11 +24,15 @@ def pytest_deselected(items):
         return
     
     for item in items:
-        test = dependency_manager.tests.lookup_by_function(item._obj)
-        if test:
-            dependency_manager.unregister_test(test.key)
-            logger.info(f"Test {test.full_path} is deselected")        
-
+        found_tests_keys = dependency_manager.tests.lookup_by_original_function(item._obj)
+        for test_key in found_tests_keys:
+            test = dependency_manager.unregister_test(test_key)            
+            msg = f"Test deselection:"
+            msg += f'\n\tdeselected: {"Yes" if test else "No"}'
+            msg += f"\n\tlookup key: {test_key}"
+            msg += f'\n\tpath: {test.full_path if test else "not found"}'
+            msg += f'\n\toriginal path: {test.original_full_path if test else "not found"}'
+            logger.info(msg)
 
 @pytest.hookimpl
 def pytest_collection_modifyitems(session, config, items):

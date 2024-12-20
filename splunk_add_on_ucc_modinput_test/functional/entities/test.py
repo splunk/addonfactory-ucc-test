@@ -47,6 +47,10 @@ class FrameworkTest(ExecutableBase):
     def full_path(self):
         return "::".join(self.key)
 
+    @property
+    def original_full_path(self):
+        return "::".join(self.original_key)
+
     def update_artifacts(self, artifacts):
         assert isinstance(artifacts, dict)
         return self._artifacts.update(artifacts)
