@@ -50,8 +50,8 @@ class Configuration:
         response = requests.post(url, headers=headers, json=data)
         if response.ok:
             session = requests.Session()
-            retries = Retry(total=5, backoff_factor=1, status_forcelist=[404])
-            session.mount("http://", HTTPAdapter(max_retries=retries))
+            retries = Retry(total=25, backoff_factor=1, status_forcelist=[404])
+            session.mount("https://", HTTPAdapter(max_retries=retries))
             response = session.get(f"{url}/{index_name}", headers=headers)
             if response.ok:
                 return
