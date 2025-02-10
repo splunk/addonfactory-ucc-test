@@ -113,7 +113,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             return directory
 
     class ModinputPath:
-        DEFAULT = "tests/modinput_functional"
+        DEFAULT = "tests/ucc_modinput_functional"
 
         @staticmethod
         def validate(value: str) -> Path:

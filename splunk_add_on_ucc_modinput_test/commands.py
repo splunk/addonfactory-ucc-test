@@ -14,6 +14,7 @@
 # limitations under the License.
 #
 import json
+import os
 from pathlib import Path
 import shutil
 from typing import Optional
@@ -26,9 +27,14 @@ SWAGGER_CODEGEN_CLI_VERSION = "3.0.46"
 
 
 def initialize(openapi: Path, modinput: Path) -> Path:
-    shutil.copytree(
-        str(files(resources).joinpath("modinput_functional")), str(modinput)
-    )
+    src = files(resources).joinpath("ucc_modinput_functional")
+    for root, _, fls in os.walk(src):
+        dest_path = Path(modinput) / Path(root).relative_to(src)
+        if not dest_path.exists():
+            dest_path.mkdir(parents=True)
+        for file in fls:
+            shutil.copy2(Path(root) / file, dest_path)
+
     with openapi.open() as f:
         data = json.load(f)
     ta_py_path = modinput / "ta.py"
