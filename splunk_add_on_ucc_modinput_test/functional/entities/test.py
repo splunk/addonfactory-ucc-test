@@ -6,8 +6,9 @@ from splunk_add_on_ucc_modinput_test.functional.entities.executable import (
 )
 from splunk_add_on_ucc_modinput_test.functional.common.identifier_factory import (
     create_identifier,
-    IdentifierType
+    IdentifierType,
 )
+
 
 class FrameworkTest(ExecutableBase):
     def __init__(self, function, altered_name=None):
@@ -21,7 +22,9 @@ class FrameworkTest(ExecutableBase):
 
     @staticmethod
     def generate_test_id():
-        return create_identifier(id_type=IdentifierType.ALPHA, in_uppercase=True)
+        return create_identifier(
+            id_type=IdentifierType.ALPHA, in_uppercase=True
+        )
 
     @property
     def test_id(self):
@@ -68,19 +71,19 @@ class FrameworkTest(ExecutableBase):
 
     @property
     def builtin_args(self):
-        return {
-            BuiltInArg.TEST_ID.value: self.test_id
-        }
+        return {BuiltInArg.TEST_ID.value: self.test_id}
 
     @property
     def artifacts_copy(self):
-        return deepcopy(self._artifacts)   
-    
+        return deepcopy(self._artifacts)
+
     def collect_required_kwargs(self, global_builtin_args):
         all_args = self.artifacts_copy
         all_args.update(self.builtin_args)
         all_args.update(global_builtin_args)
-        required_args = {k: v for k, v in all_args.items() if k in self._required_args}
+        required_args = {
+            k: v for k, v in all_args.items() if k in self._required_args
+        }
         logger.debug(
             f"Finish collect_required_kwargs for test {self.key}: kwargs={required_args}"
         )

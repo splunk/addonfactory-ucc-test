@@ -29,9 +29,9 @@ class ForgeExecData:
         self.result = result
         self.errors = errors
         self.count = count
-        
-    def summary(self, offset="")->str:
-        s = f"\n{offset}Teardown summary:" 
+
+    def summary(self, offset="") -> str:
+        s = f"\n{offset}Teardown summary:"
         s += f"\n{offset}\tdata.id: {self.id},"
         s += f"\n{offset}\tdata.count={self.count},"
         s += f"\n{offset}\tdata.is_teardown_executed={self.is_teardown_executed}"
@@ -50,7 +50,7 @@ class ForgePostExec:
     def summary(self, data):
         s = data.summary()
         s += f"\n\tteardown_is_blocked={self._teardown_is_blocked}"
-    
+
     def block_teardown(self):
         self._teardown_is_blocked = True
 
@@ -69,7 +69,9 @@ class ForgePostExec:
                 and not self._teardown_is_blocked
                 and not data.is_teardown_executed
             )
-            logger.debug(f"CAN EXECUTE TEARDOWN {can_execute}:{self.summary(data)}")
+            logger.debug(
+                f"CAN EXECUTE TEARDOWN {can_execute}:{self.summary(data)}"
+            )
             if can_execute:
                 self.execute_teardown(data)
         return can_execute
@@ -79,9 +81,7 @@ class ForgePostExec:
             with self.lock:
                 data = ForgeExecData(id, teardown, kwargs, result, errors, 1)
                 self._exec_store[id] = data
-            logger.debug(
-                f"REGISTER TEARDOWN {id}: {self.summary(data)}"
-            )
+            logger.debug(f"REGISTER TEARDOWN {id}: {self.summary(data)}")
         else:
             self.reuse(id)
 
@@ -140,11 +140,13 @@ class ForgePostExec:
 
         with data.lock:
             data.count -= 1
-            
+
         teardown_start_time = time.time()
         executed = self.exec_teardown_if_ready(data)
         if executed:
-            logger.info(f"Teardown has been executed successfully, time taken: {time.time() - teardown_start_time} seconds:{self.summary(data)}")
+            logger.info(
+                f"Teardown has been executed successfully, time taken: {time.time() - teardown_start_time} seconds:{self.summary(data)}"
+            )
         logger.debug(f"AFTER EXECUTE TEARDOWN {id}:{self.summary(data)}")
         return executed
 

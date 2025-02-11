@@ -11,6 +11,7 @@ from splunk_add_on_ucc_modinput_test.functional.exceptions import (
     SplTaFwkWaitForDependenciesTimeout,
 )
 
+
 def log_exceptions_traceback(fn):
     def wrapper(*args, **kwargs):
         try:
@@ -71,10 +72,12 @@ class TaskGroupProcessor:
         processed_tasks = []
         for task_index, task in enumerate(test_tasks):
             try:
-                task.prepare_forge_call_args(self._global_builtin_args_factory(task.test_key))
+                task.prepare_forge_call_args(
+                    self._global_builtin_args_factory(task.test_key)
+                )
             except Exception as e:
                 task.mark_as_failed(e, "Failed to prepare forge call args")
-            else: 
+            else:
                 if not self._try_skip_task(test_index, task_index):
                     job = self.Job(test_index, task_index, task)
                     processed_tasks.append(job)
@@ -182,7 +185,9 @@ class FrmwkSequentialExecutor(FrmwkExecutorBase):
     def start(self, tasks):
         logger.debug(f"sequential executor has started with tasks {tasks}")
         for task_group in tasks:
-            proc = TaskGroupProcessor(task_group, self.global_builtin_args_factory)
+            proc = TaskGroupProcessor(
+                task_group, self.global_builtin_args_factory
+            )
             for job in proc.jobs:
                 self._execute_request(job)
                 proc.process_response(job)
@@ -215,19 +220,21 @@ class FrmwkParallelExecutor(FrmwkExecutorBase):
 
     def wait(self, is_bootstrap=True):
         if is_bootstrap:
-            wait_timeout = self._manager.bootstrap_wait_timeout  
+            wait_timeout = self._manager.bootstrap_wait_timeout
             task_type = "bootstrap"
         else:
             wait_timeout = self._manager.attached_tasks_wait_timeout
             task_type = "attached"
-        
+
         expiration = time.time() + wait_timeout
         while not self._is_free.wait(self._manager.completion_check_frequency):
             if time.time() > expiration:
                 msg = f"Waiting for executor to process all {task_type} tasks exceeded timeout {wait_timeout} seconds."
                 logger.error(msg)
                 raise SplTaFwkWaitForDependenciesTimeout(msg)
-            logger.debug(f"Still waiting for executor to process all {task_type} tasks")
+            logger.debug(
+                f"Still waiting for executor to process all {task_type} tasks"
+            )
 
     def start(self, tasks):
         logger.debug("FrmwkParallelExecutor::start - wait for previoues tasks")
@@ -283,7 +290,9 @@ class FrmwkParallelExecutor(FrmwkExecutorBase):
             interrupted, tasks = self._receive_tasks()
             logger.debug(f"manager got tasks {tasks}")
             for task_group in tasks:
-                proc = TaskGroupProcessor(task_group, self.global_builtin_args_factory)
+                proc = TaskGroupProcessor(
+                    task_group, self.global_builtin_args_factory
+                )
                 for job in proc.jobs:
                     self.task_queue.put(job)
 

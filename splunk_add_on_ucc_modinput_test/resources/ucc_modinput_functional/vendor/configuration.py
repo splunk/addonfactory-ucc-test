@@ -3,6 +3,7 @@ from splunk_add_on_ucc_modinput_test.functional.vendor.configuration import (
     VendorConfigurationBase,
 )
 
+
 class Configuration(VendorConfigurationBase):
     def customize_configuration(self) -> None:
         self._api_key = utils.get_from_environment_variable(
@@ -13,4 +14,3 @@ class Configuration(VendorConfigurationBase):
     @property
     def api_key(self):
         return self._api_key
-    

@@ -8,6 +8,7 @@ import requests
 import tempfile
 from splunk_add_on_ucc_modinput_test.functional import logger
 
+
 class SplunkInstanceFileHelper:
     """Class for Test file helper."""
 
@@ -20,7 +21,9 @@ class SplunkInstanceFileHelper:
     class ExecuteCommandError(OperationError):
         pass
 
-    def __init__(self, splunk_url: str, username: str, password: str, base_dir: str=""):
+    def __init__(
+        self, splunk_url: str, username: str, password: str, base_dir: str = ""
+    ):
         self.file_set = set()
         self.splunk_url = splunk_url
         self.username = username
@@ -56,13 +59,15 @@ class SplunkInstanceFileHelper:
         if self.base_dir == "":
             return filepath
         return f"{self.base_dir}/{filepath}"
-        
+
     def isfile(self, filepath):
         """Checks if file."""
         full_path = self._make_path(filepath)
         payload = {"file_path": full_path}
         json_response = self.perform_api_operations("is_file", payload)
-        logger.debug(f"Checking file object is a file {full_path}: {json_response}")
+        logger.debug(
+            f"Checking file object is a file {full_path}: {json_response}"
+        )
         entry = json_response["entry"][0]
         if entry["name"] == "success_message":
             return True
@@ -73,7 +78,9 @@ class SplunkInstanceFileHelper:
         full_path = self._make_path(dirpath)
         payload = {"dir_path": full_path}
         json_response = self.perform_api_operations("is_dir", payload)
-        logger.debug(f"Checking file object is a folder {full_path}: {json_response}")
+        logger.debug(
+            f"Checking file object is a folder {full_path}: {json_response}"
+        )
         entry = json_response["entry"][0]
         if entry["name"] == "success_message":
             return True
@@ -97,9 +104,11 @@ class SplunkInstanceFileHelper:
         entry = json_response["entry"][0]
         if entry["name"] != "error_message":
             return entry["content"]["file_content"]
-        
+
         logger.error(f"Error reading file {full_path}: {json_response}")
-        raise SplunkInstanceFileHelper.FileReadError(entry["content"]["read_error_message"])
+        raise SplunkInstanceFileHelper.FileReadError(
+            entry["content"]["read_error_message"]
+        )
 
     def append_file(self, filepath, content=""):
         """Updates file."""
@@ -137,7 +146,9 @@ class SplunkInstanceFileHelper:
             return entry["content"]["output"]
 
         logger.error(f"Error executiong command {command}: {json_response}")
-        raise SplunkInstanceFileHelper.ExecuteCommandError(entry["content"]["read_error_message"])
+        raise SplunkInstanceFileHelper.ExecuteCommandError(
+            entry["content"]["read_error_message"]
+        )
 
     def clean(self):
         """Clean method."""
@@ -151,8 +162,10 @@ class SplunkInstanceFileHelper:
         :param path: the file that want to get
         :return: local_path the copied file path
         """
-        temp = tempfile.NamedTemporaryFile(  # pylint: disable=consider-using-with
-            mode="w+"
+        temp = (
+            tempfile.NamedTemporaryFile(  # pylint: disable=consider-using-with
+                mode="w+"
+            )
         )
         self.file_set.add(temp)
         temp_path = temp.name

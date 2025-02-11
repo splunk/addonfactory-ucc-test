@@ -17,22 +17,26 @@ from splunk_add_on_ucc_modinput_test.functional.pytest_plugin.utils import (
     _map_forged_tests_to_pytest_items,
 )
 
+
 @pytest.hookimpl
-def pytest_deselected(items):    
+def pytest_deselected(items):
     logger.debug(f"Processing deselected items: {items}")
     if not items:
         return
-    
+
     for item in items:
-        found_tests_keys = dependency_manager.tests.lookup_by_original_function(item._obj)
+        found_tests_keys = (
+            dependency_manager.tests.lookup_by_original_function(item._obj)
+        )
         for test_key in found_tests_keys:
-            test = dependency_manager.unregister_test(test_key)            
+            test = dependency_manager.unregister_test(test_key)
             msg = f"Test deselection:"
             msg += f'\n\tdeselected: {"Yes" if test else "No"}'
             msg += f"\n\tlookup key: {test_key}"
             msg += f'\n\tpath: {test.full_path if test else "not found"}'
             msg += f'\n\toriginal path: {test.original_full_path if test else "not found"}'
             logger.info(msg)
+
 
 @pytest.hookimpl
 def pytest_collection_modifyitems(session, config, items):
@@ -67,9 +71,11 @@ def pytest_collection_modifyitems(session, config, items):
     _debug_log_test_order(items)
     _log_test_order(items)
 
+
 @pytest.hookimpl
 def pytest_collection_finish(session):
     dependency_manager.start_bootstrap_execution()
+
 
 @pytest.hookimpl
 def pytest_runtest_setup(item: pytest.Item) -> None:
@@ -89,7 +95,7 @@ def pytest_runtest_setup(item: pytest.Item) -> None:
         logger.error(f"Error during test setup: {e}\n{traceback.format_exc()}")
         pytest.fail(str(e))
 
-    global_builtin_args=dependency_manager.get_global_builtin_args(test.key)
+    global_builtin_args = dependency_manager.get_global_builtin_args(test.key)
     custom_args = test.collect_required_kwargs(global_builtin_args)
     item.funcargs.update(custom_args)
     logger.info(

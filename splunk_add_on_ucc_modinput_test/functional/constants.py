@@ -34,6 +34,7 @@ class ForgeScope(Enum):
     MODULE = "module"
     SESSION = "session"
 
+
 class Executor(Enum):
     DEFAULT_THREAD_NUMBER = 10
     MIN_THREAD_NUMBER = 10

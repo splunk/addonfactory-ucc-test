@@ -108,24 +108,18 @@ class Configuration:
                 index_name,
                 client_service,
             )
-        utils.logger.debug(
-            f"Index {index_name} has just been created"
-        )
+        utils.logger.debug(f"Index {index_name} has just been created")
         return created_index
 
     __instances: dict[tuple[str, str, str], Configuration] = {}
 
     @classmethod
     def collect_host(cls) -> str:
-        return utils.get_from_environment_variable(
-            "MODINPUT_TEST_SPLUNK_HOST"
-        )
+        return utils.get_from_environment_variable("MODINPUT_TEST_SPLUNK_HOST")
 
     @classmethod
     def collect_port(cls) -> str:
-        return utils.get_from_environment_variable(
-            "MODINPUT_TEST_SPLUNK_PORT"
-        )
+        return utils.get_from_environment_variable("MODINPUT_TEST_SPLUNK_PORT")
 
     @classmethod
     def collect_username(cls) -> str:
@@ -234,15 +228,13 @@ class Configuration:
                     test in splunk {instance._host}"
             )
         else:
-            instance._dedicated_index = (
-                instance.create_index(
-                    f"idx_{utils.Common().sufix}",
-                    instance._service,
-                    is_cloud=instance._is_cloud,
-                    acs_stack=instance._acs_stack,
-                    acs_server=instance._acs_server,
-                    splunk_token=instance._token,
-                )
+            instance._dedicated_index = instance.create_index(
+                f"idx_{utils.Common().sufix}",
+                instance._service,
+                is_cloud=instance._is_cloud,
+                acs_stack=instance._acs_stack,
+                acs_server=instance._acs_server,
+                splunk_token=instance._token,
             )
 
         utils.logger.info(

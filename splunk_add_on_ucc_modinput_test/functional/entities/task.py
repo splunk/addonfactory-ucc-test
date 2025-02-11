@@ -6,7 +6,9 @@ import random
 import traceback
 from copy import deepcopy
 from splunk_add_on_ucc_modinput_test.functional import logger
-from splunk_add_on_ucc_modinput_test.functional.common.pytest_config_adapter import PytestConfigAdapter
+from splunk_add_on_ucc_modinput_test.functional.common.pytest_config_adapter import (
+    PytestConfigAdapter,
+)
 from splunk_add_on_ucc_modinput_test.functional.constants import ForgeProbe
 
 from splunk_add_on_ucc_modinput_test.functional.exceptions import (
@@ -20,7 +22,15 @@ from splunk_add_on_ucc_modinput_test.functional.vendor import VendorClientBase
 
 
 class FrameworkTask:
-    def __init__(self, test, forge, is_bootstrap, forge_kwargs, probe_fn, config:PytestConfigAdapter):
+    def __init__(
+        self,
+        test,
+        forge,
+        is_bootstrap,
+        forge_kwargs,
+        probe_fn,
+        config: PytestConfigAdapter,
+    ):
         self._config = config
         self._test = test
         self._forge = forge
@@ -274,7 +284,6 @@ class FrameworkTask:
         logger.info(
             f"Forge probe has been executed successfully, time taken {time.time() - probe_start_time} seconds:{self.summary}"
         )
-
 
     def mark_as_failed(self, error, prefix):
         if isinstance(error, Exception):

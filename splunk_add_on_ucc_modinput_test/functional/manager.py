@@ -33,11 +33,14 @@ from splunk_add_on_ucc_modinput_test.functional.vendor import (
     VendorConfigurationBase,
 )
 
-from splunk_add_on_ucc_modinput_test.functional.common.pytest_config_adapter import PytestConfigAdapter
+from splunk_add_on_ucc_modinput_test.functional.common.pytest_config_adapter import (
+    PytestConfigAdapter,
+)
 from splunk_add_on_ucc_modinput_test.functional.common.identifier_factory import (
     create_identifier,
-    IdentifierType
+    IdentifierType,
 )
+
 
 class forge:
     def __init__(
@@ -69,30 +72,62 @@ class TestDependencyManager(PytestConfigAdapter):
         self.forges = ForgeCollection()
         self.tasks = TaskCollection()
         self.executor = None
-        self._vendor_clients = {BuiltInArg.VENDOR_CLIENT.value: (VendorClientBase, VendorConfigurationBase)}
-        self._splunk_clients = {BuiltInArg.SPLUNK_CLIENT.value: (SplunkClientBase, SplunkConfigurationBase)}
+        self._vendor_clients = {
+            BuiltInArg.VENDOR_CLIENT.value: (
+                VendorClientBase,
+                VendorConfigurationBase,
+            )
+        }
+        self._splunk_clients = {
+            BuiltInArg.SPLUNK_CLIENT.value: (
+                SplunkClientBase,
+                SplunkConfigurationBase,
+            )
+        }
         self._pytest_config = None
         self._session_id = self.generate_session_id()
         self._global_builtin_args_pool = {}
 
     @staticmethod
     def generate_session_id():
-        return create_identifier(id_type=IdentifierType.ALPHA, in_uppercase=True)
+        return create_identifier(
+            id_type=IdentifierType.ALPHA, in_uppercase=True
+        )
 
-    def set_vendor_client_class(self, vendor_configuration_class, vendor_client_class, vendor_class_argument_name):
-        logger.debug(f"set_vendor_client_class: {vendor_client_class}, {vendor_configuration_class}, {vendor_class_argument_name}")
+    def set_vendor_client_class(
+        self,
+        vendor_configuration_class,
+        vendor_client_class,
+        vendor_class_argument_name,
+    ):
+        logger.debug(
+            f"set_vendor_client_class: {vendor_client_class}, {vendor_configuration_class}, {vendor_class_argument_name}"
+        )
         assert issubclass(vendor_client_class, VendorClientBase)
         assert issubclass(vendor_configuration_class, VendorConfigurationBase)
-        self._vendor_clients[vendor_class_argument_name] = (vendor_client_class, vendor_configuration_class)
+        self._vendor_clients[vendor_class_argument_name] = (
+            vendor_client_class,
+            vendor_configuration_class,
+        )
 
     def create_vendor_client(self):
         return self._vendor_client_class()
 
-    def set_splunk_client_class(self, splunk_configuration_class, splunk_client_class, splunk_class_argument_name):
-        logger.debug(f"set_splunk_client_class: {splunk_configuration_class}, {splunk_client_class}, {splunk_class_argument_name}")
+    def set_splunk_client_class(
+        self,
+        splunk_configuration_class,
+        splunk_client_class,
+        splunk_class_argument_name,
+    ):
+        logger.debug(
+            f"set_splunk_client_class: {splunk_configuration_class}, {splunk_client_class}, {splunk_class_argument_name}"
+        )
         assert issubclass(splunk_client_class, SplunkClientBase)
         assert issubclass(splunk_configuration_class, SplunkConfigurationBase)
-        self._splunk_clients[splunk_class_argument_name] = (splunk_client_class, splunk_configuration_class)
+        self._splunk_clients[splunk_class_argument_name] = (
+            splunk_client_class,
+            splunk_configuration_class,
+        )
 
     def create_splunk_client(self):
         return self._splunk_client_class()
@@ -101,26 +136,32 @@ class TestDependencyManager(PytestConfigAdapter):
         global_builtin_args = {
             BuiltInArg.SESSION_ID.value: self.session_id,
         }
-        
+
         for prop, (client, config) in self._vendor_clients.items():
             conf_instance = config(self._pytest_config)
             global_builtin_args[prop] = client(conf_instance)
-            logger.debug(f"create_global_builtin_args, vendor: {prop}, config={conf_instance} config_id={id(conf_instance)}, client: {global_builtin_args[prop]}")
-        
+            logger.debug(
+                f"create_global_builtin_args, vendor: {prop}, config={conf_instance} config_id={id(conf_instance)}, client: {global_builtin_args[prop]}"
+            )
+
         for prop, (client, config) in self._splunk_clients.items():
             conf_instance = config(self._pytest_config)
             global_builtin_args[prop] = client(conf_instance)
-            logger.debug(f"create_global_builtin_args, splunk: {prop}, config={conf_instance} config_id={id(conf_instance)}, client: {global_builtin_args[prop]}")
-            
+            logger.debug(
+                f"create_global_builtin_args, splunk: {prop}, config={conf_instance} config_id={id(conf_instance)}, client: {global_builtin_args[prop]}"
+            )
+
         return global_builtin_args
-                    
+
     def get_global_builtin_args(self, test_key):
         if test_key not in self._global_builtin_args_pool:
             logger.debug(f"create_global_builtin_args for test {test_key}:")
-            self._global_builtin_args_pool[test_key] = self.create_global_builtin_args()
-        
+            self._global_builtin_args_pool[
+                test_key
+            ] = self.create_global_builtin_args()
+
         return self._global_builtin_args_pool[test_key]
-        
+
     @property
     def session_id(self):
         return self._session_id
@@ -192,7 +233,9 @@ class TestDependencyManager(PytestConfigAdapter):
                 frg = self.forges.get(frg_key)
                 if frg:
                     frg.unlink_test(test.key)
-            logger.debug(f"unregister_test: Test {test_key} has been unregistered")
+            logger.debug(
+                f"unregister_test: Test {test_key} has been unregistered"
+            )
 
         return test
 
@@ -205,12 +248,14 @@ class TestDependencyManager(PytestConfigAdapter):
         for key, test in self.tests.items():
             logger.debug(f"test key:{key} value: {test}")
 
-    def copy_task_for_parametrized_test(self, test, extra_kwargs, src_task, is_function_scope):
+    def copy_task_for_parametrized_test(
+        self, test, extra_kwargs, src_task, is_function_scope
+    ):
         if is_function_scope:
             frg = self.forge_find_or_make(
-                forge_fn = src_task._forge._function,
-                scope = test.full_path,
-                is_bootstrap = src_task.is_bootstrap
+                forge_fn=src_task._forge._function,
+                scope=test.full_path,
+                is_bootstrap=src_task.is_bootstrap,
             )
         else:
             frg = src_task._forge
@@ -246,7 +291,9 @@ class TestDependencyManager(PytestConfigAdapter):
                 for parallel_tasks in test_tasks:
                     frg_list = []
                     for src_task in parallel_tasks:
-                        is_function_scope = src_task._forge.scope == test.full_path
+                        is_function_scope = (
+                            src_task._forge.scope == test.full_path
+                        )
                         parametrized_task = (
                             self.copy_task_for_parametrized_test(
                                 parametrized_test,
@@ -308,7 +355,6 @@ class TestDependencyManager(PytestConfigAdapter):
         return exec_steps
 
     def start_bootstrap_execution(self):
-
         if self.tests.is_empty or self.tasks.is_empty:
             return
 
@@ -332,7 +378,9 @@ class TestDependencyManager(PytestConfigAdapter):
             return
         assert self.executor is not None
         logger.debug("inplace_tasks_execution is about to start")
-        self._execution_timeout = time.time() + self.attached_tasks_wait_timeout
+        self._execution_timeout = (
+            time.time() + self.attached_tasks_wait_timeout
+        )
         self.executor.start(deps_exec_mtx)
         self.executor.wait(is_bootstrap=False)
 
@@ -370,7 +418,9 @@ class TestDependencyManager(PytestConfigAdapter):
         self.teardown_test_dependencies(test)
 
     def _check_failed_tasks(self, test, done_tasks):
-        failed_tasks = [task.forge_key for task in done_tasks if task._setup_errors]
+        failed_tasks = [
+            task.forge_key for task in done_tasks if task._setup_errors
+        ]
         logger.debug(
             f"DONE TASKS for {test.key}: {[task.forge_key for task in done_tasks]}"
         )
@@ -416,7 +466,6 @@ class TestDependencyManager(PytestConfigAdapter):
             exec_steps.append([tasks])
         logger.debug(dump)
         self.inplace_tasks_execution(exec_steps)
-
 
     def test_setup_error_report(self, test):
         for _, _, task in self.tasks.enumerate_tasks(test.key):

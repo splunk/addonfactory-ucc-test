@@ -1,14 +1,14 @@
 class PytestConfigAdapter:
     def __init__(self, pytest_config=None):
         self._pytest_config = pytest_config
-    
+
     def link_pytest_config(self, pytest_config):
         self._pytest_config = pytest_config
 
     @property
     def pytest_config(self):
         return self._pytest_config
-    
+
     @property
     def do_not_fail_with_teardown(self):
         return self._pytest_config.getvalue("do_not_fail_with_teardown")

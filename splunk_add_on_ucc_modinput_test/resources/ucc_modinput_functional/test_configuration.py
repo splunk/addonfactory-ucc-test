@@ -14,14 +14,19 @@ from tests.ucc_modinput_functional.splunk.forges import (
 
 
 @bootstrap(
-    forge(ta_logging),  # each forge will be executed just once, no matter how many times appears in tests
+    forge(
+        ta_logging
+    ),  # each forge will be executed just once, no matter how many times appears in tests
 )
 def test_ta_logging(splunk_client):
     assert splunk_client.get_ta_log_level() == defaults.TA_LOG_LEVEL_FOR_TESTS
 
+
 @bootstrap(
-    forge(ta_logging),    # sequence matters - ta_logging will be executed before accounts
-    forges( # there is parallel execution within forges
+    forge(
+        ta_logging
+    ),  # sequence matters - ta_logging will be executed before accounts
+    forges(  # there is parallel execution within forges
         forge(account),
         forge(another_account),
     ),
@@ -37,15 +42,20 @@ def test_accounts(
     assert actual_account.name == account_config_name
     assert actual_account.content.api_key == defaults.ENCRYPTED_VALUE
 
-    actual_another_account = splunk_client.get_account(name=another_account_config_name)
+    actual_another_account = splunk_client.get_account(
+        name=another_account_config_name
+    )
     assert actual_another_account is not None
     assert actual_another_account.name == another_account_config_name
     assert actual_another_account.content.api_key == defaults.ENCRYPTED_VALUE
 
+
 @bootstrap(
     forge(ta_logging),
     forges(
-        forge(another_account_index),   # the test framework creates session specific index that can be used; if more indexes are needed, they can be created as well
+        forge(
+            another_account_index
+        ),  # the test framework creates session specific index that can be used; if more indexes are needed, they can be created as well
     ),
 )
 def test_indexes(splunk_client, another_account_index_name):

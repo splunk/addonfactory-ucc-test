@@ -12,9 +12,8 @@ from tests.ucc_modinput_functional.splunk.forges import (
     account_input,
 )
 from tests.ucc_modinput_functional.splunk import probes
-from tests.ucc_modinput_functional.splunk.client import (
-    SplunkClient
-)
+from tests.ucc_modinput_functional.splunk.client import SplunkClient
+
 
 @bootstrap(
     forge(ta_logging),
@@ -33,10 +32,8 @@ from tests.ucc_modinput_functional.splunk.client import (
         # ),
     ),
 )
-def test_inputs( splunk_client: SplunkClient, example_input_spl: str ):
-    search_result_details = splunk_client.search(
-     searchquery=example_input_spl
-    )
+def test_inputs(splunk_client: SplunkClient, example_input_spl: str):
+    search_result_details = splunk_client.search(searchquery=example_input_spl)
     assert (
         search_result_details.result_count != 0
     ), f"Following query returned 0 events: {example_input_spl}"

@@ -5,6 +5,7 @@ from splunk_add_on_ucc_modinput_test.common.splunk_instance import (
     Configuration as SplunkConfiguration,
 )
 
+
 class InputConfigurationBase:
     def __init__(self, *, name_prefix: str, interval: int = 60):
         self._name = f"{name_prefix}{utils.Common().sufix}"
@@ -52,7 +53,7 @@ class ConfigurationBase:
 
         def api_instance(self) -> swagger_client.api.default_api.DefaultApi:
             return self._api_instance
-        
+
         ConfigurationBase.api_instance = property(api_instance)
 
     @property

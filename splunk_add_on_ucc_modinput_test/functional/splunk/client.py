@@ -1,26 +1,36 @@
 import time
 from typing import List, Optional, Tuple, Callable, Generator
-from splunk_add_on_ucc_modinput_test.common.splunk_instance import search, Configuration, SearchState, Index
+from splunk_add_on_ucc_modinput_test.common.splunk_instance import (
+    search,
+    Configuration,
+    SearchState,
+    Index,
+)
 from splunk_add_on_ucc_modinput_test.common.utils import logger
-from splunk_add_on_ucc_modinput_test.functional.common.splunk_instance_file import SplunkInstanceFileHelper
+from splunk_add_on_ucc_modinput_test.functional.common.splunk_instance_file import (
+    SplunkInstanceFileHelper,
+)
+
 
 class SplunkClientBase:
-    def __init__(self, splunk_configuration:Optional[Configuration]=None) -> None:
+    def __init__(
+        self, splunk_configuration: Optional[Configuration] = None
+    ) -> None:
         self.ta_service = None
         self._splunk_configuration = splunk_configuration or Configuration()
         self._bind_swagger_client()
 
     def _bind_swagger_client(self):
         # this method is replaced in inherited class by the decorator
-        # splunk_add_on_ucc_modinput_test.functional.decorators.register_splunk_class 
+        # splunk_add_on_ucc_modinput_test.functional.decorators.register_splunk_class
         pass
-    
+
     @property
     def splunk_configuration(self):
         return self._splunk_configuration
-    
+
     @property
-    def config(self): # short alias for splunk_configuration 
+    def config(self):  # short alias for splunk_configuration
         return self._splunk_configuration
 
     @property
@@ -29,62 +39,67 @@ class SplunkClientBase:
 
     @property
     def ta_api(self):
-        assert self.ta_service is not None, "Make sure you have decorated inherited client class with @register_splunk_class"
+        assert (
+            self.ta_service is not None
+        ), "Make sure you have decorated inherited client class with @register_splunk_class"
         return self.ta_service.api_instance
 
     @property
     def instance_epoch_time(self) -> int:
         state = self.search("| makeresults | eval splunk_epoch_time=_time")
         return int(state.results[0]["splunk_epoch_time"])
-    
+
     @property
     def default_index(self) -> str:
         state = self.search("* | head 1 | fields index")
         return state.results[0]["index"]
-    
+
     def _make_conf_error(self, prop_name: str):
         return f"Make sure you have '{prop_name}' attribute in your Splunk configuration class {self.config.__class__.__name__}"
-
 
     @property
     def remote_file_helper(self) -> SplunkInstanceFileHelper:
         connect = dict(
-            splunk_url = f"https://{self.config.host}:{self.config.port}",
-            username = self.config.username,
-            password = self.config.password,
+            splunk_url=f"https://{self.config.host}:{self.config.port}",
+            username=self.config.username,
+            password=self.config.password,
         )
         return SplunkInstanceFileHelper(**connect)
-    
+
     @property
     def instance_file_helper(self) -> SplunkInstanceFileHelper:
-        assert hasattr(self.config, "home") and self.config.splunk_home, self._make_conf_error("home")
+        assert (
+            hasattr(self.config, "home") and self.config.splunk_home
+        ), self._make_conf_error("home")
         connect = dict(
-            splunk_url = f"https://{self.config.host}:{self.config.port}",
-            username = self.config.username,
-            password = self.config.password,
-            base_dir = self.config.home,     
+            splunk_url=f"https://{self.config.host}:{self.config.port}",
+            username=self.config.username,
+            password=self.config.password,
+            base_dir=self.config.home,
         )
         return SplunkInstanceFileHelper(**connect)
 
     @property
     def app_file_helper(self) -> SplunkInstanceFileHelper:
         assert hasattr(self.config, "home") and self._make_conf_error("home")
-        assert hasattr(self.config, "app_name") and self._make_conf_error("app_name")
+        assert hasattr(self.config, "app_name") and self._make_conf_error(
+            "app_name"
+        )
         connect = dict(
-            splunk_url = f"https://{self.config.host}:{self.config.port}",
-            username = self.config.username,
-            password = self.config.password,
-            base_dir = f"{self.config.home}/etc/apps/{self.config.app_name}",
+            splunk_url=f"https://{self.config.host}:{self.config.port}",
+            username=self.config.username,
+            password=self.config.password,
+            base_dir=f"{self.config.home}/etc/apps/{self.config.app_name}",
         )
         return SplunkInstanceFileHelper(**connect)
 
-    def search(self, searchquery:str) -> SearchState:
+    def search(self, searchquery: str) -> SearchState:
         return search(service=self.splunk, searchquery=searchquery)
 
-    def run_saved_search(self, saved_search_name:str) -> Tuple[int, Optional[List[object]]]:
-        saved_search = self.splunk.saved_searches[
-            saved_search_name
-        ]
+    def run_saved_search(
+        self, saved_search_name: str
+    ) -> Tuple[int, Optional[List[object]]]:
+        saved_search = self.splunk.saved_searches[saved_search_name]
         state = search(
             service=self.splunk,
             searchquery=saved_search.content["search"],
@@ -94,10 +109,9 @@ class SplunkClientBase:
         )
         return state.result_count, state.results
 
-
     def create_index(self, index_name: str) -> Index:
         return self.config.create_index(
-            index_name, 
+            index_name,
             self.splunk,
             is_cloud="splunkcloud.com" in self.config.host.lower(),
             acs_stack=self.config.acs_stack,
@@ -106,7 +120,13 @@ class SplunkClientBase:
         )
 
     def search_probe(
-        self, probe_spl: str, *, verify_fn:Optional[Callable[[SearchState],bool]]=None, timeout: int=300, interval: int=5, probe_name: Optional[str]="probe"
+        self,
+        probe_spl: str,
+        *,
+        verify_fn: Optional[Callable[[SearchState], bool]] = None,
+        timeout: int = 300,
+        interval: int = 5,
+        probe_name: Optional[str] = "probe",
     ) -> Generator[int, None, Optional[SearchState]]:
         """
         Probe state by search until it returns verify function return true.
@@ -146,9 +166,13 @@ class SplunkClientBase:
 
         logger.error(f"{probe_name} is still negative after {timeout} seconds")
 
-
     def repeat_search_until(
-        self, spl, *, confition_fn:Optional[Callable[[SearchState],bool]]=None, timeout: int=300, interval: int=5
+        self,
+        spl,
+        *,
+        confition_fn: Optional[Callable[[SearchState], bool]] = None,
+        timeout: int = 300,
+        interval: int = 5,
     ) -> Optional[SearchState]:
         """
         Reapeats search untill confition function returns True.
@@ -167,7 +191,7 @@ class SplunkClientBase:
             interval=interval,
             probe_name=None,
         )
-        
+
         try:
             while True:
                 wait = next(it)

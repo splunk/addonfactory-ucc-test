@@ -26,7 +26,10 @@ from splunk_add_on_ucc_modinput_test.common import utils
 SWAGGER_CODEGEN_CLI_VERSION = "3.0.46"
 
 
-def initialize(openapi: Path, modinput: Path) -> Path:
+def initialize(
+    *,
+    modinput: Path,
+) -> Path:
     src = files(resources).joinpath("ucc_modinput_functional")
     for root, _, fls in os.walk(src):
         dest_path = Path(modinput) / Path(root).relative_to(src)
@@ -35,14 +38,6 @@ def initialize(openapi: Path, modinput: Path) -> Path:
         for file in fls:
             shutil.copy2(Path(root) / file, dest_path)
 
-    with openapi.open() as f:
-        data = json.load(f)
-    ta_py_path = modinput / "ta.py"
-    utils.replace_line(
-        file=ta_py_path,
-        pattern=r'NAME = "splunk_ta_foo_bar" #.*',
-        replacement=f"NAME = \"{data['info']['title']}\"",
-    )
     init_in_tests = modinput.parent / "__init__.py"
     if not init_in_tests.exists():
         init_in_tests.touch()
@@ -50,6 +45,7 @@ def initialize(openapi: Path, modinput: Path) -> Path:
 
 
 def generate(
+    *,
     openapi: Path,
     tmp: Path,
     client: Path,

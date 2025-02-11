@@ -37,24 +37,36 @@ def test_get_from_environment_variable_optional() -> None:
 
 def test_get_from_environment_variable_default_value() -> None:
     v = "some_value"
-    assert utils.get_from_environment_variable("DOES_NOT_EXIST", default_value = v) == v
+    assert (
+        utils.get_from_environment_variable("DOES_NOT_EXIST", default_value=v)
+        == v
+    )
 
 
 def test_get_from_environment_variable_if_exists_and_default_defined(monkeypatch) -> None:  # type: ignore
     k = "EXISTING_ENV_VARIABLE"
     v = "some_value"
     monkeypatch.setenv(k, v)
-    assert utils.get_from_environment_variable(k,default_value="some default value") == v
+    assert (
+        utils.get_from_environment_variable(
+            k, default_value="some default value"
+        )
+        == v
+    )
+
 
 def test_get_from_def_var_string_function(monkeypatch) -> None:  # type: ignore
     some_str = "I am complex enough to be encoded"
     dv = utils.Base64.encode(some_str)
     assert (
         utils.get_from_environment_variable(
-            "DOES_NOT_EXIST", default_value=dv, string_function=utils.Base64.decode
+            "DOES_NOT_EXIST",
+            default_value=dv,
+            string_function=utils.Base64.decode,
         )
         == some_str
     )
+
 
 def test_base64() -> None:
     def _encode_decode_assert(
@@ -125,7 +137,3 @@ def test_base64_remove_ending_chars() -> None:
 """
     actual = utils.Base64._remove_ending_chars(string=input)
     assert actual == expected
-
-
-
-

@@ -15,7 +15,7 @@ class TestCollection(Dict[Tuple[str, str], FrameworkTest]):
     @property
     def is_empty(self):
         return not bool(self)
-    
+
     def add(self, item):
         assert isinstance(item, FrameworkTest)
         if item.key not in self:
@@ -25,16 +25,18 @@ class TestCollection(Dict[Tuple[str, str], FrameworkTest]):
         test = FrameworkTest(fn)
         return self.get(test.key)
 
-
     def lookup_by_original_function(self, fn):
         found_tests_keys = set()
         lookup_test = FrameworkTest(fn)
         for key, test in self.items():
             if lookup_test.key == test.original_key:
-                logger.debug(f"lookup_by_original_function found key: {lookup_test.key} -> {test.key}|{test.original_key}")
+                logger.debug(
+                    f"lookup_by_original_function found key: {lookup_test.key} -> {test.key}|{test.original_key}"
+                )
                 found_tests_keys.add(key)
-                
+
         return list(found_tests_keys)
+
 
 class ForgeCollection(Dict[Tuple[str, str, str], FrameworkForge]):
     @property
@@ -57,7 +59,7 @@ class TaskCollection:
     @property
     def is_empty(self):
         return not bool(self._tasks)
-    
+
     def remove_test_tasks(self, test_key):
         return self._tasks.pop(test_key, None)
 

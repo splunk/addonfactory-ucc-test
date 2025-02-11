@@ -3,6 +3,7 @@ from threading import Lock
 from typing import Any, Union
 from splunk_add_on_ucc_modinput_test.common.utils import logger
 
+
 class SplunkServiceProxy:
     def __init__(self, host, port, username, password):
         self._lock = Lock()
@@ -12,7 +13,7 @@ class SplunkServiceProxy:
         self._password = password
         self.__connect()
 
-    def __getattr__(self, name: str)->Any:
+    def __getattr__(self, name: str) -> Any:
         return getattr(self._service, name)
 
     def __connect(self):
@@ -28,16 +29,16 @@ class SplunkServiceProxy:
 class SplunkServicePool:
     def __init__(
         self,
-        host:str,
-        port:Union[int,str],
-        username:str,
-        password:str,
+        host: str,
+        port: Union[int, str],
+        username: str,
+        password: str,
         *,
         pool_initial_size=3,
-        pool_size_inc=2
+        pool_size_inc=2,
     ):
         logger.debug(f"SplunkServicePool init {username}@{host}:{port}")
-        
+
         self._lock = Lock()
         self._host = host
         self._port = port
@@ -48,7 +49,7 @@ class SplunkServicePool:
         self._pool = []
         self.__increase_pool(self._pool_initial_size)
 
-    def __increase_pool(self, increment_size:int):
+    def __increase_pool(self, increment_size: int):
         with self._lock:
             for _ in range(increment_size):
                 self._pool.append(
@@ -58,7 +59,7 @@ class SplunkServicePool:
                 )
         logger.debug(f"SplunkServicePool has been sized to {len(self._pool)}")
 
-    def __getattr__(self, name: str)->Any:
+    def __getattr__(self, name: str) -> Any:
         while True:
             for svc in self._pool:
                 locked = svc._lock.acquire(False)

@@ -253,7 +253,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         )
     if args.command == "init":
         commands.initialize(
-            openapi=args.openapi_json,
             modinput=args.modinput,
         )
     if args.command == "base64encode":

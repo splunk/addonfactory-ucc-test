@@ -13,6 +13,7 @@ from typing import Callable, Optional
 
 global logger
 
+
 class SplunkClientConfigurationException(Exception):
     pass
 
@@ -52,7 +53,11 @@ def get_from_environment_variable(
     ) -> str:
         return variable if function is None else function(variable)
 
-    if environment_variable not in os.environ and default_value is None and is_optional:
+    if (
+        environment_variable not in os.environ
+        and default_value is None
+        and is_optional
+    ):
         return None
     if environment_variable not in os.environ and default_value is None:
         logger.critical(40 * "*")
@@ -63,7 +68,11 @@ def get_from_environment_variable(
 
         error = f"Mandatory environment variable {environment_variable} is missing and does not have a default value specified."
         raise SplunkClientConfigurationException(error)
-    variable = os.environ[environment_variable] if environment_variable in os.environ else default_value
+    variable = (
+        os.environ[environment_variable]
+        if environment_variable in os.environ
+        else default_value
+    )
     return use_string_function_if_needed(
         variable=variable,
         function=string_function,  # type: ignore
