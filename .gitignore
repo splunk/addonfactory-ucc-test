@@ -138,4 +138,6 @@ swagger_client/
 
 .vscode/
 
+.DS_Store
+
 tests/functional/splunk-example-ta

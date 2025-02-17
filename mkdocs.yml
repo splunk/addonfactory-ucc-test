@@ -1,0 +1,63 @@
+site_name: AUT Framework
+site_author: Splunk
+site_url: "https://splunk.github.io/addonfactory-ucc-test/"
+edit_uri: "tree/main/docs/"
+remote_branch: gh-pages
+
+repo_name: Splunk Add-on AUT Framework
+repo_url: "https://github.com/splunk/addonfactory-ucc-test"
+
+markdown_extensions:
+  - toc:
+      permalink: True
+  - smarty
+  - fenced_code
+  - sane_lists
+  - codehilite
+  - pymdownx.superfences
+  - pymdownx.snippets
+  - admonition
+  - pymdownx.details
+
+theme:
+  name: "material"
+  custom_dir: docs/theme_overrides
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: black
+      accent: orange
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: black
+      accent: orange
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - content.code.copy
+    - navigation.indexes
+
+extra_css:
+  - css/extra.css
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            show_if_no_docstring: true
+            filters: ["!^_"]
+            show_source: true
+  - autorefs
+  - print-site  # should be at the end
+
+nav:
+  - About AUT: "index.md"
+  - Design Principles: "design_principles.md"
+
+  - Action Diagram: "action_diagram.md"
