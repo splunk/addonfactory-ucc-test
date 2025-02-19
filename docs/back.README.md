@@ -3,12 +3,6 @@ A framework to test UCC-based Splunk Add-ons.
 
 splunk_add_on_ucc_modinput_test is aimed for TA modinput tests that currently involve vendor products becoming end to end tests.
 
-ucc-test-modinput CLI tool is delivered with this project. You can use the tool with following arguments:
-- `base64encode` 
--- `-s [string you want to encode]` - eg. `base64encode -s ThisIsMyPassword`
--- `-f [text file path; string from the file will be encoded]` - eg. `ucc-test-modinput base64encode -f ~/client_secret.json`
-- `base64decode -s [string you want to decode]` - eg. `ucc-test-modinput base64decode -s VGghczEkTXlQQHNzdzByZA==`
-- `init` and `gen` - their meaning and usecases are described in further part of this documentation; run with `-h` or `--help` argument to see arguments that can be customised if needed
 
 
 1. If you want to apply this library for your TA, there three aspects you need to facus on and document:

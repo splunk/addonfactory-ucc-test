@@ -18,6 +18,7 @@ markdown_extensions:
   - pymdownx.snippets
   - admonition
   - pymdownx.details
+  - footnotes
 
 theme:
   name: "material"
@@ -59,5 +60,6 @@ plugins:
 nav:
   - About AUT: "index.md"
   - Design Principles: "design_principles.md"
-
+  - Before you write your first line of code: "before_you_write_your_first_line_of_code.md"
   - Action Diagram: "action_diagram.md"
+  - ucc-test-modinput CLI tool: "ucc-test-modinput_cli_tool.md"

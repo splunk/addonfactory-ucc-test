@@ -49,12 +49,3 @@ There are certain ways data can be isolated:
 
 This framework is supported on the most popular workstations (MacOS, Linux, Windows) as well as CIs (GitHub, GitLab).
 
-## Developer experience
-
-1. Run `ucc-test-modinput init` in  the context of your add-on repo  and proven to work tests for [splunk-example-ta](https://github.com/splunk/splunk-example-ta) will be populated for you. It is 
-
-<!--
-2. Follow [the instruction](./after_init_step_by_step.md) to adopt test files in correct order
--->
-
-3. Keep checking comments (to understand general idea), documentation (to find more information) and unit tests (for details)
