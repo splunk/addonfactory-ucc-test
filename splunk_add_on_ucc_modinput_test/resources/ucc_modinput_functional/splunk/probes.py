@@ -15,12 +15,14 @@ def events_ingested(
         if search.result_count != 0:
             break
         utils.logger.debug(
-            f"failed, let's wait another {probes_wait_time} seconds and try again"
+            f"failed, let's wait another {probes_wait_time} \
+                seconds and try again"
         )
         yield probes_wait_time
 
     utils.logger.debug(
-        f"successfully finished after {utils.get_epoch_timestamp()-start_time} seconds"
+        "successfully finished after "
+        f"{utils.get_epoch_timestamp()-start_time} seconds"
     )
 
 

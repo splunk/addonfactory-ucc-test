@@ -1,4 +1,4 @@
-import pytest
+import pytest  # noqa F401
 from splunk_add_on_ucc_modinput_test.functional.decorators import (
     bootstrap,
     forge,
@@ -14,9 +14,8 @@ from tests.ucc_modinput_functional.splunk.forges import (
 
 
 @bootstrap(
-    forge(
-        ta_logging
-    ),  # each forge will be executed just once, no matter how many times appears in tests
+    forge(ta_logging),  # each forge will be executed just once,
+    # no matter how many times appears in tests
 )
 def test_ta_logging(splunk_client):
     assert splunk_client.get_ta_log_level() == defaults.TA_LOG_LEVEL_FOR_TESTS
@@ -33,7 +32,7 @@ def test_ta_logging(splunk_client):
 )
 def test_accounts(
     splunk_client,
-    # vendor_client,    # you may want to refer to vendor_client in most real-life cases
+    # vendor_client,    # you may want to refer to it in most real-life cases
     account_config_name,
     another_account_config_name,
 ):
@@ -53,9 +52,9 @@ def test_accounts(
 @bootstrap(
     forge(ta_logging),
     forges(
-        forge(
-            another_account_index
-        ),  # the test framework creates session specific index that can be used; if more indexes are needed, they can be created as well
+        forge(another_account_index),
+        # the test framework creates session specific index that can be used
+        # if more indexes are needed, they can be created as well
     ),
 )
 def test_indexes(splunk_client, another_account_index_name):

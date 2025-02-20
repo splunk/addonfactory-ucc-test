@@ -48,6 +48,7 @@ def get_from_environment_variable(
     is_optional: bool = False,
     string_function: Optional[Callable[[str], str]] = None,
 ) -> Optional[str]:
+    
     def use_string_function_if_needed(
         *, variable: str, function: Callable[[str], str]
     ) -> str:
@@ -59,7 +60,7 @@ def get_from_environment_variable(
         and is_optional
     ):
         return None
-    if environment_variable not in os.environ and default_value is None:
+    elif environment_variable not in os.environ and default_value is None:
         logger.critical(40 * "*")
         logger.critical(f"{environment_variable} environment variable not set")
         logger.critical("run below in terminal:")
@@ -68,15 +69,16 @@ def get_from_environment_variable(
 
         error = f"Mandatory environment variable {environment_variable} is missing and does not have a default value specified."
         raise SplunkClientConfigurationException(error)
-    variable = (
-        os.environ[environment_variable]
-        if environment_variable in os.environ
-        else default_value
-    )
-    return use_string_function_if_needed(
-        variable=variable,
-        function=string_function,  # type: ignore
-    )
+    else:
+        variable = (
+            os.environ[environment_variable]
+            if environment_variable in os.environ
+            else default_value
+        )
+        return use_string_function_if_needed(
+            variable=variable,
+            function=string_function,  # type: ignore
+        )
 
 
 class Base64:

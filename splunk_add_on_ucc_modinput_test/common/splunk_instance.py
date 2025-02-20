@@ -2,12 +2,10 @@ from __future__ import annotations
 
 # mypy: disable-error-code="attr-defined,arg-type"
 
-from typing import List, Optional, Dict, Tuple
 import time
 import pytest
 import requests  # type: ignore
 from requests.adapters import HTTPAdapter, Retry  # type: ignore
-from splunklib import client
 from splunklib.client import Service
 from splunklib.client import Job
 from splunklib.client import Index

@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-import json
 import os
 from pathlib import Path
 import shutil
@@ -21,7 +20,6 @@ from typing import Optional
 from python_on_whales import docker
 from importlib_resources import files
 from splunk_add_on_ucc_modinput_test import resources
-from splunk_add_on_ucc_modinput_test.common import utils
 
 SWAGGER_CODEGEN_CLI_VERSION = "3.0.46"
 

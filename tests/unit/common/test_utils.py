@@ -4,10 +4,10 @@ import pytest
 
 
 def test_get_from_environment_variable(monkeypatch) -> None:  # type: ignore
-    with pytest.raises(SystemExit) as e:
+    with pytest.raises(utils.SplunkClientConfigurationException) as e:
         utils.get_from_environment_variable("DOES_NOT_EXIST")
-    assert e.type == SystemExit
-    assert e.value.code == 1
+    assert e.type == utils.SplunkClientConfigurationException
+    # assert e.value.code == 1
 
     k = "EXISTING_ENV_VARIABLE"
     v = "some_value"
@@ -43,7 +43,9 @@ def test_get_from_environment_variable_default_value() -> None:
     )
 
 
-def test_get_from_environment_variable_if_exists_and_default_defined(monkeypatch) -> None:  # type: ignore
+def test_get_from_environment_variable_if_exists_and_default_defined(
+    monkeypatch,
+) -> None:  # type: ignore
     k = "EXISTING_ENV_VARIABLE"
     v = "some_value"
     monkeypatch.setenv(k, v)

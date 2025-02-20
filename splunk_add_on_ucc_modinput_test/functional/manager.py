@@ -1,6 +1,5 @@
 import time
-import random
-import string
+
 from typing import List, Tuple, Optional, Union
 from splunk_add_on_ucc_modinput_test.functional import logger
 from splunk_add_on_ucc_modinput_test.functional.exceptions import (
@@ -27,7 +26,6 @@ from splunk_add_on_ucc_modinput_test.functional.splunk import (
     SplunkClientBase,
     SplunkConfigurationBase,
 )
-from splunk_add_on_ucc_modinput_test.common import splunk_instance
 from splunk_add_on_ucc_modinput_test.functional.vendor import (
     VendorClientBase,
     VendorConfigurationBase,

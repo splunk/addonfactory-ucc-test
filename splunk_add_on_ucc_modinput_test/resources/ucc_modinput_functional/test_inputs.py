@@ -1,4 +1,4 @@
-import pytest
+import pytest  # noqa F401
 from splunk_add_on_ucc_modinput_test.common import utils
 from splunk_add_on_ucc_modinput_test.functional.decorators import (
     bootstrap,
@@ -39,5 +39,6 @@ def test_inputs(splunk_client: SplunkClient, example_input_spl: str):
     ), f"Following query returned 0 events: {example_input_spl}"
 
     utils.logger.info(
-        f"test_inputs_loginhistory_clone done at {utils.convert_to_utc(utils.get_epoch_timestamp())}"
+        "test_inputs_loginhistory_clone done at "
+        + utils.convert_to_utc(utils.get_epoch_timestamp())
     )

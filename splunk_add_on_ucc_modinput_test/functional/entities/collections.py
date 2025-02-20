@@ -31,7 +31,8 @@ class TestCollection(Dict[Tuple[str, str], FrameworkTest]):
         for key, test in self.items():
             if lookup_test.key == test.original_key:
                 logger.debug(
-                    f"lookup_by_original_function found key: {lookup_test.key} -> {test.key}|{test.original_key}"
+                    f"lookup_by_original_function found key: \
+                        {lookup_test.key} -> {test.key}|{test.original_key}"
                 )
                 found_tests_keys.add(key)
 

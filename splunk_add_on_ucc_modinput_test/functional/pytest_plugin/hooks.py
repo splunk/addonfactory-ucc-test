@@ -30,7 +30,7 @@ def pytest_deselected(items):
         )
         for test_key in found_tests_keys:
             test = dependency_manager.unregister_test(test_key)
-            msg = f"Test deselection:"
+            msg = "Test deselection:"
             msg += f'\n\tdeselected: {"Yes" if test else "No"}'
             msg += f"\n\tlookup key: {test_key}"
             msg += f'\n\tpath: {test.full_path if test else "not found"}'

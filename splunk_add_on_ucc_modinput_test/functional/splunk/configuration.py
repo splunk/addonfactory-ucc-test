@@ -1,7 +1,7 @@
 from splunk_add_on_ucc_modinput_test.common.splunk_instance import (
     Configuration,
 )
-from splunk_add_on_ucc_modinput_test.functional.common.pytest_config_adapter import (
+from splunk_add_on_ucc_modinput_test.functional.common.pytest_config_adapter import (  # noqa E501
     PytestConfigAdapter,
 )
 

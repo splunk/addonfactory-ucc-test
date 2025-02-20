@@ -3,16 +3,15 @@ from tests.ucc_modinput_functional import defaults
 from tests.ucc_modinput_functional.splunk.client import SplunkClient
 from tests.ucc_modinput_functional.vendor.client import VendorClient
 
+from typing import Dict, Generator
+
 
 def ta_logging(splunk_client: SplunkClient):
-    utils.logger.debug(f"Executing forge ta_logging")
+    utils.logger.debug("Executing forge ta_logging")
     previous_log_level = splunk_client.get_ta_log_level()
     splunk_client.set_ta_log_level()
     yield
     splunk_client.set_ta_log_level(previous_log_level)
-
-
-from typing import Dict, Generator
 
 
 def _account_config(name: str, vendor_client: VendorClient) -> Dict[str, str]:
@@ -30,7 +29,8 @@ def account(
     splunk_client.create_account(**account_config)
     yield dict(
         account_config_name=account_config["name"]
-    )  # yielded from forges dict key will be available as global variable you can use in your tests to refer to yielded dict value
+    )  # yielded from forges dict key will be available as global variable
+    # you can use in your tests to refer to yielded dict value
 
 
 def another_account(
@@ -74,8 +74,12 @@ def _account_input(
         account=account,
     )
     splunk_client.create_input(**account_input_config)
-    input_spl = f'search index={index} source="example://{name}" | where _time>{start_time}'
-    # Take raw event into account when constructing the SPL; as an example: extractions should be tested with pytest-splunk-addon
+    input_spl = (
+        f'search index={index} source="example://{name}" '
+        f"| where _time>{start_time}"
+    )
+    # Take raw event into account when constructing the SPL; as an example:
+    # extractions should be tested with pytest-splunk-addon
     yield {input_spl_name: input_spl}
     splunk_client.disable_input(name=name)
 

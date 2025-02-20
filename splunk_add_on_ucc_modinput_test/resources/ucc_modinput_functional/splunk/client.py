@@ -31,7 +31,7 @@ class SplunkClient(SplunkClientBase):
         # find relevant part in swagger_client README.md
         # copy and paste here
         try:
-            # api_response = api_instance.splunk_ta_example_settings_logging_get(output_mode)
+            # api_response = api_instance.splunk_ta_example_settings_logging_get(output_mode) # noqa: E501
             # replace "api_instance." with "self.ta_api."
             api_response = self.ta_api.splunk_ta_example_settings_logging_get(
                 output_mode
@@ -39,7 +39,8 @@ class SplunkClient(SplunkClientBase):
             pprint(api_response)
         except ApiException as e:
             print(
-                "Exception when calling DefaultApi->splunk_ta_example_settings_logging_get: %s\n"
+                "Exception when calling DefaultApi->\
+                    splunk_ta_example_settings_logging_get: %s\n"
                 % e
             )
         # if you want to return any value, add return section
@@ -57,7 +58,8 @@ class SplunkClient(SplunkClientBase):
             pprint(api_response)
         except ApiException as e:
             print(
-                "Exception when calling DefaultApi->splunk_ta_example_settings_logging_post: %s\n"
+                "Exception when calling DefaultApi->\
+                    splunk_ta_example_settings_logging_post: %s\n"
                 % e
             )
 
@@ -74,7 +76,8 @@ class SplunkClient(SplunkClientBase):
             pprint(api_response)
         except ApiException as e:
             print(
-                "Exception when calling DefaultApi->splunk_ta_example_account_post: %s\n"
+                "Exception when calling DefaultApi->\
+                    splunk_ta_example_account_post: %s\n"
                 % e
             )
 
@@ -90,7 +93,8 @@ class SplunkClient(SplunkClientBase):
             pprint(api_response)
         except ApiException as e:
             print(
-                "Exception when calling DefaultApi->splunk_ta_example_account_name_get: %s\n"
+                "Exception when calling DefaultApi->\
+                    splunk_ta_example_account_name_get: %s\n"
                 % e
             )
         else:
@@ -105,8 +109,10 @@ class SplunkClient(SplunkClientBase):
         account: str,
     ):
         try:
-            # api_response = self.ta_api.splunk_ta_example_example_post(output_mode, name=name, interval=interval, index=index, account=account, fetch_from=fetch_from, start_from=start_from)
-            # fetch_from and start_from were created to show UCC options by UI side and are not used by server side any way, that's why we are skipping them here
+            # api_response = self.ta_api.splunk_ta_example_example_post(output_mode, name=name, interval=interval, index=index, account=account, fetch_from=fetch_from, start_from=start_from) # noqa: E501
+            # fetch_from and start_from were created to show UCC options
+            # by UI side and are not used by server side any way,
+            # that's why we are skipping them here
             api_response = self.ta_api.splunk_ta_example_example_post(
                 output_mode,
                 name=name,
@@ -117,7 +123,8 @@ class SplunkClient(SplunkClientBase):
             pprint(api_response)
         except ApiException as e:
             print(
-                "Exception when calling DefaultApi->splunk_ta_example_example_post: %s\n"
+                "Exception when calling DefaultApi->\
+                    splunk_ta_example_example_post: %s\n"
                 % e
             )
 
@@ -129,6 +136,7 @@ class SplunkClient(SplunkClientBase):
             pprint(api_response)
         except ApiException as e:
             print(
-                "Exception when calling DefaultApi->splunk_ta_example_example_name_post: %s\n"
+                "Exception when calling DefaultApi->\
+                    splunk_ta_example_example_name_post: %s\n"
                 % e
             )

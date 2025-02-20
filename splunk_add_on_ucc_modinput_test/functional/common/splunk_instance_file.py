@@ -34,7 +34,10 @@ class SplunkInstanceFileHelper:
         self, operation, payload={}
     ):  # pylint: disable=dangerous-default-value
         """Performs API operations."""
-        endpoint = "/servicesNS/nobody/Splunk_TA_Modinput_Test/Splunk_TA_Modinput_Test_perform_crd_operation/<entry>/"
+        endpoint = (
+            "/servicesNS/nobody/Splunk_TA_Modinput_Test/"
+            "Splunk_TA_Modinput_Test_perform_crd_operation/<entry>/"
+        )
         api_url = self.splunk_url + endpoint + operation
 
         payload.update({"output_mode": "json"})
@@ -48,9 +51,8 @@ class SplunkInstanceFileHelper:
         )
         if response.status_code > 299:
             raise SplunkInstanceFileHelper.OperationError(
-                "Operation: {}, failed. Response Code:{}".format(  # pylint: disable=consider-using-f-string
-                    operation, response.status_code
-                )
+                f"Operation: {operation}, failed. \
+                    Response Code:{response.status_code}"
             )
         return response.json()
 

@@ -56,7 +56,9 @@ def define_vendor_client_argument(
     vendor_class_argument_name: str = BuiltInArg.VENDOR_CLIENT.value,
 ) -> Callable[..., Any]:
     logger.debug(
-        f"attach_vendor_client_config vendor_client_class: {vendor_client_class} with vendor_class_argument_name {vendor_class_argument_name}"
+        "attach_vendor_client_config vendor_client_class: "
+        f"{vendor_client_class} with vendor_class_argument_name "
+        + vendor_class_argument_name
     )
 
     def register_vendor_class_decorator(vendor_configuration_class):
@@ -93,7 +95,9 @@ def define_splunk_client_argument(
     splunk_class_argument_name: str = BuiltInArg.SPLUNK_CLIENT.value,
 ) -> Callable[..., Any]:
     logger.debug(
-        f"attach_splunk_client_config splunk_client_class:{splunk_client_class} with splunk_class_argument_name {splunk_class_argument_name}"
+        "attach_splunk_client_config splunk_client_class: "
+        f"{splunk_client_class} with "
+        f"splunk_class_argument_name {splunk_class_argument_name}"
     )
 
     def register_splunk_class_decorator(splunk_configuration_class):
@@ -114,7 +118,8 @@ def register_splunk_class(
     ] = SplunkConfigurationBase,
 ) -> Callable[..., Any]:
     logger.debug(
-        f"register_splunk_class swagger_client:{swagger_client} with configuration {splunk_configuration_class}"
+        f"register_splunk_class swagger_client:{swagger_client} with "
+        f"configuration {splunk_configuration_class}"
     )
 
     def _bind_swagger_client(self):

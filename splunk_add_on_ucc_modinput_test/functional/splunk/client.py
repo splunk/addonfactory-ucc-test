@@ -7,7 +7,7 @@ from splunk_add_on_ucc_modinput_test.common.splunk_instance import (
     Index,
 )
 from splunk_add_on_ucc_modinput_test.common.utils import logger
-from splunk_add_on_ucc_modinput_test.functional.common.splunk_instance_file import (
+from splunk_add_on_ucc_modinput_test.functional.common.splunk_instance_file import (  # noqa: E501
     SplunkInstanceFileHelper,
 )
 
@@ -41,21 +41,40 @@ class SplunkClientBase:
     def ta_api(self):
         assert (
             self.ta_service is not None
-        ), "Make sure you have decorated inherited client class with @register_splunk_class"
+        ), "Make sure you have decorated inherited client class \
+            with @register_splunk_class"
         return self.ta_service.api_instance
 
     @property
     def instance_epoch_time(self) -> int:
         state = self.search("| makeresults | eval splunk_epoch_time=_time")
-        return int(state.results[0]["splunk_epoch_time"])
+        if isinstance(state.results, list) and len(state.results) > 0:
+            first_result = state.results[0]
+            if (
+                isinstance(first_result, dict)
+                and "splunk_epoch_time" in first_result
+            ):
+                return int(first_result["splunk_epoch_time"])
+        raise ValueError(
+            "Expected a list of dictionaries with 'splunk_epoch_time' key \
+                in search results"
+        )
 
     @property
     def default_index(self) -> str:
         state = self.search("* | head 1 | fields index")
-        return state.results[0]["index"]
+        if isinstance(state.results, list) and len(state.results) > 0:
+            first_result = state.results[0]
+            if isinstance(first_result, dict) and "index" in first_result:
+                return first_result["index"]
+        raise ValueError(
+            "Expected a list of dictionaries with 'index' key in search \
+                results"
+        )
 
     def _make_conf_error(self, prop_name: str):
-        return f"Make sure you have '{prop_name}' attribute in your Splunk configuration class {self.config.__class__.__name__}"
+        return f"Make sure you have '{prop_name}' attribute in your Splunk \
+            configuration class {self.config.__class__.__name__}"
 
     @property
     def remote_file_helper(self) -> SplunkInstanceFileHelper:
@@ -105,7 +124,9 @@ class SplunkClientBase:
             searchquery=saved_search.content["search"],
         )
         logger.debug(
-            f"Executed saved search {saved_search_name}, count: {state.result_count}, query: {saved_search.content['search']}"
+            f"Executed saved search {saved_search_name}, "
+            f"count: {state.result_count}, "
+            f"query: {saved_search.content['search']}"
         )
         return state.result_count, state.results
 
@@ -130,12 +151,13 @@ class SplunkClientBase:
     ) -> Generator[int, None, Optional[SearchState]]:
         """
         Probe state by search until it returns verify function return true.
-        Default verify function checks for non empty search result
-        @param probe_spl: Splunk search query to execure for each check iteration
-        @param verify_fn: function to verify search state
-        @param timeout: how long in seconds to wait for positive result
-        @param interval: interval to repeat search
-        @return: SearchState object
+        Default verify function checks for non empty search result.
+        @param probe_spl: Splunk search query to execute for each check
+                iteration.
+        @param verify_fn: function to verify search state.
+        @param timeout: how long in seconds to wait for positive result.
+        @param interval: interval to repeat search.
+        @return: SearchState object.
         """
 
         def non_empty_result(state: SearchState) -> bool:
@@ -156,11 +178,13 @@ class SplunkClientBase:
             search_state = self.search(searchquery=probe_spl)
             if verify_fn(search_state):
                 logger.debug(
-                    f"{probe_name} has successfully finished after {time.time()-start_time} seconds"
+                    f"{probe_name} has successfully finished after "
+                    f"{time.time() - start_time} seconds"
                 )
                 return search_state
             logger.debug(
-                f"{probe_name} is negatve after {time.time()-start_time} seconds"
+                f"{probe_name} is negative after "
+                f"{time.time()-start_time} seconds"
             )
             yield interval
 
@@ -170,23 +194,26 @@ class SplunkClientBase:
         self,
         spl,
         *,
-        confition_fn: Optional[Callable[[SearchState], bool]] = None,
+        condition_fn: Optional[Callable[[SearchState], bool]] = None,
         timeout: int = 300,
         interval: int = 5,
     ) -> Optional[SearchState]:
         """
-        Reapeats search untill confition function returns True.
-        Default confition function checks for non empty search result
-        @param spl: Splunk search query to execure
-        @param confition_fn: function to verify search state to stop search iterations
-        @param timeout: how long in seconds to wait for positive result of condition function
-        @param interval: interval to repeat search if condition function is negative
-        @return: SearchState object
+        Repeats search until condition function returns True.
+        Default condition function checks for non empty search result.
+        @param spl: Splunk search query to execute.
+        @param condition_fn: function to verify search state to stop search
+                iterations.
+        @param timeout: how long in seconds to wait for positive result of
+                condition function.
+        @param interval: interval to repeat search if condition function is
+                negative.
+        @return: SearchState object.
         """
 
         it = self.search_probe(
             probe_spl=spl,
-            verify_fn=confition_fn,
+            verify_fn=condition_fn,
             timeout=timeout,
             interval=interval,
             probe_name=None,
