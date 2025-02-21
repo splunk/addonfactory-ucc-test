@@ -33,11 +33,16 @@ The addonfactory-ucc-test framework follows principles in an order based on impo
 
 5. [cross-platform & CI-ready](./design_principles.md#supported-platforms)
 
+## Building blocks
 
-<!--
-Refer to the [How to use](./how_to_use.md) section for detailed instructions on running the tests.
+The addonfactory-ucc-test framework consists of following building blocks:
 
-## Release notes
+- [`ucc-test-modinput` CLI tool](./ucc-test-modinput_cli_tool.md) used initialise the tests (create relevant directories, files and initial test)
 
-Find details about all the releases [here](https://github.com/splunk/addonfactory-ucc-test/releases).
--->
+- [`addonfactory-ucc-test/functional` pytest plugin](./addonfactory-ucc-test_pytest_plugin.md) used to extend pytest functionality to support end-to-end functional tests 
+
+- supporting artifacts:
+
+    - `ucc_modinput_functional` tests in [`Splunk Add-on for Example` ](https://github.com/splunk/splunk-example-ta)
+
+    - this documentation
