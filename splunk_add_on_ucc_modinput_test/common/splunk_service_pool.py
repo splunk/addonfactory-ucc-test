@@ -5,7 +5,9 @@ from splunk_add_on_ucc_modinput_test.common.utils import logger
 
 
 class SplunkServiceProxy:
-    def __init__(self, host, port, username, password):
+    def __init__(
+        self, host: str, port: Union[int, str], username: str, password: str
+    ) -> None:
         self._lock = Lock()
         self._host = host
         self._port = port
@@ -16,7 +18,7 @@ class SplunkServiceProxy:
     def __getattr__(self, name: str) -> Any:
         return getattr(self._service, name)
 
-    def __connect(self):
+    def __connect(self) -> None:
         with self._lock:
             self._service = client.connect(
                 host=self._host,
@@ -34,9 +36,9 @@ class SplunkServicePool:
         username: str,
         password: str,
         *,
-        pool_initial_size=3,
-        pool_size_inc=2,
-    ):
+        pool_initial_size: int = 3,
+        pool_size_inc: int = 2,
+    ) -> None:
         logger.debug(f"SplunkServicePool init {username}@{host}:{port}")
 
         self._lock = Lock()
@@ -46,10 +48,10 @@ class SplunkServicePool:
         self._password = password
         self._pool_initial_size = pool_initial_size
         self._pool_size_inc = pool_size_inc
-        self._pool = []
+        self._pool: list[SplunkServiceProxy] = []
         self.__increase_pool(self._pool_initial_size)
 
-    def __increase_pool(self, increment_size: int):
+    def __increase_pool(self, increment_size: int) -> None:
         with self._lock:
             for _ in range(increment_size):
                 self._pool.append(

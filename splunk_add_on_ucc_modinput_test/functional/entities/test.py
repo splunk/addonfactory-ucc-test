@@ -58,7 +58,7 @@ class FrameworkTest(ExecutableBase):
         assert isinstance(artifacts, dict)
         return self._artifacts.update(artifacts)
 
-    def mark_executed(self):
+    def mark_executed(self) -> None:
         logger.debug(f"TEST: mark_executed {self}")
         self._is_executed = True
 

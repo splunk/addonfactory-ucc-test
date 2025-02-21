@@ -44,8 +44,8 @@ def test_get_from_environment_variable_default_value() -> None:
 
 
 def test_get_from_environment_variable_if_exists_and_default_defined(
-    monkeypatch,
-) -> None:  # type: ignore
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     k = "EXISTING_ENV_VARIABLE"
     v = "some_value"
     monkeypatch.setenv(k, v)

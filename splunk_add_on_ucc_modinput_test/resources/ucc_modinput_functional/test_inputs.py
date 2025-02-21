@@ -32,7 +32,7 @@ from tests.ucc_modinput_functional.splunk.client import SplunkClient
         # ),
     ),
 )
-def test_inputs(splunk_client: SplunkClient, example_input_spl: str):
+def test_inputs(splunk_client: SplunkClient, example_input_spl: str) -> None:
     search_result_details = splunk_client.search(searchquery=example_input_spl)
     assert (
         search_result_details.result_count != 0

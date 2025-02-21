@@ -1,12 +1,11 @@
 from splunk_add_on_ucc_modinput_test.common import utils
 from tests.ucc_modinput_functional.splunk.client import SplunkClient
-from typing import Dict
 from typing import Generator
 
 
 def events_ingested(
-    splunk_client: SplunkClient, probe_spl: str, probes_wait_time=10
-) -> Generator[Dict[str, str], None, None]:
+    splunk_client: SplunkClient, probe_spl: str, probes_wait_time: int = 10
+) -> Generator[int, None, None]:
     start_time = utils.get_epoch_timestamp()
     utils.logger.debug(f"started at {start_time}")
     utils.logger.debug(probe_spl)
@@ -28,5 +27,5 @@ def events_ingested(
 
 def account_input_events_ingested(
     splunk_client: SplunkClient, example_input_spl: str
-) -> Generator[Dict[str, str], None, None]:
+) -> Generator[int, None, None]:
     yield from events_ingested(splunk_client, example_input_spl)

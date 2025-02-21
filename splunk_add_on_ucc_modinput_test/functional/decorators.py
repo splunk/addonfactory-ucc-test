@@ -35,7 +35,7 @@ def bind(
         dependency_manager.bind(fn, scope, step_forges, is_bootstrap)
 
 
-def bootstrap(*forges: Tuple[Union[forge, forges], ...]) -> Callable[..., Any]:
+def bootstrap(*forges: Union[forge, forges]) -> Callable[..., Any]:
     def bootstrap_dec(fn: Callable[..., Any]) -> Callable[..., Any]:
         bind(fn, forges, is_bootstrap=True)
         return fn
@@ -61,7 +61,9 @@ def define_vendor_client_argument(
         + vendor_class_argument_name
     )
 
-    def register_vendor_class_decorator(vendor_configuration_class):
+    def register_vendor_class_decorator(
+        vendor_configuration_class: VendorConfigurationBase,
+    ) -> VendorConfigurationBase:
         dependency_manager.set_vendor_client_class(
             vendor_configuration_class,
             vendor_client_class,
@@ -122,13 +124,15 @@ def register_splunk_class(
         f"configuration {splunk_configuration_class}"
     )
 
-    def _bind_swagger_client(self):
+    def _bind_swagger_client(self) -> None:
         self.ta_service = ta_base.ConfigurationBase(
             swagger_client=swagger_client,
             splunk_configuration=self._splunk_configuration,
         )
 
-    def register_splunk_class_decorator(splunk_client_class):
+    def register_splunk_class_decorator(
+        splunk_client_class: SplunkClientBase,
+    ) -> SplunkClientBase:
         splunk_client_class._bind_swagger_client = _bind_swagger_client
         dependency_manager.set_splunk_client_class(
             splunk_configuration_class,

@@ -1,6 +1,6 @@
 import time
 
-from typing import List, Tuple, Optional, Union
+from typing import Generator, List, Tuple, Optional, Union
 from splunk_add_on_ucc_modinput_test.functional import logger
 from splunk_add_on_ucc_modinput_test.functional.exceptions import (
     SplTaFwkDependencyExecutionError,
@@ -398,24 +398,24 @@ class TestDependencyManager(PytestConfigAdapter):
         ]
         return all(executed)
 
-    def try_to_unblock_inplace_teardowns(self, test):
+    def try_to_unblock_inplace_teardowns(self, test) -> None:
         inplace_tasks = self.tasks.enumerate_inplace_tasks(test.key)
         for _, _, task in inplace_tasks:
             if self.check_tests_executed(task.forge_test_keys):
                 task.unblock_forge_teardown()
 
-    def teardown_test_dependencies(self, test):
+    def teardown_test_dependencies(self, test) -> None:
         self.try_to_unblock_inplace_teardowns(test)
         tasks = list(self.tasks.enumerate_tasks(test.key))
         for _, _, task in reversed(tasks):
             task.teardown()
 
-    def teardown_test(self, test):
+    def teardown_test(self, test) -> None:
         logger.debug(f"teardown test:{test}")
         test.mark_executed()
         self.teardown_test_dependencies(test)
 
-    def _check_failed_tasks(self, test, done_tasks):
+    def _check_failed_tasks(self, test, done_tasks) -> None:
         failed_tasks = [
             task.forge_key for task in done_tasks if task._setup_errors
         ]
@@ -430,14 +430,14 @@ class TestDependencyManager(PytestConfigAdapter):
                 logger.error(msg)
                 raise SplTaFwkDependencyExecutionError(msg)
 
-    def _report_timeout(self, test, pending_tasks):
+    def _report_timeout(self, test: FrameworkTest, pending_tasks) -> None:
         msg = f"{test} exceeded {self.bootstrap_wait_timeout} seconds timeout while waiting for dependencies:"
         for task in pending_tasks:
             msg += f"\n\t{task.forge_full_path}, self id: {id(task)}, scope: {task.forge_scope}, exec_id: {task._exec_id} is_executed: {task.is_executed}, is_failed: {task.setup_failed}"
         logger.error(msg)
         raise SplTaFwkWaitForDependenciesTimeout(msg)
 
-    def wait_for_test_bootstrap(self, test):
+    def wait_for_test_bootstrap(self, test: FrameworkTest) -> None:
         while True:
             done, pending = self.tasks.bootstrap_tasks_by_state(test.key)
             self._check_failed_tasks(test, done)
@@ -452,7 +452,7 @@ class TestDependencyManager(PytestConfigAdapter):
 
         logger.debug(f"{test} bootstrap dependencies are ready")
 
-    def execute_test_inplace_forges(self, test):
+    def execute_test_inplace_forges(self, test: FrameworkTest) -> None:
         logger.debug(f"Executing attached forges for test {test}")
         exec_steps = []
         inplace_tasks = self.tasks.get_inplace_tasks(test.key)
@@ -465,17 +465,23 @@ class TestDependencyManager(PytestConfigAdapter):
         logger.debug(dump)
         self.inplace_tasks_execution(exec_steps)
 
-    def test_setup_error_report(self, test):
+    def test_setup_error_report(
+        self, test: FrameworkTest
+    ) -> Generator[Tuple[FrameworkTask, Exception], None, None]:
         for _, _, task in self.tasks.enumerate_tasks(test.key):
             if task.setup_failed:
                 yield task, task.setup_error
 
-    def test_teardown_error_report(self, test):
+    def test_teardown_error_report(
+        self, test: FrameworkTest
+    ) -> Generator[Tuple[FrameworkTask, Exception], None, None]:
         for _, _, task in self.tasks.enumerate_tasks(test.key):
             if task.teardown_failed:
                 yield task, task.teardown_error
 
-    def test_error_report(self, test):
+    def test_error_report(
+        self, test: FrameworkTest
+    ) -> Generator[Tuple[FrameworkTask, Exception], None, None]:
         for _, _, task in self.tasks.enumerate_tasks(test.key):
             if task.failed:
                 yield task, task.error

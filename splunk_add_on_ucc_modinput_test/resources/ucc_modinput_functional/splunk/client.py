@@ -1,3 +1,4 @@
+from typing import Any
 from splunk_add_on_ucc_modinput_test.functional.decorators import (
     register_splunk_class,
 )
@@ -22,12 +23,12 @@ output_mode = "json"
 class SplunkClient(SplunkClientBase):
     NAME = "Splunk_TA_salesforce"
 
-    def search(self, searchquery):
+    def search(self, searchquery: str) -> splunk_instance.SearchState:
         return splunk_instance.search(
             service=self.splunk, searchquery=searchquery
         )
 
-    def get_ta_log_level(self):
+    def get_ta_log_level(self) -> str:
         # find relevant part in swagger_client README.md
         # copy and paste here
         try:
@@ -43,13 +44,13 @@ class SplunkClient(SplunkClientBase):
                     splunk_ta_example_settings_logging_get: %s\n"
                 % e
             )
-        # if you want to return any value, add return section
+            raise e
         else:
             return api_response.entry[0].content.loglevel
 
     def set_ta_log_level(
         self, loglevel: str = defaults.TA_LOG_LEVEL_FOR_TESTS
-    ):
+    ) -> None:
         pprint(f"Configuring TA log level to {loglevel}")
         try:
             api_response = self.ta_api.splunk_ta_example_settings_logging_post(
@@ -68,7 +69,7 @@ class SplunkClient(SplunkClientBase):
         *,
         name: str,
         api_key: str,
-    ):
+    ) -> None:
         try:
             api_response = self.ta_api.splunk_ta_example_account_post(
                 output_mode, name=name, api_key=api_key
@@ -85,7 +86,7 @@ class SplunkClient(SplunkClientBase):
         self,
         *,
         name: str,
-    ):
+    ) -> Any:
         try:
             api_response = self.ta_api.splunk_ta_example_account_name_get(
                 name, output_mode
@@ -107,7 +108,7 @@ class SplunkClient(SplunkClientBase):
         interval: str,
         index: str,
         account: str,
-    ):
+    ) -> None:
         try:
             # api_response = self.ta_api.splunk_ta_example_example_post(output_mode, name=name, interval=interval, index=index, account=account, fetch_from=fetch_from, start_from=start_from) # noqa: E501
             # fetch_from and start_from were created to show UCC options
@@ -128,7 +129,7 @@ class SplunkClient(SplunkClientBase):
                 % e
             )
 
-    def disable_input(self, *, name: str):
+    def disable_input(self, *, name: str) -> None:
         try:
             api_response = self.ta_api.splunk_ta_example_example_name_post(
                 output_mode, name, disabled=True

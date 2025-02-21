@@ -1,17 +1,23 @@
+from typing import Any, Dict, List, Tuple
 from splunk_add_on_ucc_modinput_test.functional import logger
+from splunk_add_on_ucc_modinput_test.functional.entities.test import (
+    FrameworkTest,
+)
 from splunk_add_on_ucc_modinput_test.functional.manager import (
     dependency_manager,
 )
+from pytest import Item
+from _pytest.mark.structures import Mark
 
 
-def _extract_parametrized_data(pyfuncitem):
+def _extract_parametrized_data(pyfuncitem: Item) -> Tuple[str, Any]:
     callspec_params = {}
     if hasattr(pyfuncitem, "callspec"):
         callspec_params = pyfuncitem.callspec.params
     return pyfuncitem.keywords.node.name, callspec_params
 
 
-def _map_forged_tests_to_pytest_items(items):
+def _map_forged_tests_to_pytest_items(items: List[Item]) -> Dict[str, Item]:
     forged_tests = {}
     for item in items:
         test = dependency_manager.tests.lookup_by_function(item._obj)
@@ -20,8 +26,10 @@ def _map_forged_tests_to_pytest_items(items):
     return forged_tests
 
 
-def _collect_parametrized_tests(items):
-    parametrized_tests = {}
+def _collect_parametrized_tests(
+    items: List[Item],
+) -> Dict[str, List[Tuple[str, Any]]]:
+    parametrized_tests: Dict[str, List[Tuple[str, Any]]] = {}
     for item in items:
         parametrized_markers = [
             marker
@@ -50,7 +58,9 @@ def _collect_parametrized_tests(items):
     return parametrized_tests
 
 
-def _collect_skipped_tests(items):
+def _collect_skipped_tests(
+    items: List[Item],
+) -> List[Tuple[FrameworkTest, List[Mark]]]:
     skip_tests = []
     for item in items:
         skipped_markers = [
@@ -65,7 +75,7 @@ def _collect_skipped_tests(items):
     return skip_tests
 
 
-def _adjust_test_order(items):
+def _adjust_test_order(items: List[Item]) -> List[Item]:
     tests = []
     logger.debug("Initial test order:")
     for item in items:
@@ -84,7 +94,7 @@ def _adjust_test_order(items):
     return [item for item, _ in sorted_items]
 
 
-def _debug_log_test_order(items):
+def _debug_log_test_order(items: List[Item]) -> None:
     logger.debug("Adjusted test order:")
     for item in items:
         pytest_funcname, _ = _extract_parametrized_data(item)
@@ -96,7 +106,7 @@ def _debug_log_test_order(items):
             logger.debug(f"NOT FOUND: {item}, {pytest_funcname} ")
 
 
-def _log_test_order(items):
+def _log_test_order(items: List[Item]) -> None:
     order = "\nTest execution order:\n"
     for index, item in enumerate(items):
         pytest_funcname, _ = _extract_parametrized_data(item)

@@ -1,3 +1,4 @@
+from typing import Optional
 from splunk_add_on_ucc_modinput_test.common import utils
 from splunk_add_on_ucc_modinput_test.functional.vendor.configuration import (
     VendorConfigurationBase,
@@ -12,5 +13,5 @@ class Configuration(VendorConfigurationBase):
         )
 
     @property
-    def api_key(self):
+    def api_key(self) -> Optional[str]:
         return self._api_key

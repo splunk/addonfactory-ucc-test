@@ -1,3 +1,4 @@
+from typing import List
 import pytest
 import traceback
 from splunk_add_on_ucc_modinput_test.functional import logger
@@ -16,10 +17,12 @@ from splunk_add_on_ucc_modinput_test.functional.pytest_plugin.utils import (
     _extract_parametrized_data,
     _map_forged_tests_to_pytest_items,
 )
+from pytest import Session, Config, Item
+from typing import Sequence
 
 
 @pytest.hookimpl
-def pytest_deselected(items):
+def pytest_deselected(items: Sequence[Item]) -> None:
     logger.debug(f"Processing deselected items: {items}")
     if not items:
         return
@@ -39,7 +42,9 @@ def pytest_deselected(items):
 
 
 @pytest.hookimpl
-def pytest_collection_modifyitems(session, config, items):
+def pytest_collection_modifyitems(
+    session: Session, config: Config, items: List[Item]
+) -> None:
     logger.debug(f"Lookung for forged tests in: {items}")
     dependency_manager.link_pytest_config(config)
     tests2items = _map_forged_tests_to_pytest_items(items)
@@ -73,12 +78,12 @@ def pytest_collection_modifyitems(session, config, items):
 
 
 @pytest.hookimpl
-def pytest_collection_finish(session):
+def pytest_collection_finish(session: Session) -> None:
     dependency_manager.start_bootstrap_execution()
 
 
 @pytest.hookimpl
-def pytest_runtest_setup(item: pytest.Item) -> None:
+def pytest_runtest_setup(item: Item) -> None:
     pytest_funcname, _ = _extract_parametrized_data(item)
     test = dependency_manager.find_test(item._obj, pytest_funcname)
     if not test:
@@ -104,7 +109,7 @@ def pytest_runtest_setup(item: pytest.Item) -> None:
 
 
 @pytest.hookimpl
-def pytest_runtest_call(item: pytest.Item) -> None:
+def pytest_runtest_call(item: Item) -> None:
     pytest_funcname, _ = _extract_parametrized_data(item)
     test = dependency_manager.find_test(item._obj, pytest_funcname)
     if not test:
@@ -114,7 +119,7 @@ def pytest_runtest_call(item: pytest.Item) -> None:
 
 
 @pytest.hookimpl
-def pytest_runtest_teardown(item: pytest.Item) -> None:
+def pytest_runtest_teardown(item: Item) -> None:
     pytest_funcname, _ = _extract_parametrized_data(item)
     test = dependency_manager.find_test(item._obj, pytest_funcname)
     if not test:

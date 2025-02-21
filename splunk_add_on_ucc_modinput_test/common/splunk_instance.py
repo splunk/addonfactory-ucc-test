@@ -3,6 +3,7 @@ from __future__ import annotations
 # mypy: disable-error-code="attr-defined,arg-type"
 
 import time
+from typing import Dict, Tuple
 import pytest
 import requests  # type: ignore
 from requests.adapters import HTTPAdapter, Retry  # type: ignore
@@ -109,7 +110,7 @@ class Configuration:
         utils.logger.debug(f"Index {index_name} has just been created")
         return created_index
 
-    __instances: dict[tuple[str, str, str], Configuration] = {}
+    __instances: Dict[Tuple[str, str, str], Configuration] = {}
 
     @classmethod
     def collect_host(cls) -> str:

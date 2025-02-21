@@ -6,7 +6,7 @@ from tests.ucc_modinput_functional.vendor.client import VendorClient
 from typing import Dict, Generator
 
 
-def ta_logging(splunk_client: SplunkClient):
+def ta_logging(splunk_client: SplunkClient) -> Generator[None, None, None]:
     utils.logger.debug("Executing forge ta_logging")
     previous_log_level = splunk_client.get_ta_log_level()
     splunk_client.set_ta_log_level()
@@ -24,7 +24,7 @@ def _account_config(name: str, vendor_client: VendorClient) -> Dict[str, str]:
 def account(
     splunk_client: SplunkClient,
     vendor_client: VendorClient,
-):
+) -> Generator[Dict[str, str], None, None]:
     account_config = _account_config("ExampleAccount", vendor_client)
     splunk_client.create_account(**account_config)
     yield dict(
@@ -36,13 +36,15 @@ def account(
 def another_account(
     splunk_client: SplunkClient,
     vendor_client: VendorClient,
-):
+) -> Generator[Dict[str, str], None, None]:
     account_config = _account_config("AnotherExampleAccount", vendor_client)
     splunk_client.create_account(**account_config)
     yield dict(another_account_config_name=account_config["name"])
 
 
-def another_account_index(splunk_client: SplunkClient):
+def another_account_index(
+    splunk_client: SplunkClient,
+) -> Generator[Dict[str, str], None, None]:
     index_name = f"idx_mit_another_account_{utils.Common().sufix}"
     splk_conf = splunk_client.splunk_configuration
     splk_conf.create_index(

@@ -4,9 +4,12 @@
 #
 #
 
-import requests
+from typing import Any, Dict, Set
+import requests  # type: ignore
 import tempfile
 from splunk_add_on_ucc_modinput_test.functional import logger
+
+from typing import IO
 
 
 class SplunkInstanceFileHelper:
@@ -23,16 +26,16 @@ class SplunkInstanceFileHelper:
 
     def __init__(
         self, splunk_url: str, username: str, password: str, base_dir: str = ""
-    ):
-        self.file_set = set()
+    ) -> None:
+        self.file_set: Set[IO[str]] = set()
         self.splunk_url = splunk_url
         self.username = username
         self.password = password
         self.base_dir = base_dir
 
     def perform_api_operations(
-        self, operation, payload={}
-    ):  # pylint: disable=dangerous-default-value
+        self, operation: str, payload: Dict[str, str] = {}
+    ) -> Any:  # pylint: disable=dangerous-default-value
         """Performs API operations."""
         endpoint = (
             "/servicesNS/nobody/Splunk_TA_Modinput_Test/"
@@ -56,13 +59,13 @@ class SplunkInstanceFileHelper:
             )
         return response.json()
 
-    def _make_path(self, filepath):
+    def _make_path(self, filepath: str) -> str:
         """Makes path."""
         if self.base_dir == "":
             return filepath
         return f"{self.base_dir}/{filepath}"
 
-    def isfile(self, filepath):
+    def isfile(self, filepath: str) -> bool:
         """Checks if file."""
         full_path = self._make_path(filepath)
         payload = {"file_path": full_path}
@@ -75,7 +78,7 @@ class SplunkInstanceFileHelper:
             return True
         return False
 
-    def isdir(self, dirpath):
+    def isdir(self, dirpath: str) -> bool:
         """Checks if directory."""
         full_path = self._make_path(dirpath)
         payload = {"dir_path": full_path}
@@ -88,16 +91,16 @@ class SplunkInstanceFileHelper:
             return True
         return False
 
-    def create_file(self, filepath, content=""):
+    def create_file(self, filepath: str, content: str = "") -> None:
         """Creates file."""
         payload = {"file_path": self._make_path(filepath), "data": content}
         self.perform_api_operations("create", payload)
 
-    def overwrite_file(self, filepath, content=""):
+    def overwrite_file(self, filepath: str, content: str = "") -> None:
         """Overwrites file."""
         self.create_file(filepath, content)
 
-    def read_file(self, filepath):
+    def read_file(self, filepath: str) -> str:
         """Reads file."""
         full_path = self._make_path(filepath)
         payload = {"file_path": full_path}
@@ -112,12 +115,12 @@ class SplunkInstanceFileHelper:
             entry["content"]["read_error_message"]
         )
 
-    def append_file(self, filepath, content=""):
+    def append_file(self, filepath: str, content: str = "") -> None:
         """Updates file."""
         payload = {"file_path": self._make_path(filepath), "data": content}
         self.perform_api_operations("update", payload)
 
-    def delete_file(self, filepath):
+    def delete_file(self, filepath: str) -> bool:
         """Deletes file."""
         full_path = self._make_path(filepath)
         payload = {"file_path": full_path}
@@ -128,7 +131,7 @@ class SplunkInstanceFileHelper:
             return True
         return False
 
-    def remove_dir(self, dirpath):
+    def remove_dir(self, dirpath: str) -> bool:
         """Removes directory."""
         full_path = self._make_path(dirpath)
         payload = {"dir_path": full_path}
@@ -139,7 +142,7 @@ class SplunkInstanceFileHelper:
             return True
         return False
 
-    def execute(self, command):
+    def execute(self, command: str) -> str:
         """Executes shell command."""
         payload = {"command": command}
         json_response = self.perform_api_operations("execute", payload)
@@ -152,12 +155,12 @@ class SplunkInstanceFileHelper:
             entry["content"]["read_error_message"]
         )
 
-    def clean(self):
+    def clean(self) -> None:
         """Clean method."""
         for temp in self.file_set:
             temp.close()
 
-    def retrieve(self, path):
+    def retrieve(self, path: str) -> str:
         """
         if remote, then copy the remote file to local
         if not remot, then return the path itself

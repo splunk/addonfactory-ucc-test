@@ -2,7 +2,7 @@ import threading
 import inspect
 import contextlib
 import time
-from typing import List
+from typing import Any, Dict, List
 from dataclasses import dataclass, replace
 from splunk_add_on_ucc_modinput_test.functional import logger
 from splunk_add_on_ucc_modinput_test.functional.entities.executable import (
@@ -30,7 +30,7 @@ class ForgeExecData:
         self.errors = errors
         self.count = count
 
-    def summary(self, offset="") -> str:
+    def summary(self, offset: str = "") -> str:
         s = f"\n{offset}Teardown summary:"
         s += f"\n{offset}\tdata.id: {self.id},"
         s += f"\n{offset}\tdata.count={self.count},"
@@ -42,27 +42,27 @@ class ForgeExecData:
 
 
 class ForgePostExec:
-    def __init__(self):
+    def __init__(self) -> None:
         self.lock = threading.Lock()
-        self._exec_store = {}
+        self._exec_store: Dict[str, Any] = {}
         self._teardown_is_blocked = False
 
-    def summary(self, data):
+    def summary(self, data: ForgeExecData) -> None:
         s = data.summary()
         s += f"\n\tteardown_is_blocked={self._teardown_is_blocked}"
 
-    def block_teardown(self):
+    def block_teardown(self) -> None:
         self._teardown_is_blocked = True
 
-    def unblock_teardown(self):
+    def unblock_teardown(self) -> None:
         self._teardown_is_blocked = False
         self.exec_ready_teardowns()
 
-    def exec_ready_teardowns(self):
+    def exec_ready_teardowns(self) -> None:
         for data in self._exec_store.values():
             self.exec_teardown_if_ready(data)
 
-    def exec_teardown_if_ready(self, data):
+    def exec_teardown_if_ready(self, data: ForgeExecData) -> bool:
         with data.lock:
             can_execute = (
                 data.count == 0
@@ -76,7 +76,14 @@ class ForgePostExec:
                 self.execute_teardown(data)
         return can_execute
 
-    def add(self, id, teardown, kwargs, result, errors):
+    def add(
+        self,
+        id: str,
+        teardown: object,
+        kwargs: dict,
+        result: object,
+        errors: List[str],
+    ) -> None:
         if id not in self._exec_store:
             with self.lock:
                 data = ForgeExecData(id, teardown, kwargs, result, errors, 1)
