@@ -29,3 +29,6 @@ def base64encode(
 
 def base64decode(base64_string: str) -> str:
     return utils.Base64.decode(base64_string=base64_string)
+
+def hello_world():
+    print("hello world")
