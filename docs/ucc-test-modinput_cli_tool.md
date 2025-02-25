@@ -1,6 +1,8 @@
 # ucc-test-modinput CLI tool
 
-ucc-test-modinput CLI tool comes with following arguments:
+ucc-test-modinput CLI is a supporting tool.
+
+It comes with following arguments:
 
 - `--help` or `-h` ; shows help message and exits ; you can use it for arguments as well - eg. `ucc-test-modinput base64encode -h` will show help message for `base64encode`
 

@@ -2,23 +2,6 @@
 
 addonfactory-ucc-test (AUT) is an open-source testing framework for functional tests for [UCC-based Splunk Add-ons](https://splunk.github.io/addonfactory-ucc-generator/) which allows to test add-ons functonality for data ingestion. It automates add-ons configuration, events generation by vendor product side and assessment of ingested events providing platform for end to end tests.
 
-## Prerequisites
-
-- Prepared basic setup for the add-on
-    - Vendor product configured for the add-on
-    - Splunk instance with add-on installed
-    - The setup is manually tested
-- [openapi.json](https://splunk.github.io/addonfactory-ucc-generator/openapi/#how-to-find-the-document) saved to developer workstation
-
-
-## Installation
-
-addonfactory-ucc-test can be installed via pip from PyPI:
-
-```console
-pip3 install addonfactory-ucc-test
-```
-
 ## Principles
 
 The addonfactory-ucc-test framework follows principles in an order based on importance:
@@ -37,12 +20,32 @@ The addonfactory-ucc-test framework follows principles in an order based on impo
 
 The addonfactory-ucc-test framework consists of following building blocks:
 
-- [`ucc-test-modinput` CLI tool](./ucc-test-modinput_cli_tool.md) used initialise the tests (create relevant directories, files and initial test)
+- addonfactory-ucc-test that contains:
 
-- [`addonfactory-ucc-test/functional` pytest plugin](./addonfactory-ucc-test_pytest_plugin.md) used to extend pytest functionality to support end-to-end functional tests 
+    - [`ucc-test-modinput` CLI tool](./ucc-test-modinput_cli_tool.md) used to initialise the tests (creates relevant directories, files and initial test; one time action), generate add-on SDK and other supporting actions (text encryption and decryption) 
+
+    - [`addonfactory-ucc-test/functional` pytest plugin](./addonfactory-ucc-test_pytest_plugin.md) used to extend pytest functionality to support end-to-end functional tests 
 
 - supporting artifacts:
 
     - `ucc_modinput_functional` tests in [`Splunk Add-on for Example` ](https://github.com/splunk/splunk-example-ta)
 
     - this documentation
+
+
+## Installation
+
+addonfactory-ucc-test can be installed via pip from PyPI:
+
+```console
+pip3 install addonfactory-ucc-test
+```
+
+## Prerequisites
+
+- Prepared basic setup for the add-on
+    - Vendor product configured for the add-on
+    - Splunk instance with add-on installed
+    - The setup is manually tested
+- [openapi.json](https://splunk.github.io/addonfactory-ucc-generator/openapi/#how-to-find-the-document) saved to developer workstation
+

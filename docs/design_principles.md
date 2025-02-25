@@ -1,8 +1,10 @@
 # Design principles
 
+Framework comes with libraries used to deal with Splunk (Enterprise as well as Cloud), UCC-related functionalities and common actions.
+
 There are following concepts used in the framework as well as rules add-on developer should follow:
 
-1. framework comes with libraries used to deal with Splunk (Enterprise as well as Cloud) and UCC-related functionalities. Vendor product-related as well as add-on specific functionalities are left to the developer to deal with.
+1. **Vendor product-related and add-on specific functionalities** are left to the **developer to deal with**
 
 2. **test function**s should be used just **to assert** actual vs expected values
 
