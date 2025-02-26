@@ -76,19 +76,41 @@ If you find you add-on more complex, feel free to organise the test structure th
 
     2. [addonfactory-ucc-test is installed](index.md#installation)
 
-2. Once you run `ucc-test-modinput init`[^1] , [`tests/ucc_modinput_functional`](#testsucc_modinput_functional) directory will be copied from the [example TA](https://github.com/splunk/splunk-example-ta) to your add-on repository.
+2. Once you run `ucc-test-modinput init`, `tests/ucc_modinput_functional` directory and relevant files will be generated as well as `swagger_client` directory with supporting modules.
+
+**Note:** You may want to specify openapi.json file location - eg. if it is in `Downloads`: `ucc-test-modinput init --openapi-json ~/Downloads/openapi.json`; go to [`ucc-test-modinput` page](./ucc-test-modinput_cli_tool.md) for more
 
 3. Export Splunk parameters to [relevant environment variables](./addonfactory-ucc-test_pytest_plugin/#expected-environment-variables)
 
+4. Run test: `pytest tests/ucc_modinput_functional`
+
+
+![Screen Recording](./images/output.gif)
+
+## Test cases
+
+### Basic
+
+We are assuming that vendor product is *talkative* enough 
+
+1. Increase log level to DEBUG
+
+2. Create configuration
+
+3. Create input that depends on just created configuration
+
+
+
+<!--
+ [`tests/ucc_modinput_functional`](#testsucc_modinput_functional) directory will be copied from the [example TA](https://github.com/splunk/splunk-example-ta) to your add-on repository.
+-->
+<!--
     2. You've got all the parameters that define your environment?
 
         1. Are there vendor product-specific, environment-specific, test-specific or other kind?
 
         2. Are there confidential parameters?
+-->
+
 
 3. Follow [recommended order](#testsucc_modinput_functional) and hints given within the files when modifying them for your needs.
-
-![Screen Recording](./images/output.gif)
-
-
-[^1]: you may want to specify openapi.json file location (eg. if it is in `Downloads`: `ucc-test-modinput init --openapi-json ~/Downloads/openapi.json`); go to [`ucc-test-modinput` page](./ucc-test-modinput_cli_tool.md) for more
