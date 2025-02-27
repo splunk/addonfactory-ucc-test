@@ -41,13 +41,13 @@ The framework is thought the way, to be able to address even the most complicate
 
 There are certain ways data can be isolated:
 
-- **dedicated index** is created for each test run by default and it is highly recommended to use the index. Moreover, AUT provides a functionality that allows to create custom indexes if needed,
+- **dedicated index** is created for each test run by default and it is highly recommended to use the index. Moreover, AUT provides a functionality that allows to create custom indexes if needed
 
-- **attach decorator** allows to isolate specific tests so time range can be defined for splunk events,
+- **attach decorator** allows to isolate specific tests so time range can be defined for splunk events
 
-- source of the event allows to identify input,
+- source of the event allows to identify input
 
-- unique **test id** can be used to distinguish between specific tests and test runs.
+- unique **test id** can be used to distinguish between specific tests and test runs
 
 ## Supported platforms
 

@@ -2,9 +2,9 @@
 
 General test cases are described. There are scenarios for each and relevant [concepts](./design_principles.md#design-principles) that should be used.
 
-***Note:** all `forge` tasks should be treated as `bootstrap` unless explicitely defined as `attach`*
+***Note:** all `forge` tasks should be treated as `bootstrap` unless explicitly defined as `attach`*
 
-***Note:** if `forge` term is used, that generally refers to setup step unless explicitely defined as teardown*
+***Note:** if `forge` term is used, that generally refers to setup step unless explicitly defined as teardown*
 
 
 ## Basic scenario
@@ -82,7 +82,7 @@ We want to ingest some general events for an input and vendor product needs to b
 
 1. Increase log level to DEBUG (forge)
 
-2. Following steps can be exexcuted independently, before relevant input is created (forges)
+2. Following steps can be executed independently, before relevant input is created (forges)
 
     1. Create configuration (forge; yield configuration name - will be used for input)
 
