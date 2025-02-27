@@ -87,19 +87,6 @@ If you find you add-on more complex, feel free to organise the test structure th
 
 ![Screen Recording](./images/output.gif)
 
-## Test cases
-
-### Basic
-
-We are assuming that vendor product is *talkative* enough 
-
-1. Increase log level to DEBUG
-
-2. Create configuration
-
-3. Create input that depends on just created configuration
-
-
 
 <!--
  [`tests/ucc_modinput_functional`](#testsucc_modinput_functional) directory will be copied from the [example TA](https://github.com/splunk/splunk-example-ta) to your add-on repository.
