@@ -1,0 +1,50 @@
+import json
+from typing import Dict, Optional, Tuple
+from splunk_add_on_ucc_modinput_test.common.utils import logger
+from splunk_add_on_ucc_modinput_test.functional.splunk.client import (
+    SplunkClientBase,
+)
+from splunk_add_on_ucc_modinput_test.functional.decorators import (
+    register_splunk_class,
+)
+from tests.ucc_modinput_functional.splunk.client.configuration import (
+    Configuration,
+)
+import swagger_client
+from swagger_client.rest import ApiException
+
+
+class SplunkApiError(Exception):
+    def __init__(self, error: ApiException):
+        self.api_exception = error
+
+    @property
+    def status(self) -> int:
+        return int(self.api_exception.status)
+
+    @property
+    def reason(self) -> str:
+        return self.api_exception.reason
+
+    @property
+    def body(self) -> bytes:
+        return self.api_exception.body
+
+    @property
+    def json(self) -> Optional[Dict]:
+        try:
+            return json.loads(self.api_exception.body)
+        except json.JSONDecodeError:
+            return None
+
+    @property
+    def error_message(self) -> Optional[str]:
+        json_body = self.json
+        if json_body:
+            return json_body.get("messages", [{}])[0].get("text")
+        return None
+
+
+@register_splunk_class(swagger_client, Configuration)
+class SplunkClient(SplunkClientBase):
+    _OUTPUT_MODE = "json"

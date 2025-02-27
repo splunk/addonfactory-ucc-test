@@ -1,0 +1,12 @@
+    
+    def {{method_name}}(self{{method_args}}) -> Dict:
+        try:
+            kwargs = dict({{api_args}})
+            kwargs = {k:v for k,v in kwargs.items() if v is not None}
+            response = self.ta_api.{{api_name}}(**kwargs)
+            logger.debug(response)
+            return  response.to_dict()["entry"][0]["content"]
+        except ApiException as e:
+            logger.error(f"Exception when calling TA API {{api_name}}: {e}")
+            raise SplunkApiError(e) from e
+

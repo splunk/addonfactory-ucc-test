@@ -7,6 +7,9 @@ from pathlib import Path
 from datetime import datetime
 from typing import Optional, Sequence
 from splunk_add_on_ucc_modinput_test import commands, tools
+from splunk_add_on_ucc_modinput_test.bootstrap.clients import (
+    SplunkClientBootstrup,
+)
 
 
 class DefaultSubcommandArgumentParser(argparse.ArgumentParser):
@@ -144,6 +147,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "init",
         description="Initialize modinput tests. This is one time action.",
     )
+    init_parser = subparsers.add_parser(
+        "make-splunk-client",
+        description="Generates splunk client class based on swagger README.md file",
+    )
+    init_parser = subparsers.add_parser(
+        "make-clients-files",
+        description="Generates splunk client class based on swagger README.md file, plus creates default vendor client class and configuration classes for each client",
+    )
     base64encode_parser = subparsers.add_parser(
         "base64encode",
         description="Tool to convert complex string (due to special characters \
@@ -255,6 +266,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         commands.initialize(
             modinput=args.modinput,
         )
+    if args.command == "make-splunk-client":
+        SplunkClientBootstrup().make_splunk_client()
+
+    if args.command == "make-clients-files":
+        SplunkClientBootstrup().init()
+
     if args.command == "base64encode":
         print(
             tools.base64encode(
