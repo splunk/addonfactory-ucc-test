@@ -1,19 +1,5 @@
 
 
-    1.2. vendor product
-
-Focus on each unique event you are collecting with use of modular inputs
-What actions need to be taken in vendor product to generate the event?
-How the actions can be achieved programatically?
-
-    1.3. Splunk
-
-        1.3.1. Is it Enterprise or Cloud (Victoria is supported only). If Cloud, is the stack in production or some other environment (eg. Staging)
-
-        1.3.2. How does each unique event look like in Splunk?
-What query needs to be applied to find particular event?
-What are expected field values?
-etc. 
 
 
 
