@@ -18,7 +18,7 @@ It comes with following arguments:
 
     - `--openapi-json` or `-o` ; `-o [path to openapi.json / source file ]` - default value is `output/*/appserver/static/openapi.json` ; refer to [UCC documentation](https://splunk.github.io/addonfactory-ucc-generator/openapi/#how-to-find-the-document) to learn more where you can find this document
 
-    - `--client-code` or `-c` ; `-c [path to client code / target directory]` - default value is set to repo root directory
+    - `--client-code` or `-c` ; `-c [path to client code / target directory]` - default value is set to repo root directory ; this is where `swagger_client` directory will be saved. The directory contains client code for TA REST API and `swagger_client/README.md` file that documents the client API
 
     - `--tmp` or `-t` ; `-t [path to directory where temporary files are stored]` - default value is set to `/modinput/` subdirectory of [directory used for temporary files](https://docs.python.org/3/library/tempfile.html#tempfile.gettempdir)
 
