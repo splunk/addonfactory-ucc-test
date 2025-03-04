@@ -78,7 +78,7 @@ where:
 
 - **raw_event_specific_string** that can be skipped, if other values are sufficient, one or many strings that define uniquely raw event we are interested in
 
-- **start_time** - epoch timestamp should be used, however where timestamp is collected should be pick with special care. Check [test scenarios](./test_scenarios.md) to understand what potential options you've got. Timetamp of begginig of tests can be used as default: `start_time = utils.get_epoch_timestamp()`
+- **start_time** - epoch timestamp should be used, however where timestamp is collected should be pick with special care. Check [test scenarios](./test_scenarios.md) to understand what potential options you've got. Timestamp of begginig of tests can be used as default: `start_time = utils.get_epoch_timestamp()`
 
 # When your tests are ready
 
