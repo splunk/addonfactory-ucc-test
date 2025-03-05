@@ -12,15 +12,17 @@ Open `tests/ucc_modinput_functional` and go through it in proposed below order t
 
 #### tests/ucc_modinput_functional
 
-1. `defaults.py` - contains predefined, the tests-specific, constant values
+1. `README.md` - contains add-on specific information related to the functional tests
 
-2. `vendor/` - contains vendor product-specific code
+2. `defaults.py` - contains predefined, the tests-specific, constant values
+
+3. `vendor/` - contains vendor product-specific code
 
     1. `configuration.py` - to read configuration from environment variables; it can be used later for vendor product-specific means (eg. triggering action that would generate event available for add-on to collect), add-on configuration or within test functions
 
     2. `client.py` - contains code used to communicate with vendor product
 
-3. `splunk/` - contains add-on specific code
+4. `splunk/` - contains add-on specific code
 
     1. `client.py` - contains code used to communicate with add-on REST API; relevant code snippets can be found in swagger_client README.md copied from there, pasted to the client file and adopted
 
@@ -28,9 +30,9 @@ Open `tests/ucc_modinput_functional` and go through it in proposed below order t
 
     3. `probes.py`
 
-4. `test_configuration.py` - start simple, eg. from making sure the simplest case like `test_ta_logging` works fine. Keep adding following tests for add-on configuration to make sure you are able to define building blocks that will be used for inputs
+5. `test_configuration.py` - start simple, eg. from making sure the simplest case like `test_ta_logging` works fine. Keep adding following tests for add-on configuration to make sure you are able to define building blocks that will be used for inputs
 
-5. `test_inputs.py` - you have proper configuration. There are still two things you need to confirm:
+6. `test_inputs.py` - you have proper configuration. There are still two things you need to confirm:
 
     1. Make sure vendor product is talkative enough to have always events available for your tests or you need to trigger events generation
 
