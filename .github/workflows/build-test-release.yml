@@ -29,7 +29,7 @@ jobs:
   #   runs-on: ubuntu-latest
   #   steps:
   #     - uses: actions/checkout@v4
-  #     - uses: actions/setup-python@v4
+  #     - uses: actions/setup-python@v5
   #       with:
   #         python-version: "3.7"
   #     - uses: pre-commit/action@v3.0.0
@@ -38,7 +38,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.7"
       - run: curl -sSL https://install.python-poetry.org | python3 - --version 1.5.1
@@ -62,7 +62,7 @@ jobs:
   #         - "3.11"
   #   steps:
   #     - uses: actions/checkout@v4
-  #     - uses: actions/setup-python@v4
+  #     - uses: actions/setup-python@v5
   #       with:
   #         python-version: ${{ matrix.python-version }}
   #     - run: curl -sSL https://install.python-poetry.org | python3 - --version 1.5.1
@@ -81,7 +81,7 @@ jobs:
         splunk: ${{ fromJson(needs.meta.outputs.matrix_supportedSplunk) }}
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: 3.7
       - name: Clone Example TA
@@ -174,7 +174,7 @@ jobs:
   #         # Very important: semantic-release won't trigger a tagged
   #         # build if this is not set false
   #         persist-credentials: false
-  #     - uses: actions/setup-python@v4
+  #     - uses: actions/setup-python@v5
   #       with:
   #         python-version: "3.7"
   #     - id: semantic
