@@ -46,7 +46,7 @@ jobs:
       - name: Build UCC test
         run: |
           poetry build
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: UCC-test-build
           path: dist/
@@ -113,7 +113,7 @@ jobs:
       #     ucc-test-modinput
       #     tree -a
       #     cd ../../..
-      # - uses: actions/upload-artifact@v3
+      # - uses: actions/upload-artifact@v4
       #   with:
       #     name: swagger_client
       #     path: tests/functional/demo_addon_for_splunk/swagger_client
@@ -156,7 +156,7 @@ jobs:
       #     poetry install
       #     poetry run pytest -n 10 tests/modinput_functional
       
-      # - uses: actions/upload-artifact@v3
+      # - uses: actions/upload-artifact@v4
       #   with:
       #     name: ucc_modinput_test.log
       #     path: tests/functional/demo_addon_for_splunk/ucc_modinput_test.log
