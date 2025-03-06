@@ -14,9 +14,12 @@ addonfactory-ucc-test (AUT) is an open-source testing framework for functional t
 ## Installation
 
 addonfactory-ucc-test can be installed via pip from PyPI:
-
 ```console
 pip3 install addonfactory-ucc-test
+```
+You can verify installation by checking installed version:
+```console
+ucc-test-modinput --version
 ```
 
 ## How can I run existing tests?

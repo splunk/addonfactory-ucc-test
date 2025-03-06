@@ -7,8 +7,14 @@ from pathlib import Path
 from datetime import datetime
 from typing import Optional, Sequence
 from splunk_add_on_ucc_modinput_test import commands, tools
+from importlib_metadata import version, PackageNotFoundError
 
-VERSION = "0.4.0"  # Define your version here
+
+def get_version():
+    try:
+        return version("splunk_add_on_ucc_modinput_test")
+    except PackageNotFoundError:
+        return "unknown"
 
 class DefaultSubcommandArgumentParser(argparse.ArgumentParser):
     __default_subparser = None
@@ -137,7 +143,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     argv = argv if argv is not None else sys.argv[1:]
     parser = DefaultSubcommandArgumentParser()
-    parser.add_argument('--version', action='version', version=f'%(prog)s {VERSION}')
+    parser.add_argument('--version', action='version', version=f'%(prog)s {get_version()}')
     subparsers = parser.add_subparsers(dest="command")
     gen_parser = subparsers.add_parser(
         "gen", description="Generate python client code from openapi.json"

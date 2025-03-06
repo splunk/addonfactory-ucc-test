@@ -6,6 +6,8 @@ It comes with following arguments:
 
 - `--help` or `-h` ; shows help message and exits ; you can use it for arguments as well - eg. `ucc-test-modinput base64encode -h` will show help message for `base64encode`
 
+- `--version` - shows program's version number and exit 
+
 - `base64encode` - converts complex string (due to special characters or structure) to base64 string
 
     - `--string` or `-s` ; `-s [string you want to encode]` - eg. `base64encode -s ThisIsMyPassword`
