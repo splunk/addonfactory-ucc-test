@@ -1,5 +1,35 @@
 # Design principles
 
+The addonfactory-ucc-test framework follows principles in an order based on importance:
+
+1. [add-on developer experience](./before_you_write_your_first_line_of_code.md)
+
+2. [execution time](./design_principles.md#performance)
+
+3. [test scenarios complexity](./design_principles.md#complexity)
+
+4. [data isolation](./design_principles.md#data-isolation)
+
+5. [cross-platform & CI-ready](./design_principles.md#supported-platforms)
+
+## Building blocks
+
+The addonfactory-ucc-test framework consists of following building blocks:
+
+- addonfactory-ucc-test that contains:
+
+    - [`ucc-test-modinput` CLI tool](./ucc-test-modinput_cli_tool.md) used to initialise the tests (creates relevant directories, files and initial test; one time action), generate add-on SDK and other supporting actions (text encryption and decryption) 
+
+    - [`addonfactory-ucc-test/functional` pytest plugin](./addonfactory-ucc-test_pytest_plugin.md) used to extend pytest functionality to support end-to-end functional tests 
+
+- supporting artifacts:
+
+    - `ucc_modinput_functional` tests in [`Splunk Add-on for Example` ](https://github.com/splunk/splunk-example-ta)
+
+    - this documentation
+
+## Concepts to use and rules to follow
+
 Framework comes with libraries used to deal with Splunk (Enterprise as well as Cloud), UCC-related functionalities and common actions.
 
 There are following concepts used in the framework as well as rules add-on developer should follow:
@@ -41,11 +71,13 @@ The framework is thought the way, to be able to address even the most complicate
 
 There are certain ways data can be isolated:
 
-- **dedicated index** is created for each test run by default and it is highly recommended to use the index. Moreover, AUT provides a functionality that allows to create custom indexes if needed.    
+- **dedicated index** is created for each test run by default and it is highly recommended to use the index. Moreover, AUT provides a functionality that allows to create custom indexes if needed
 
-- **attach decorator** allows to isolate specific tests so time range can be defined for splunk events.
+- **attach decorator** allows to isolate specific tests so time range can be defined for splunk events
 
-- source of the event allows to identify input.
+- source of the event allows to identify input
+
+- unique **test id** can be used to distinguish between specific tests and test runs
 
 ## Supported platforms
 

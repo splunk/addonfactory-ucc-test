@@ -6,10 +6,18 @@ import tempfile
 from pathlib import Path
 from datetime import datetime
 from typing import Optional, Sequence
+from importlib_metadata import version, PackageNotFoundError
 from splunk_add_on_ucc_modinput_test import commands, tools
 from splunk_add_on_ucc_modinput_test.bootstrap.clients import (
     SplunkClientBootstrup,
 )
+
+
+def get_version() -> str:
+    try:
+        return version("splunk_add_on_ucc_modinput_test")
+    except PackageNotFoundError:
+        return "unknown"
 
 
 class DefaultSubcommandArgumentParser(argparse.ArgumentParser):
@@ -21,7 +29,9 @@ class DefaultSubcommandArgumentParser(argparse.ArgumentParser):
     def _parse_known_args(self, arg_strings, *args, **kwargs):  # type: ignore
         in_args = set(arg_strings)
         d_sp = self.__default_subparser
-        if d_sp is not None and not {"-h", "--help"}.intersection(in_args):
+        if d_sp is not None and not {"-h", "--help", "--version"}.intersection(
+            in_args
+        ):
             for x in self._subparsers._actions:  # type: ignore
                 subparser_found = isinstance(
                     x, argparse._SubParsersAction
@@ -139,6 +149,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     argv = argv if argv is not None else sys.argv[1:]
     parser = DefaultSubcommandArgumentParser()
+    parser.add_argument(
+        "--version", action="version", version=f"%(prog)s {get_version()}"
+    )
     subparsers = parser.add_subparsers(dest="command")
     gen_parser = subparsers.add_parser(
         "gen", description="Generate python client code from openapi.json"
@@ -152,8 +165,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         description="Generates splunk client class based on swagger README.md file",
     )
     init_parser = subparsers.add_parser(
-        "make-clients-files",
-        description="Generates splunk client class based on swagger README.md file, plus creates default vendor client class and configuration classes for each client",
+        "bootstrap-unified-tests",
+        description="Bootstraps minimal unified tests including creation of splunk and vendor client classes together with supporting configuration, forges and probes files for each client",
     )
     base64encode_parser = subparsers.add_parser(
         "base64encode",
@@ -269,7 +282,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if args.command == "make-splunk-client":
         SplunkClientBootstrup().make_splunk_client()
 
-    if args.command == "make-clients-files":
+    if args.command == "bootstrap-unified-tests":
         SplunkClientBootstrup().init()
 
     if args.command == "base64encode":

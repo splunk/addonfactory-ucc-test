@@ -12,15 +12,17 @@ Open `tests/ucc_modinput_functional` and go through it in proposed below order t
 
 #### tests/ucc_modinput_functional
 
-1. `defaults.py` - contains predefined, the tests-specific, constant values
+1. `README.md` - contains add-on specific information related to the functional tests
 
-2. `vendor/` - contains vendor product-specific code
+2. `defaults.py` - contains predefined, the tests-specific, constant values
+
+3. `vendor/` - contains vendor product-specific code
 
     1. `configuration.py` - to read configuration from environment variables; it can be used later for vendor product-specific means (eg. triggering action that would generate event available for add-on to collect), add-on configuration or within test functions
 
     2. `client.py` - contains code used to communicate with vendor product
 
-3. `splunk/` - contains add-on specific code
+4. `splunk/` - contains add-on specific code
 
     1. `client.py` - contains code used to communicate with add-on REST API; relevant code snippets can be found in swagger_client README.md copied from there, pasted to the client file and adopted
 
@@ -28,9 +30,9 @@ Open `tests/ucc_modinput_functional` and go through it in proposed below order t
 
     3. `probes.py`
 
-4. `test_configuration.py` - start simple, eg. from making sure the simplest case like `test_ta_logging` works fine. Keep adding following tests for add-on configuration to make sure you are able to define building blocks that will be used for inputs
+5. `test_configuration.py` - start simple, eg. from making sure the simplest case like `test_ta_logging` works fine. Keep adding following tests for add-on configuration to make sure you are able to define building blocks that will be used for inputs
 
-5. `test_inputs.py` - you have proper configuration. There are still two things you need to confirm:
+6. `test_inputs.py` - you have proper configuration. There are still two things you need to confirm:
 
     1. Make sure vendor product is talkative enough to have always events available for your tests or you need to trigger events generation
 
@@ -78,39 +80,10 @@ If you find you add-on more complex, feel free to organise the test structure th
 
 2. Once you run `ucc-test-modinput init`, `tests/ucc_modinput_functional` directory and relevant files will be generated as well as `swagger_client` directory with supporting modules.
 
-**Note:** You may want to specify openapi.json file location - eg. if it is in `Downloads`: `ucc-test-modinput init --openapi-json ~/Downloads/openapi.json`; go to [`ucc-test-modinput` page](./ucc-test-modinput_cli_tool.md) for more
+**Note:** You may want to specify openapi.json file location - eg. if it is in `Downloads`:
+```console
+ucc-test-modinput init --openapi-json ~/Downloads/openapi.json
+```
+Visit [`ucc-test-modinput` page](./ucc-test-modinput_cli_tool.md) for more
 
-3. Export Splunk parameters to [relevant environment variables](./addonfactory-ucc-test_pytest_plugin/#expected-environment-variables)
-
-4. Run test: `pytest tests/ucc_modinput_functional`
-
-
-![Screen Recording](./images/output.gif)
-
-## Test cases
-
-### Basic
-
-We are assuming that vendor product is *talkative* enough 
-
-1. Increase log level to DEBUG
-
-2. Create configuration
-
-3. Create input that depends on just created configuration
-
-
-
-<!--
- [`tests/ucc_modinput_functional`](#testsucc_modinput_functional) directory will be copied from the [example TA](https://github.com/splunk/splunk-example-ta) to your add-on repository.
--->
-<!--
-    2. You've got all the parameters that define your environment?
-
-        1. Are there vendor product-specific, environment-specific, test-specific or other kind?
-
-        2. Are there confidential parameters?
--->
-
-
-3. Follow [recommended order](#testsucc_modinput_functional) and hints given within the files when modifying them for your needs.
+![ucc-test-modinput init](./images/ucc-test-modinput_init.gif)
