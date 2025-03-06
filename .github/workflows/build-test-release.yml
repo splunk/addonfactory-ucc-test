@@ -23,7 +23,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - id: matrix
-        uses: splunk/addonfactory-test-matrix-action@v1.10
+        uses: splunk/addonfactory-test-matrix-action@v3.0
 
   # pre-commit:
   #   runs-on: ubuntu-22.04
