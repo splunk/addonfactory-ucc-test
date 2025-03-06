@@ -86,6 +86,4 @@ ucc-test-modinput init --openapi-json ~/Downloads/openapi.json
 ```
 Visit [`ucc-test-modinput` page](./ucc-test-modinput_cli_tool.md) for more
 
-
-
 ![ucc-test-modinput init](./images/ucc-test-modinput_init.gif)
