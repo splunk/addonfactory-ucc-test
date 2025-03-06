@@ -34,6 +34,8 @@ If you just want to run existing functional tests developed with use of the fram
 
 4. run [`pytest tests/ucc_modinput_functional/`](./addonfactory-ucc-test_pytest_plugin.md#plugin-arguments)
 
+![Run existing tests](./images/ucc-test-modinput_gen.gif)
+
 ## Writing all tests from scratch
 
 Building a comprehensive test suite requires careful planning and adherence to best practices. Following paragraphs outlines the key aspects of starting from scratch, including the [Design Principles](./design_principles.md) that guide test architecture, the [Test Scenarios](./test_scenarios.md) that ensure coverage, important considerations [Before You Write Your First Line of Code](./before_you_write_your_first_line_of_code.md), and best practices [When You Write Your Tests](./when_you_write_your_tests.md).
