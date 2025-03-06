@@ -89,6 +89,16 @@ jobs:
           git clone https://github.com/splunk/splunk-example-ta.git
           cd splunk-example-ta
           ./scripts/run_locally.sh
+          source .venv/bin/activate
+          pip install ../../../dist/*.whl
+          ucc-test-modinput init
+          export MODINPUT_TEST_SPLUNK_HOST=localhost
+          export MODINPUT_TEST_SPLUNK_PORT=8089
+          export MODINPUT_TEST_SPLUNK_USERNAME=admin
+          export MODINPUT_TEST_SPLUNK_PASSWORD_BASE64=$(ucc-test-modinput base64encode -s 'Chang3d!')
+          export MODINPUT_TEST_EXAMPLE_API_KEY_BASE64=$(ucc-test-modinput base64encode -s 'super-secret-api-token')
+          pytest tests/ucc_modinput_functional
+
       # - name: Expose endpoints (vendor product)
       #   run: |
       #     pip install Flask
