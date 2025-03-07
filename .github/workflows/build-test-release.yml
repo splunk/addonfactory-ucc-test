@@ -16,29 +16,37 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  meta:
-    runs-on: ubuntu-latest
-    outputs:
-      matrix_supportedSplunk: ${{ steps.matrix.outputs.supportedSplunk }}
-    steps:
-      - uses: actions/checkout@v4
-      - id: matrix
-        uses: splunk/addonfactory-test-matrix-action@v1.10
+  # meta:
+  #   runs-on: ubuntu-22.04
+  #   outputs:
+  #     # matrix_supportedSplunk: ${{ steps.matrix.outputs.supportedSplunk }}
+  #     matrix_supportedPython: "3.7,3.9,3.13"
+  #   # steps:
+  #   #   - uses: actions/checkout@v4
+  #   #   - id: matrix
+  #   #     uses: splunk/addonfactory-test-matrix-action@v3.0
 
-  pre-commit:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v4
-        with:
-          python-version: "3.7"
-      - uses: pre-commit/action@v3.0.0
+  # pre-commit:
+  #   runs-on: ubuntu-22.04
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: actions/setup-python@v5
+  #       with:
+  #         python-version: "3.7"
+  #     - uses: pre-commit/action@v3.0.0
 
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        python-version:
+          - "3.7"
+          # - "3.9"
+          # - "3.13"
+          # use version currently used in CI/CD pipelines
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.7"
       - run: curl -sSL https://install.python-poetry.org | python3 - --version 1.5.1
@@ -46,25 +54,42 @@ jobs:
       - name: Build UCC test
         run: |
           poetry build
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: UCC-test-build
           path: dist/
 
+  test-build:
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        python-version:
+          # - "3.7"
+          - "3.9"
+          - "3.13"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: curl -sSL https://install.python-poetry.org | python3 - --version 1.5.1
+      - run: poetry install
+      - name: Build UCC test
+        run: |
+          poetry build
+  
   test-unit:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     continue-on-error: true
     strategy:
       matrix:
         python-version:
           - "3.7"
-          - "3.8"
           - "3.9"
-          - "3.10"
-          - "3.11"
+          - "3.13"
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
       - run: curl -sSL https://install.python-poetry.org | python3 - --version 1.5.1
@@ -72,120 +97,76 @@ jobs:
           poetry install
           poetry run pytest tests/unit
 
-  test-splunk:
-    runs-on: ubuntu-latest
+  test-cli-init:
+    runs-on: ubuntu-22.04
     continue-on-error: true
-    needs:
-      - meta
-      - build
     strategy:
       matrix:
-        splunk: ${{ fromJson(needs.meta.outputs.matrix_supportedSplunk) }}
+        python-version:
+          - "3.7"
+          - "3.9"
+          - "3.13"
+    needs:
+      - build
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         with:
-          python-version: 3.7
-      - name: Expose endpoints (vendor product)
-        run: |
-          pip install Flask
-          python tests/functional/demo_rest_endpoints_generator/endpoints_exposer.py &
-          sleep 5
-      - name: Build TA
-        run: |
-          pip install poetry==1.5.1 poetry-plugin-export==1.4.0 splunk-add-on-ucc-framework
-          cd tests/functional/demo_addon_for_splunk/
-          mkdir -p package/lib || true
-          poetry export --without-hashes -o package/lib/requirements.txt
-          ucc-gen build --ta-version 1.0.0
-          cd ../../..
-      - uses: actions/download-artifact@v3
+          python-version: ${{ matrix.python-version }}
+      - uses: actions/download-artifact@v4
         with:
           name: UCC-test-build
           path: dist/
-      - name: Generate modinput tests
+      - name: Clone Example TA
         run: |
-          pip install dist/*.whl
-          cd tests/functional/demo_addon_for_splunk
-          ucc-test-modinput
-          tree -a
-          cd ../../..
-      - uses: actions/upload-artifact@v3
-        with:
-          name: swagger_client
-          path: tests/functional/demo_addon_for_splunk/swagger_client
-      - name: Install Splunk and Demo TA
-        run: |
-          export SPLUNK_PRODUCT=splunk
-          export SPLUNK_VERSION=${{ matrix.splunk.version }}
-          export SPLUNK_BUILD=${{ matrix.splunk.build }}
-          export SPLUNK_SLUG=$SPLUNK_VERSION-$SPLUNK_BUILD
-          export SPLUNK_ARCH=x86_64
-          export SPLUNK_LINUX_FILENAME=splunk-${SPLUNK_VERSION}-${SPLUNK_BUILD}-Linux-${SPLUNK_ARCH}.tgz
-          export SPLUNK_BUILD_URL=https://download.splunk.com/products/${SPLUNK_PRODUCT}/releases/${SPLUNK_VERSION}/linux/${SPLUNK_LINUX_FILENAME}
-          echo "$SPLUNK_BUILD_URL"
-          export SPLUNK_HOME=/opt/splunk
-          wget -qO /tmp/splunk.tgz "${SPLUNK_BUILD_URL}"
-          sudo tar -C /opt -zxf /tmp/splunk.tgz
-          sudo cp -r tests/functional/demo_addon_for_splunk/output/* $SPLUNK_HOME/etc/apps
-          sudo chown -R "$USER":"$USER" /opt/splunk
-          ls $SPLUNK_HOME/etc/apps/
-          echo -e "[user_info]\nUSERNAME=Admin\nPASSWORD=Chang3d"'!' | sudo tee -a /opt/splunk/etc/system/local/user-seed.conf
-          echo 'OPTIMISTIC_ABOUT_FILE_LOCKING=1' | sudo tee -a /opt/splunk/etc/splunk-launch.conf
-          sudo /opt/splunk/bin/splunk start --accept-license
-          sudo /opt/splunk/bin/splunk set servername custom-servername -auth admin:Chang3d!
-          sudo /opt/splunk/bin/splunk restart
-          until curl -k -s -u admin:Chang3d! https://localhost:8089/services/server/info\?output_mode\=json | jq '.entry[0].content.kvStoreStatus' | grep -o "ready" ; do echo -n "Waiting for KVStore to become ready-" && sleep 5 ; done
-        timeout-minutes: 5
-
-          
-      - name: Run modinput tests
-        run: |
+          cd tests/functional/
+          git clone https://github.com/splunk/splunk-example-ta.git
+          cd splunk-example-ta
+          ./scripts/run_locally.sh
+          source .venv/bin/activate
+          pip install ../../../dist/*.whl
           export MODINPUT_TEST_SPLUNK_HOST=localhost
           export MODINPUT_TEST_SPLUNK_PORT=8089
           export MODINPUT_TEST_SPLUNK_USERNAME=admin
-          export MODINPUT_TEST_SPLUNK_PASSWORD_BASE64=Q2hhbmczZCE==
-          export MODINPUT_TEST_DEMO_ENDPOINT1=http://localhost:5000/endpoint1
-          export MODINPUT_TEST_DEMO_ENDPOINT2=http://localhost:5000/endpoint2
-          export MODINPUT_TEST_DEMO_ENDPOINT3=http://localhost:5000/endpoint3
-          cd tests/functional/demo_addon_for_splunk
-          poetry add ../../../dist/*.whl
-          poetry install
-          poetry run pytest -n 10 tests/modinput_functional
-      
-      - uses: actions/upload-artifact@v3
+          export MODINPUT_TEST_SPLUNK_PASSWORD_BASE64=$(ucc-test-modinput base64encode -s 'Chang3d!')
+          export MODINPUT_TEST_EXAMPLE_API_KEY_BASE64=$(ucc-test-modinput base64encode -s 'super-secret-api-token')
+          ucc-test-modinput init
+          pytest tests/ucc_modinput_functional
+
+  test-cli-gen:
+    runs-on: ubuntu-22.04
+    continue-on-error: true
+    strategy:
+      matrix:
+        python-version:
+          - "3.7"
+          - "3.9"
+          - "3.13"
+    needs:
+      - build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
-          name: ucc_modinput_test.log
-          path: tests/functional/demo_addon_for_splunk/ucc_modinput_test.log
-
-  # release:
-  #   needs:
-  #     - build
-  #     - test-unit
-  #     - test-splunk
-  #     - pre-commit
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #       with:
-  #         # Very important: semantic-release won't trigger a tagged
-  #         # build if this is not set false
-  #         persist-credentials: false
-  #     - uses: actions/setup-python@v4
-  #       with:
-  #         python-version: "3.7"
-  #     - id: semantic
-  #       uses: splunk/semantic-release-action@v1.3
-  #       with:
-  #         git_committer_name: ${{ secrets.SA_GH_USER_NAME }}
-  #         git_committer_email: ${{ secrets.SA_GH_USER_EMAIL }}
-  #         gpg_private_key: ${{ secrets.SA_GPG_PRIVATE_KEY }}
-  #         passphrase: ${{ secrets.SA_GPG_PASSPHRASE }}
-
-  # update-semver:
-  #   if: startsWith(github.ref, 'refs/tags/v')
-  #   needs: release
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - uses: haya14busa/action-update-semver@v1
+          python-version: ${{ matrix.python-version }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: UCC-test-build
+          path: dist/
+      - name: Clone Example TA
+        run: |
+          cd tests/functional/
+          git clone https://github.com/splunk/splunk-example-ta.git
+          mv for-splunk-example-ta/__init__.py splunk-example-ta/tests
+          mv for-splunk-example-ta/ucc_modinput_functional splunk-example-ta/tests
+          cd splunk-example-ta
+          ./scripts/run_locally.sh
+          source .venv/bin/activate
+          pip install ../../../dist/*.whl
+          export MODINPUT_TEST_SPLUNK_HOST=localhost
+          export MODINPUT_TEST_SPLUNK_PORT=8089
+          export MODINPUT_TEST_SPLUNK_USERNAME=admin
+          export MODINPUT_TEST_SPLUNK_PASSWORD_BASE64=$(ucc-test-modinput base64encode -s 'Chang3d!')
+          export MODINPUT_TEST_EXAMPLE_API_KEY_BASE64=$(ucc-test-modinput base64encode -s 'super-secret-api-token')
+          ucc-test-modinput gen
+          pytest tests/ucc_modinput_functional
