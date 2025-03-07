@@ -5,7 +5,7 @@ import types
 import random
 import traceback
 from copy import deepcopy
-from typing import Tuple
+from typing import Tuple, List
 from splunk_add_on_ucc_modinput_test.functional import logger
 from splunk_add_on_ucc_modinput_test.functional.common.pytest_config_adapter import (
     PytestConfigAdapter,
@@ -319,7 +319,7 @@ class FrameworkTask:
         if type(args1) != type(args2):
             return False
 
-        if isinstance(args1, (list, tuple)):
+        if isinstance(args1, (List, Tuple)):
             if len(args1) != len(args2):
                 return False
             for arg1, arg2 in zip(args1, args2):
@@ -360,7 +360,7 @@ class FrameworkTask:
 
     def use_previous_executions(
         self, args_to_match
-    ) -> Tuple[bool, object | None]:
+    ) -> tuple[bool, object | None]:
         logger.debug(
             f"Dep {self.forge_key}: look for {self._forge_kwargs} in {self._forge.executions}"
         )

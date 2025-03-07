@@ -51,6 +51,7 @@ mkdocs-material = "^9.1.3"
 mkdocs-print-site-plugin = "^2.3.6"
 mkdocstrings = {version=">=0", extras=["python"]}
 splunk-sdk = "2.1.0"
+mypy = "1.4.1"
 
 
 [tool.poetry.scripts]

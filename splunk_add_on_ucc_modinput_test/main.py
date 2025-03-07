@@ -16,6 +16,7 @@ def get_version():
     except PackageNotFoundError:
         return "unknown"
 
+
 class DefaultSubcommandArgumentParser(argparse.ArgumentParser):
     __default_subparser = None
 
@@ -25,7 +26,9 @@ class DefaultSubcommandArgumentParser(argparse.ArgumentParser):
     def _parse_known_args(self, arg_strings, *args, **kwargs):  # type: ignore
         in_args = set(arg_strings)
         d_sp = self.__default_subparser
-        if d_sp is not None and not {"-h", "--help", "--version"}.intersection(in_args):
+        if d_sp is not None and not {"-h", "--help", "--version"}.intersection(
+            in_args
+        ):
             for x in self._subparsers._actions:  # type: ignore
                 subparser_found = isinstance(
                     x, argparse._SubParsersAction
@@ -143,7 +146,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     argv = argv if argv is not None else sys.argv[1:]
     parser = DefaultSubcommandArgumentParser()
-    parser.add_argument('--version', action='version', version=f'%(prog)s {get_version()}')
+    parser.add_argument(
+        "--version", action="version", version=f"%(prog)s {get_version()}"
+    )
     subparsers = parser.add_subparsers(dest="command")
     gen_parser = subparsers.add_parser(
         "gen", description="Generate python client code from openapi.json"

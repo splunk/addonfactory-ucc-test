@@ -157,8 +157,8 @@ jobs:
         run: |
           cd tests/functional/
           git clone https://github.com/splunk/splunk-example-ta.git
-          mv for-splunk-example-ta/__init__.py splunk-example-ta/tests
-          mv for-splunk-example-ta/ucc_modinput_functional splunk-example-ta/tests
+          mv for_splunk_example_ta/__init__.py splunk-example-ta/tests
+          mv for_splunk_example_ta/ucc_modinput_functional splunk-example-ta/tests
           cd splunk-example-ta
           ./scripts/run_locally.sh
           source .venv/bin/activate
