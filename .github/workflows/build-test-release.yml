@@ -90,16 +90,12 @@ jobs:
           path: dist/
       - name: Clone Example TA
         run: |
+          cd tests/functional/
           git clone https://github.com/splunk/splunk-example-ta.git
           cd splunk-example-ta
           ./scripts/run_locally.sh
           pwd
           source .venv/bin/activate
-
-          cd $(git rev-parse --show-toplevel)
-          echo "Repository Root: $(pwd)"
-          tree -d -a -L 3  # Show directories (including hidden ones like .venv), up to depth 3
-          
           pip install ../../../dist/*.whl
           ucc-test-modinput init
           export MODINPUT_TEST_SPLUNK_HOST=localhost
