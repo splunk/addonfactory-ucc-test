@@ -16,14 +16,15 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  meta:
-    runs-on: ubuntu-22.04
-    outputs:
-      matrix_supportedSplunk: ${{ steps.matrix.outputs.supportedSplunk }}
-    steps:
-      - uses: actions/checkout@v4
-      - id: matrix
-        uses: splunk/addonfactory-test-matrix-action@v3.0
+  # meta:
+  #   runs-on: ubuntu-22.04
+  #   outputs:
+  #     # matrix_supportedSplunk: ${{ steps.matrix.outputs.supportedSplunk }}
+  #     matrix_supportedPython: "3.7,3.9,3.13"
+  #   # steps:
+  #   #   - uses: actions/checkout@v4
+  #   #   - id: matrix
+  #   #     uses: splunk/addonfactory-test-matrix-action@v3.0
 
   # pre-commit:
   #   runs-on: ubuntu-22.04
@@ -36,11 +37,17 @@ jobs:
 
   build:
     runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        python-version:
+          - "3.7"
+          - "3.9"
+          - "3.13"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.7"
+          python-version: ${{ matrix.python-version }}
       - run: curl -sSL https://install.python-poetry.org | python3 - --version 1.5.1
       - run: poetry install
       - name: Build UCC test
@@ -73,14 +80,19 @@ jobs:
   test-cli-init:
     runs-on: ubuntu-22.04
     continue-on-error: true
+    strategy:
+      matrix:
+        python-version:
+          - "3.7"
+          - "3.9"
+          - "3.13"
     needs:
-      - meta
       - build
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: 3.7
+          python-version: ${{ matrix.python-version }}
       - uses: actions/download-artifact@v4
         with:
           name: UCC-test-build
@@ -91,7 +103,6 @@ jobs:
           git clone https://github.com/splunk/splunk-example-ta.git
           cd splunk-example-ta
           ./scripts/run_locally.sh
-          pwd
           source .venv/bin/activate
           pip install ../../../dist/*.whl
           export MODINPUT_TEST_SPLUNK_HOST=localhost
@@ -105,14 +116,19 @@ jobs:
   test-cli-gen:
     runs-on: ubuntu-22.04
     continue-on-error: true
+    strategy:
+      matrix:
+        python-version:
+          - "3.7"
+          - "3.9"
+          - "3.13"
     needs:
-      - meta
       - build
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: 3.7
+          python-version: ${{ matrix.python-version }}
       - uses: actions/download-artifact@v4
         with:
           name: UCC-test-build
