@@ -76,9 +76,9 @@ jobs:
     needs:
       - meta
       - build
-    strategy:
-      matrix:
-        splunk: ${{ fromJson(needs.meta.outputs.matrix_supportedSplunk) }}
+    # strategy:
+    #   matrix:
+    #     splunk: ${{ fromJson(needs.meta.outputs.matrix_supportedSplunk) }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
