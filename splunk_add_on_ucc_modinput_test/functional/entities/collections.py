@@ -13,15 +13,15 @@ from splunk_add_on_ucc_modinput_test.functional import logger
 
 class TestCollection(Dict[Tuple[str, str], FrameworkTest]):
     @property
-    def is_empty(self):
+    def is_empty(self) -> bool:
         return not bool(self)
 
-    def add(self, item):
+    def add(self, item: FrameworkTest) -> None:
         assert isinstance(item, FrameworkTest)
         if item.key not in self:
             self[item.key] = item
 
-    def lookup_by_function(self, fn):
+    def lookup_by_function(self, fn: callable):
         test = FrameworkTest(fn)
         return self.get(test.key)
 
@@ -54,7 +54,7 @@ class ForgeCollection(Dict[Tuple[str, str, str], FrameworkForge]):
 
 
 class TaskCollection:
-    def __init__(self):
+    def __init__(self) -> None:
         self._tasks = {}
 
     @property

@@ -26,14 +26,14 @@ jobs:
   #   #   - id: matrix
   #   #     uses: splunk/addonfactory-test-matrix-action@v3.0
 
-  # pre-commit:
-  #   runs-on: ubuntu-22.04
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: actions/setup-python@v5
-  #       with:
-  #         python-version: "3.7"
-  #     - uses: pre-commit/action@v3.0.0
+  pre-commit:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.7"
+      - uses: pre-commit/action@v3.0.0
 
   build:
     runs-on: ubuntu-22.04
