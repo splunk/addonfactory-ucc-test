@@ -41,6 +41,30 @@ jobs:
       matrix:
         python-version:
           - "3.7"
+          # - "3.9"
+          # - "3.13"
+          # use version currently used in CI/CD pipelines
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.7"
+      - run: curl -sSL https://install.python-poetry.org | python3 - --version 1.5.1
+      - run: poetry install
+      - name: Build UCC test
+        run: |
+          poetry build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: UCC-test-build
+          path: dist/
+
+  test-build:
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        python-version:
+          - "3.7"
           - "3.9"
           - "3.13"
     steps:
@@ -53,11 +77,7 @@ jobs:
       - name: Build UCC test
         run: |
           poetry build
-      - uses: actions/upload-artifact@v4
-        with:
-          name: UCC-test-build
-          path: dist/
-
+  
   test-unit:
     runs-on: ubuntu-22.04
     continue-on-error: true
