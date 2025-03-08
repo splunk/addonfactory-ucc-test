@@ -1,4 +1,4 @@
-from typing import List, Dict, Tuple
+from typing import Any, Callable, List, Dict, Tuple
 from splunk_add_on_ucc_modinput_test.functional.entities.forge import (
     FrameworkForge,
 )
@@ -21,11 +21,11 @@ class TestCollection(Dict[Tuple[str, str], FrameworkTest]):
         if item.key not in self:
             self[item.key] = item
 
-    def lookup_by_function(self, fn: callable):
+    def lookup_by_function(self, fn: Callable[..., Any]) -> Tuple[str,str]:
         test = FrameworkTest(fn)
         return self.get(test.key)
 
-    def lookup_by_original_function(self, fn):
+    def lookup_by_original_function(self, fn: Callable) -> List[FrameworkTest]:
         found_tests_keys = set()
         lookup_test = FrameworkTest(fn)
         for key, test in self.items():

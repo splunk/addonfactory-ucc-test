@@ -1,6 +1,6 @@
 import time
 
-from typing import Generator, List, Tuple, Optional, Union
+from typing import Any, Callable, Dict, Generator, List, Tuple, Optional, Union
 from splunk_add_on_ucc_modinput_test.functional import logger
 from splunk_add_on_ucc_modinput_test.functional.exceptions import (
     SplTaFwkDependencyExecutionError,
@@ -43,12 +43,12 @@ from splunk_add_on_ucc_modinput_test.functional.common.identifier_factory import
 class forge:
     def __init__(
         self,
-        forge_fn,
+        forge_fn: Callable[..., Any],
         *,
-        probe=None,
+        probe: Optional[ Callable[..., Any] ]=None,
         scope: Optional[Union[ForgeScope, str]] = None,
-        **kwargs,
-    ):
+        **kwargs: Dict[str, Any],
+    ) -> None:
         self.forge_fn = forge_fn
         self.probe = probe
         self.scope = scope.value if isinstance(scope, ForgeScope) else scope
@@ -57,14 +57,14 @@ class forge:
 
 class forges:
     def __init__(
-        self, *forge_list, scope: Optional[Union[ForgeScope, str]] = None
-    ):
+        self, *forge_list: List[forge], scope: Optional[Union[ForgeScope, str]] = None
+    ) -> None:
         self.forge_list = forge_list
         self.scope = scope.value if isinstance(scope, ForgeScope) else scope
 
 
 class TestDependencyManager(PytestConfigAdapter):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.tests = TestCollection()
         self.forges = ForgeCollection()
@@ -87,17 +87,17 @@ class TestDependencyManager(PytestConfigAdapter):
         self._global_builtin_args_pool = {}
 
     @staticmethod
-    def generate_session_id():
+    def generate_session_id() -> str:
         return create_identifier(
             id_type=IdentifierType.ALPHA, in_uppercase=True
         )
 
     def set_vendor_client_class(
         self,
-        vendor_configuration_class,
-        vendor_client_class,
-        vendor_class_argument_name,
-    ):
+        vendor_configuration_class: VendorConfigurationBase,
+        vendor_client_class: VendorClientBase,
+        vendor_class_argument_name: str,
+    ) -> None:
         logger.debug(
             f"set_vendor_client_class: {vendor_client_class}, {vendor_configuration_class}, {vendor_class_argument_name}"
         )
@@ -192,7 +192,7 @@ class TestDependencyManager(PytestConfigAdapter):
             )
         return frg
 
-    def bind(self, test_fn, scope, frg_fns, is_bootstrap):
+    def bind(self, test_fn: Callable[..., Any], scope: str, frg_fns: tuple, is_bootstrap: bool) -> FrameworkTest:
         logger.debug(f"bind: {test_fn} -> {frg_fns}")
 
         test = self.tests.lookup_by_function(test_fn)
