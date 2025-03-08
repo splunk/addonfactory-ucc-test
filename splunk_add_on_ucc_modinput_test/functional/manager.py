@@ -108,9 +108,6 @@ class TestDependencyManager(PytestConfigAdapter):
             vendor_configuration_class,
         )
 
-    # def create_vendor_client(self):
-    #     return self._vendor_client_class()
-
     def set_splunk_client_class(
         self,
         splunk_configuration_class,
