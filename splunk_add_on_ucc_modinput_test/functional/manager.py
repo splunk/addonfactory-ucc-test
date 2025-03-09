@@ -1,6 +1,16 @@
 import time
 
-from typing import Any, Callable, Dict, Generator, List, Tuple, Optional, Union
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Generator,
+    List,
+    Tuple,
+    Optional,
+    Type,
+    Union,
+)
 from splunk_add_on_ucc_modinput_test.functional import logger
 from splunk_add_on_ucc_modinput_test.functional.exceptions import (
     SplTaFwkDependencyExecutionError,
@@ -45,7 +55,7 @@ class forge:
         self,
         forge_fn: Callable[..., Any],
         *,
-        probe: Optional[ Callable[..., Any] ]=None,
+        probe: Optional[Callable[..., Any]] = None,
         scope: Optional[Union[ForgeScope, str]] = None,
         **kwargs: Dict[str, Any],
     ) -> None:
@@ -57,7 +67,9 @@ class forge:
 
 class forges:
     def __init__(
-        self, *forge_list: List[forge], scope: Optional[Union[ForgeScope, str]] = None
+        self,
+        *forge_list: forge,
+        scope: Optional[Union[ForgeScope, str]] = None,
     ) -> None:
         self.forge_list = forge_list
         self.scope = scope.value if isinstance(scope, ForgeScope) else scope
@@ -94,7 +106,7 @@ class TestDependencyManager(PytestConfigAdapter):
 
     def set_vendor_client_class(
         self,
-        vendor_configuration_class: VendorConfigurationBase,
+        vendor_configuration_class: Type[VendorConfigurationBase],
         vendor_client_class: VendorClientBase,
         vendor_class_argument_name: str,
     ) -> None:
@@ -189,7 +201,13 @@ class TestDependencyManager(PytestConfigAdapter):
             )
         return frg
 
-    def bind(self, test_fn: Callable[..., Any], scope: str, frg_fns: tuple, is_bootstrap: bool) -> FrameworkTest:
+    def bind(
+        self,
+        test_fn: Callable[..., Any],
+        scope: Optional[str],
+        frg_fns: List[forge],
+        is_bootstrap: bool,
+    ) -> FrameworkTest:
         logger.debug(f"bind: {test_fn} -> {frg_fns}")
 
         test = self.tests.lookup_by_function(test_fn)

@@ -21,7 +21,7 @@ class TestCollection(Dict[Tuple[str, str], FrameworkTest]):
         if item.key not in self:
             self[item.key] = item
 
-    def lookup_by_function(self, fn: Callable[..., Any]) -> Tuple[str,str]:
+    def lookup_by_function(self, fn: Callable[..., Any]) -> Tuple[str, str]:
         test = FrameworkTest(fn)
         return self.get(test.key)
 

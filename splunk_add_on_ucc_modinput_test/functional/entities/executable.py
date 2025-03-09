@@ -5,7 +5,7 @@ from typing import Any, Dict, Generator, Tuple
 
 class ExecutableBase:
     def __init__(
-        self, function#: Callable[[Any], Generator[None, None, None]]
+        self, function  #: Callable[[Any], Generator[None, None, None]]
     ) -> None:
         assert callable(function)
         self._function = function
@@ -16,11 +16,11 @@ class ExecutableBase:
         return self._fn_source_file
 
     @property
-    def key(self):# -> tuple[str, str]:
+    def key(self):  # -> tuple[str, str]:
         return (self._fn_source_file, self.fn_full_name)
 
     @property
-    def original_key(self):# -> tuple[str, str]:
+    def original_key(self):  # -> tuple[str, str]:
         return (self._fn_source_file, self.fn_original_full_name)
 
     @property
