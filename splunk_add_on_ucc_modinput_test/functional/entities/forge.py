@@ -2,7 +2,7 @@ import threading
 import inspect
 import contextlib
 import time
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Type
 from dataclasses import dataclass, replace
 from splunk_add_on_ucc_modinput_test.functional import logger
 from splunk_add_on_ucc_modinput_test.functional.entities.executable import (
@@ -14,14 +14,22 @@ from splunk_add_on_ucc_modinput_test.functional.entities.executable import (
 class ForgeExecData:
     id: str
     teardown: object
-    kwargs: dict
+    kwargs: Dict[str, Any]
     result: object
     errors: List[str]
     count: int
-    lock = threading.Lock
+    lock: threading.Lock
     is_teardown_executed: bool = False
 
-    def __init__(self, id, teardown, kwargs, result, errors, count):
+    def __init__(
+        self,
+        id: str,
+        teardown: object,
+        kwargs: Dict[str, Any],
+        result: object,
+        errors: List[str],
+        count: int,
+    ) -> None:
         self.lock = threading.Lock()
         self.id = id
         self.teardown = teardown
