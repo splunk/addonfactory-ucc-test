@@ -5,7 +5,7 @@ from typing import Any, Dict, Generator, Tuple
 
 class ExecutableBase:
     def __init__(
-        self, function  #: Callable[[Any], Generator[None, None, None]]
+        self, function: Callable[[Any], Generator[None, None, None]]
     ) -> None:
         assert callable(function)
         self._function = function
