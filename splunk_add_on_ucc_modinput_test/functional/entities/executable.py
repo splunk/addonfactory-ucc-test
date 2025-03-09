@@ -15,7 +15,7 @@ class ExecutableBase:
         return self._fn_source_file
 
     @property
-    def key(self) -> Tuple[str, str]:
+    def key(self) -> Tuple[str, ...]:
         return (self._fn_source_file, self.fn_full_name)
 
     @property

@@ -2,7 +2,17 @@ import threading
 import inspect
 import contextlib
 import time
-from typing import Any, Callable, Dict, Generator, List, Set, Tuple, Type
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Generator,
+    List,
+    Set,
+    Tuple,
+    Type,
+    Union,
+)
 from dataclasses import dataclass, replace
 from splunk_add_on_ucc_modinput_test.functional import logger
 from splunk_add_on_ucc_modinput_test.functional.entities.executable import (
@@ -13,7 +23,7 @@ from splunk_add_on_ucc_modinput_test.functional.entities.executable import (
 @dataclass
 class ForgeExecData:
     id: str
-    teardown: function
+    teardown: Callable[..., Any]
     kwargs: Dict[str, Any]
     result: object
     errors: List[str]
@@ -24,7 +34,7 @@ class ForgeExecData:
     def __init__(
         self,
         id: str,
-        teardown: function,
+        teardown: Callable[..., Any],
         kwargs: Dict[str, Any],
         result: object,
         errors: List[str],
@@ -88,7 +98,7 @@ class ForgePostExec:
     def add(
         self,
         id: str,
-        teardown: function,
+        teardown: Callable[..., Any],
         kwargs: dict[str, Any],
         result: object,
         errors: List[str],
@@ -179,7 +189,7 @@ class FrameworkForge(ExecutableBase):
         self._executions = ForgePostExec()
 
     @property
-    def key(self) -> Tuple[str, str]:
+    def key(self) -> Tuple[str, ...]:
         key_value = list(super().key)
         key_value.append(self._scope)
         return tuple(key_value)
@@ -224,24 +234,24 @@ class FrameworkForge(ExecutableBase):
         self,
         id: str,
         *,
-        teardown: function,
+        teardown: Callable[..., Any],
         kwargs: Dict[str, Any],
         result: object,
         errors: List[str],
     ) -> None:
         self._executions.add(id, teardown, kwargs, result, errors)
 
-    def reuse_execution(self, prev_exec: ForgeExecData) -> None:
-        id = (
-            prev_exec._id
-            if isinstance(prev_exec, ForgeExecData)
-            else prev_exec
-        )
-        self._executions.reuse(id)
+    def reuse_execution(self, prev_exec_id: str) -> None:
+        # id = (
+        #     prev_exec._id
+        #     if isinstance(prev_exec, ForgeExecData)
+        #     else prev_exec
+        # )
+        self._executions.reuse(prev_exec_id)
 
-    @property
-    def is_executed(self) -> bool:
-        return self._is_executed
+    # @property
+    # def is_executed(self) -> bool:
+    #     return self._is_executed
 
     def __contains__(self, test_key: object) -> bool:
         return test_key in self.tests
