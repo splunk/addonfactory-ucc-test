@@ -1,6 +1,5 @@
 import inspect
-from collections.abc import Callable
-from typing import Any, Dict, Generator, Tuple
+from typing import Any, Callable, Dict, Generator, Tuple
 
 
 class ExecutableBase:
