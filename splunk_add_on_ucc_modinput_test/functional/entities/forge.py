@@ -123,7 +123,7 @@ class ForgePostExec:
         with data.lock:
             data.count += 1
 
-    def get_teardown(self, id: str) -> function:
+    def get_teardown(self, id: str) -> Callable[..., Any]:
         data = self._exec_store.get(id)
         assert data
         return data.teardown
