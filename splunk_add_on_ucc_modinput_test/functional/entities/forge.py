@@ -2,7 +2,7 @@ import threading
 import inspect
 import contextlib
 import time
-from typing import Any, Dict, List, Type
+from typing import Any, Callable, Dict, Generator, List, Set, Tuple, Type
 from dataclasses import dataclass, replace
 from splunk_add_on_ucc_modinput_test.functional import logger
 from splunk_add_on_ucc_modinput_test.functional.entities.executable import (
@@ -13,7 +13,7 @@ from splunk_add_on_ucc_modinput_test.functional.entities.executable import (
 @dataclass
 class ForgeExecData:
     id: str
-    teardown: object
+    teardown: function
     kwargs: Dict[str, Any]
     result: object
     errors: List[str]
@@ -24,7 +24,7 @@ class ForgeExecData:
     def __init__(
         self,
         id: str,
-        teardown: object,
+        teardown: function,
         kwargs: Dict[str, Any],
         result: object,
         errors: List[str],
@@ -52,12 +52,13 @@ class ForgeExecData:
 class ForgePostExec:
     def __init__(self) -> None:
         self.lock = threading.Lock()
-        self._exec_store: Dict[str, Any] = {}
+        self._exec_store: Dict[str, ForgeExecData] = {}
         self._teardown_is_blocked = False
 
-    def summary(self, data: ForgeExecData) -> None:
+    def summary(self, data: ForgeExecData) -> str:
         s = data.summary()
         s += f"\n\tteardown_is_blocked={self._teardown_is_blocked}"
+        return s
 
     def block_teardown(self) -> None:
         self._teardown_is_blocked = True
@@ -87,8 +88,8 @@ class ForgePostExec:
     def add(
         self,
         id: str,
-        teardown: object,
-        kwargs: dict,
+        teardown: function,
+        kwargs: dict[str, Any],
         result: object,
         errors: List[str],
     ) -> None:
@@ -100,42 +101,42 @@ class ForgePostExec:
         else:
             self.reuse(id)
 
-    def get(self, id):
+    def get(self, id: str) -> ForgeExecData:
         data = self._exec_store.get(id)
         assert data
         return replace(data)
 
-    def reuse(self, id):
+    def reuse(self, id: str) -> None:
         data = self._exec_store.get(id)
         assert data
         logger.debug(f"REUSE TEARDOWN {id}:{self.summary(data)}")
         with data.lock:
             data.count += 1
 
-    def get_teardown(self, id):
+    def get_teardown(self, id: str) -> function:
         data = self._exec_store.get(id)
         assert data
         return data.teardown
 
-    def get_result(self, id):
+    def get_result(self, id: str) -> object:
         data = self._exec_store.get(id)
         assert data
         return data.result
 
-    def get_count(self, id):
+    def get_count(self, id: str) -> int:
         data = self._exec_store.get(id)
         assert data
         return data.count
 
-    def is_teardown_executed(self, id):
+    def is_teardown_executed(self, id: str) -> bool:
         data = self._exec_store.get(id)
         assert data
         return data.is_teardown_executed
 
-    def list(self):
+    def list(self) -> Tuple[ForgeExecData, ...]:
         return tuple(self._exec_store.values())
 
-    def execute_teardown(self, data):
+    def execute_teardown(self, data: ForgeExecData) -> None:
         teardown = data.teardown
         if inspect.isgenerator(teardown):
             with contextlib.suppress(StopIteration):
@@ -146,7 +147,7 @@ class ForgePostExec:
             pass
         data.is_teardown_executed = True
 
-    def dereference_teardown(self, id):
+    def dereference_teardown(self, id: str) -> bool:
         data = self._exec_store.get(id)
         if data is None:
             return False
@@ -167,58 +168,70 @@ class ForgePostExec:
 
 
 class FrameworkForge(ExecutableBase):
-    def __init__(self, function, scope: str):
+    def __init__(
+        self,
+        function: Callable[[Any], Generator[None, None, None]],
+        scope: str,
+    ) -> None:
         super().__init__(function)
         self._scope = scope
-        self.tests = set()
+        self.tests: Set[object] = set()
         self._executions = ForgePostExec()
 
     @property
-    def key(self):
+    def key(self) -> Tuple[str, str]:
         key_value = list(super().key)
         key_value.append(self._scope)
         return tuple(key_value)
 
-    def set_scope(self, scope):
+    def set_scope(self, scope: str) -> None:
         self._scope = scope
 
     @property
-    def scope(self):
+    def scope(self) -> str:
         return self._scope
 
     @property
-    def tests_keys(self):
+    def tests_keys(self) -> List[object]:
         return list(self.tests)
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self.key[1]
 
     @property
-    def path(self):
+    def path(self) -> str:
         return self.source_file
 
     @property
-    def full_path(self):
+    def full_path(self) -> str:
         return "::".join(self.key[:2])
 
     @property
-    def executions(self):
+    def executions(self) -> Tuple[ForgeExecData, ...]:
         return self._executions.list()
 
-    def block_teardown(self):
+    def block_teardown(self) -> None:
         self._executions.block_teardown()
 
-    def unblock_teardown(self):
+    def unblock_teardown(self) -> None:
         self._executions.unblock_teardown()
 
-    def teardown(self, id):
+    def teardown(self, id: str) -> bool:
         return self._executions.dereference_teardown(id)
 
-    def register_execution(self, id, *, teardown, kwargs, result, errors):
+    def register_execution(
+        self,
+        id: str,
+        *,
+        teardown: function,
+        kwargs: Dict[str, Any],
+        result: object,
+        errors: List[str],
+    ) -> None:
         self._executions.add(id, teardown, kwargs, result, errors)
 
-    def reuse_execution(self, prev_exec):
+    def reuse_execution(self, prev_exec: ForgeExecData) -> None:
         id = (
             prev_exec._id
             if isinstance(prev_exec, ForgeExecData)
@@ -227,19 +240,19 @@ class FrameworkForge(ExecutableBase):
         self._executions.reuse(id)
 
     @property
-    def is_executed(self):
+    def is_executed(self) -> bool:
         return self._is_executed
 
-    def __contains__(self, test_key):
+    def __contains__(self, test_key: object) -> bool:
         return test_key in self.tests
 
-    def unlink_test(self, test_key):
+    def unlink_test(self, test_key: object) -> None:
         self.tests.discard(test_key)
 
-    def link_test(self, test_key):
+    def link_test(self, test_key: object) -> None:
         if test_key not in self.tests:
             self.tests.add(test_key)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         s = repr(self._function)
         return s.replace("<function", "<dependency function")
