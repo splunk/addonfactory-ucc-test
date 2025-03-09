@@ -99,7 +99,7 @@ class ForgePostExec:
         self,
         id: str,
         teardown: Callable[..., Any],
-        kwargs: dict[str, Any],
+        kwargs: Dict[str, Any],
         result: object,
         errors: List[str],
     ) -> None:
