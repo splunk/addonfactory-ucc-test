@@ -10,7 +10,7 @@ from splunk_add_on_ucc_modinput_test import commands, tools
 from importlib_metadata import version, PackageNotFoundError
 
 
-def get_version():
+def get_version() -> str:
     try:
         return version("splunk_add_on_ucc_modinput_test")
     except PackageNotFoundError:
