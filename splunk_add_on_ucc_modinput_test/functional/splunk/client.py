@@ -11,7 +11,6 @@ from splunk_add_on_ucc_modinput_test.common.utils import logger
 from splunk_add_on_ucc_modinput_test.functional.common.splunk_instance_file import (  # noqa: E501
     SplunkInstanceFileHelper,
 )
-import swagger_client  # type: ignore
 
 
 class SplunkClientBase:
@@ -117,20 +116,20 @@ class SplunkClientBase:
     def search(self, searchquery: str) -> SearchState:
         return search(service=self.splunk, searchquery=searchquery)
 
-    def run_saved_search(
-        self, saved_search_name: str
-    ) -> Tuple[int, Optional[List[object]]]:
-        saved_search = self.splunk.saved_searches[saved_search_name]
-        state = search(
-            service=self.splunk,
-            searchquery=saved_search.content["search"],
-        )
-        logger.debug(
-            f"Executed saved search {saved_search_name}, "
-            f"count: {state.result_count}, "
-            f"query: {saved_search.content['search']}"
-        )
-        return state.result_count, state.results
+    # def run_saved_search(
+    #     self, saved_search_name: str
+    # ) -> Tuple[int, Optional[List[object]]]:
+    #     saved_search = self.splunk.saved_searches[saved_search_name]
+    #     state = search(
+    #         service=self.splunk,
+    #         searchquery=saved_search.content["search"],
+    #     )
+    #     logger.debug(
+    #         f"Executed saved search {saved_search_name}, "
+    #         f"count: {state.result_count}, "
+    #         f"query: {saved_search.content['search']}"
+    #     )
+    #     return state.result_count, state.results
 
     def create_index(self, index_name: str) -> Index:
         return self.config.create_index(
