@@ -43,9 +43,9 @@ class FrameworkTask:
         self._forge = forge
         self._is_bootstrap = is_bootstrap
         self._forge_initial_kwargs = forge_kwargs
-        self._exec_id = None
+        self._exec_id: str | None = None
         self._is_executed = False
-        self._teardown = None
+        self._teardown: Generator[None, None, None] | None = None
         self._setup_errors: list[str] = []
         self._teardown_errors: list[str] = []
         self._result = None
@@ -317,24 +317,26 @@ class FrameworkTask:
             f"MARK TASK EXECUTED: {self.forge_full_path},\n\tself id: {id(self)},\n\tscope: {self.forge_scope},\n\texec_id: {self._exec_id},\n\ttest: {self.test_key},\n\tis_executed: {self.is_executed},\n\tis_failed: {self.failed},\n\terrors: {self._setup_errors}"
         )
 
-    def _save_generator_teardown(self, gen):
+    def _save_generator_teardown(
+        self, gen: Generator[None, None, None] | None
+    ) -> None:
         self._teardown = gen
 
-    def _save_class_teardown(self):
+    def _save_class_teardown(self) -> None:
         if not isinstance(self._forge._function, types.FunctionType):
             attr = getattr(self._forge._function, "teardown", None)
             if callable(attr):
                 self._teardown = attr
 
-    def update_test_artifacts(self, artifacts):
+    def update_test_artifacts(self, artifacts: dict[str, Any]) -> None:
         self._test.update_artifacts(artifacts)
 
     @staticmethod
-    def same_args(args1, args2):
+    def same_args(args1: Any, args2: Any) -> bool:
         if type(args1) != type(args2):
             return False
 
-        if isinstance(args1, (List, Tuple)):
+        if isinstance(args1, (list, tuple)):
             if len(args1) != len(args2):
                 return False
             for arg1, arg2 in zip(args1, args2):
@@ -356,7 +358,7 @@ class FrameworkTask:
 
         return args1 == args2
 
-    def same_tasks(self, other_task):
+    def same_tasks(self, other_task: Any) -> bool:
         if self.forge_key != other_task.forge_key:
             return False
 
@@ -364,7 +366,9 @@ class FrameworkTask:
         args2 = other_task._get_comparable_args()
         return FrameworkTask.same_args(args1, args2)
 
-    def reuse_forge_execution(self, exec_id, result, errors):
+    def reuse_forge_execution(
+        self, exec_id: str, result: Any, errors: list[str]
+    ) -> None:
         logger.debug(
             f"reuse execution {exec_id}:\n\tTask: {self.test_key}\n\tDep: {self.forge_key}\n\tresult: {result}\n\terrors: {errors}"
         )
@@ -374,7 +378,7 @@ class FrameworkTask:
         self._setup_errors = errors
 
     def use_previous_executions(
-        self, args_to_match
+        self, args_to_match: dict[str, Any]
     ) -> tuple[bool, object | None]:
         logger.debug(
             f"Dep {self.forge_key}: look for {self._forge_kwargs} in {self._forge.executions}"
@@ -391,7 +395,7 @@ class FrameworkTask:
                 return True, prev_exec.result
         return False, None
 
-    def execute(self):
+    def execute(self) -> None:
         logger.debug(
             f"EXECTASK: execute {self} - executions {self._forge.executions}, dep_kwargs: {self._forge_kwargs}"
         )
@@ -451,7 +455,7 @@ class FrameworkTask:
 
         self.mark_as_executed()
 
-    def teardown(self):
+    def teardown(self) -> None:
         logger.debug(
             f"Teardown task\n\t_exec_id: {self._exec_id}\n\tforge: {self.forge_full_path},\n\tscope: {self.forge_scope},\n\ttask: {self.test_key}\n\tteardown {self._teardown}"
         )
