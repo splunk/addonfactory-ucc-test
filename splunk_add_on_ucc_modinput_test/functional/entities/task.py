@@ -5,13 +5,19 @@ import types
 import random
 import traceback
 from copy import deepcopy
-from typing import Tuple, List
+from typing import Any, Callable, Dict, Optional, Tuple, List
 from splunk_add_on_ucc_modinput_test.functional import logger
 from splunk_add_on_ucc_modinput_test.functional.common.pytest_config_adapter import (
     PytestConfigAdapter,
 )
 from splunk_add_on_ucc_modinput_test.functional.constants import ForgeProbe
 
+from splunk_add_on_ucc_modinput_test.functional.entities.forge import (
+    FrameworkForge,
+)
+from splunk_add_on_ucc_modinput_test.functional.entities.test import (
+    FrameworkTest,
+)
 from splunk_add_on_ucc_modinput_test.functional.exceptions import (
     SplTaFwkWaitForProbeTimeout,
 )
@@ -25,11 +31,11 @@ from splunk_add_on_ucc_modinput_test.functional.vendor import VendorClientBase
 class FrameworkTask:
     def __init__(
         self,
-        test,
-        forge,
-        is_bootstrap,
-        forge_kwargs,
-        probe_fn,
+        test: FrameworkTest,
+        forge: FrameworkForge,
+        is_bootstrap: bool,
+        forge_kwargs: dict[str, Any],
+        probe_fn: Callable[..., Any],
         config: PytestConfigAdapter,
     ):
         self._config = config
@@ -40,67 +46,67 @@ class FrameworkTask:
         self._exec_id = None
         self._is_executed = False
         self._teardown = None
-        self._setup_errors = []
-        self._teardown_errors = []
+        self._setup_errors: list[str] = []
+        self._teardown_errors: list[str] = []
         self._result = None
-        self._global_builtin_args = {}
-        self._forge_kwargs = {}
+        self._global_builtin_args: dict[str, Any] = {}
+        self._forge_kwargs: dict[str, Any] = {}
         self._probe = None
         self._probe_fn = None
         self._probe_gen = None
-        self._probe_kwargs = {}
+        self._probe_kwargs: dict[str, Any] = {}
         self.apply_probe(probe_fn)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"{id(self)} - {super().__repr__()}, is_executed={self.is_executed}, is_bootstrap={self._is_bootstrap}, dep: {id(self._forge)} - {self._forge} - {self.forge_key}"
 
     @property
-    def is_bootstrap(self):
+    def is_bootstrap(self) -> bool:
         return self._is_bootstrap
 
     @property
-    def is_executed(self):
+    def is_executed(self) -> bool:
         return self._is_executed
 
     @property
-    def error(self):
+    def error(self) -> str:
         errors = self._setup_errors + self._teardown_errors
         return "\n".join(errors)
 
     @property
-    def setup_error(self):
+    def setup_error(self) -> str:
         return "\n".join(self._setup_errors)
 
     @property
-    def teardown_error(self):
+    def teardown_error(self) -> str:
         return "\n".join(self._teardown_errors)
 
     @property
-    def setup_failed(self):
+    def setup_failed(self) -> bool:
         return bool(self._setup_errors)
 
     @property
-    def teardown_failed(self):
+    def teardown_failed(self) -> bool:
         return bool(self._teardown_errors)
 
     @property
-    def failed(self):
+    def failed(self) -> bool:
         return self.setup_failed or self.teardown_failed
 
     @property
-    def result(self):
+    def result(self) -> object:
         return self._result
 
-    @property
-    def has_probe(self):
-        return callable(self._probe_gen)
+    # @property
+    # def has_probe(self):
+    #     return callable(self._probe_gen)
 
     @property
-    def forge_key(self):
+    def forge_key(self) -> tuple[str, ...]:
         return self._forge.key
 
     @property
-    def forge_scope(self):
+    def forge_scope(self) -> str:
         return self._forge.scope
 
     @property
@@ -124,37 +130,37 @@ class FrameworkTask:
         return self._test.key
 
     @property
-    def test_name(self):
+    def test_name(self) -> str:
         return self._test.name
 
     @property
-    def test_path(self):
+    def test_path(self) -> str:
         return self._test.path
 
     @property
-    def test_full_path(self):
+    def test_full_path(self) -> str:
         return self._test.full_path
 
     @property
-    def probe_name(self):
+    def probe_name(self) -> str | None:
         if self._probe:
             return self._probe.key[1]
         return None
 
     @property
-    def probe_path(self):
+    def probe_path(self) -> str | None:
         if self._probe:
             return self._probe.key[0]
         return None
 
     @property
-    def probe_full_path(self):
+    def probe_full_path(self) -> str | None:
         if self._probe:
             return "::".join(self._probe.key)
         return None
 
     @property
-    def summary(self):
+    def summary(self) -> str:
         return (
             f"\ntest: {self.test_name},"
             + f"\n\tlocation: {self.test_path},"
@@ -169,25 +175,25 @@ class FrameworkTask:
         )
 
     @property
-    def default_artifact_name(self):
+    def default_artifact_name(self) -> str:
         return self._forge.original_name
 
-    def block_forge_teardown(self):
+    def block_forge_teardown(self) -> None:
         logger.debug(f"BLOCK teardown for forge {self._forge.key}")
         self._forge.block_teardown()
 
-    def unblock_forge_teardown(self):
+    def unblock_forge_teardown(self) -> None:
         logger.debug(f"UNBLOCK teardown for forge {self._forge.key}")
         self._forge.unblock_teardown()
 
-    def make_kwarg(self, test_result):
+    def make_kwarg(self, test_result) -> dict[str, Any]:
         if test_result is None:
             return {}
         if not isinstance(test_result, dict):
             return {self.default_artifact_name: test_result}
         return test_result
 
-    def apply_probe(self, probe_fn):
+    def apply_probe(self, probe_fn: Callable[..., Any]) -> None:
         self._probe_fn = probe_fn
         if callable(probe_fn):
             self._probe = ExecutableBase(probe_fn)
