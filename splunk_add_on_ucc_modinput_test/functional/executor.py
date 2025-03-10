@@ -3,6 +3,7 @@ import queue
 import traceback
 import time
 from dataclasses import dataclass
+from typing import Any, Callable, Optional, Tuple
 from splunk_add_on_ucc_modinput_test.functional import logger
 from splunk_add_on_ucc_modinput_test.functional.entities.task import (
     FrameworkTask,
@@ -12,8 +13,8 @@ from splunk_add_on_ucc_modinput_test.functional.exceptions import (
 )
 
 
-def log_exceptions_traceback(fn):
-    def wrapper(*args, **kwargs):
+def log_exceptions_traceback(fn: Callable[..., Any]) -> Callable[..., Any]:
+    def wrapper(*args: Any, **kwargs: Any) -> Optional[Any]:
         try:
             return fn(*args, **kwargs)
         except Exception as e:
@@ -33,7 +34,7 @@ class TaskGroupProcessor:
         task: FrameworkTask
 
         @property
-        def id(self):
+        def id(self) -> Tuple[int, int]:
             return self.test_index, self.task_index
 
     def __init__(self, group, global_builtin_args_factory):

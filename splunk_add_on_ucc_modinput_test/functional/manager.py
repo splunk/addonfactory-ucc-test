@@ -96,7 +96,7 @@ class TestDependencyManager(PytestConfigAdapter):
         }
         self._pytest_config = None
         self._session_id = self.generate_session_id()
-        self._global_builtin_args_pool = {}
+        self._global_builtin_args_pool: Dict[str, Dict[str, str]] = {}
 
     @staticmethod
     def generate_session_id() -> str:
@@ -107,7 +107,7 @@ class TestDependencyManager(PytestConfigAdapter):
     def set_vendor_client_class(
         self,
         vendor_configuration_class: Type[VendorConfigurationBase],
-        vendor_client_class: VendorClientBase,
+        vendor_client_class: Type[VendorClientBase],
         vendor_class_argument_name: str,
     ) -> None:
         logger.debug(
@@ -122,10 +122,10 @@ class TestDependencyManager(PytestConfigAdapter):
 
     def set_splunk_client_class(
         self,
-        splunk_configuration_class,
-        splunk_client_class,
-        splunk_class_argument_name,
-    ):
+        splunk_configuration_class: Type[SplunkConfigurationBase],
+        splunk_client_class: Type[SplunkClientBase],
+        splunk_class_argument_name: str,
+    ) -> None:
         logger.debug(
             f"set_splunk_client_class: {splunk_configuration_class}, {splunk_client_class}, {splunk_class_argument_name}"
         )
@@ -136,8 +136,10 @@ class TestDependencyManager(PytestConfigAdapter):
             splunk_configuration_class,
         )
 
-    def create_splunk_client(self):
-        return self._splunk_client_class()
+    # OLEG
+    # looks like not used anywhere
+    # def create_splunk_client(self):
+    #     return self._splunk_client_class()
 
     def create_global_builtin_args(self):
         global_builtin_args = {
@@ -160,7 +162,7 @@ class TestDependencyManager(PytestConfigAdapter):
 
         return global_builtin_args
 
-    def get_global_builtin_args(self, test_key):
+    def get_global_builtin_args(self, test_key: str) -> Dict[str, str]:
         if test_key not in self._global_builtin_args_pool:
             logger.debug(f"create_global_builtin_args for test {test_key}:")
             self._global_builtin_args_pool[
