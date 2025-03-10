@@ -6,10 +6,12 @@ from splunk_add_on_ucc_modinput_test.common.splunk_instance import (
     SearchState,
     Index,
 )
+from splunk_add_on_ucc_modinput_test.common.ta_base import ConfigurationBase
 from splunk_add_on_ucc_modinput_test.common.utils import logger
 from splunk_add_on_ucc_modinput_test.functional.common.splunk_instance_file import (  # noqa: E501
     SplunkInstanceFileHelper,
 )
+import swagger_client  # type: ignore
 
 
 class SplunkClientBase:
@@ -26,19 +28,19 @@ class SplunkClientBase:
         pass
 
     @property
-    def splunk_configuration(self):
+    def splunk_configuration(self) -> Configuration:
         return self._splunk_configuration
 
     @property
-    def config(self):  # short alias for splunk_configuration
+    def config(self) -> Configuration:  # short alias for splunk_configuration
         return self._splunk_configuration
 
     @property
-    def splunk(self):
+    def splunk(self) -> ConfigurationBase:
         return self._splunk_configuration.service
 
     @property
-    def ta_api(self):
+    def ta_api(self) -> swagger_client.api.default_api.DefaultApi:
         assert (
             self.ta_service is not None
         ), "Make sure you have decorated inherited client class \
@@ -72,7 +74,7 @@ class SplunkClientBase:
                 results"
         )
 
-    def _make_conf_error(self, prop_name: str):
+    def _make_conf_error(self, prop_name: str) -> str:
         return f"Make sure you have '{prop_name}' attribute in your Splunk \
             configuration class {self.config.__class__.__name__}"
 
