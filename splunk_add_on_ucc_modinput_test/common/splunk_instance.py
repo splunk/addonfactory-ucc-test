@@ -3,7 +3,6 @@ from __future__ import annotations
 # mypy: disable-error-code="attr-defined,arg-type"
 
 import time
-from typing import Optional
 import pytest
 import requests  # type: ignore
 from requests.adapters import HTTPAdapter, Retry  # type: ignore
@@ -173,6 +172,10 @@ class Configuration:
         host = cls.collect_host()
         port = cls.collect_port()
         username = cls.collect_username()
+
+        if host is None or port is None or username is None:
+            raise ValueError("Host, port, and username must not be None")
+
         connection_key = (host, port, username)
         if connection_key in cls.__instances:
             return cls.__instances[connection_key]
