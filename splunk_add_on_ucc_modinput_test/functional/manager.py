@@ -141,23 +141,23 @@ class TestDependencyManager(PytestConfigAdapter):
     # def create_splunk_client(self):
     #     return self._splunk_client_class()
 
-    def create_global_builtin_args(self):
+    def create_global_builtin_args(self) -> Dict[str, Any]:
         global_builtin_args = {
             BuiltInArg.SESSION_ID.value: self.session_id,
         }
 
-        for prop, (client, config) in self._vendor_clients.items():
-            conf_instance = config(self._pytest_config)
-            global_builtin_args[prop] = client(conf_instance)
+        for v_prop, (v_client, v_config) in self._vendor_clients.items():
+            v_conf_instance = v_config(self._pytest_config)
+            global_builtin_args[v_prop] = v_client(v_conf_instance)
             logger.debug(
-                f"create_global_builtin_args, vendor: {prop}, config={conf_instance} config_id={id(conf_instance)}, client: {global_builtin_args[prop]}"
+                f"create_global_builtin_args, vendor: {v_prop}, v_config={v_conf_instance} config_id={id(v_conf_instance)}, v_client: {global_builtin_args[v_prop]}"
             )
 
-        for prop, (client, config) in self._splunk_clients.items():
-            conf_instance = config(self._pytest_config)
-            global_builtin_args[prop] = client(conf_instance)
+        for s_prop, (s_client, s_config) in self._splunk_clients.items():
+            conf_instance = s_config(self._pytest_config)
+            global_builtin_args[s_prop] = s_client(conf_instance)
             logger.debug(
-                f"create_global_builtin_args, splunk: {prop}, config={conf_instance} config_id={id(conf_instance)}, client: {global_builtin_args[prop]}"
+                f"create_global_builtin_args, splunk: {s_prop}, s_config={conf_instance} config_id={id(conf_instance)}, s_client: {global_builtin_args[s_prop]}"
             )
 
         return global_builtin_args
@@ -172,7 +172,7 @@ class TestDependencyManager(PytestConfigAdapter):
         return self._global_builtin_args_pool[test_key]
 
     @property
-    def session_id(self):
+    def session_id(self) -> str:
         return self._session_id
 
     def _interpret_scope(
@@ -188,7 +188,9 @@ class TestDependencyManager(PytestConfigAdapter):
 
         return scope
 
-    def forge_find_or_make(self, forge_fn, scope, is_bootstrap):
+    def forge_find_or_make(
+        self, forge_fn: Callable[..., Any], scope: str, is_bootstrap: bool
+    ) -> FrameworkForge:
         frg = FrameworkForge(forge_fn, scope)
         found = self.forges.get(frg.key)
         if not found:
@@ -241,7 +243,7 @@ class TestDependencyManager(PytestConfigAdapter):
 
         return test
 
-    def unregister_test(self, test_key):
+    def unregister_test(self, test_key: FrameworkTest) -> FrameworkTest:
         test = self.tests.pop(test_key, None)
         if test:
             for frg_key in test.forges:
@@ -342,7 +344,7 @@ class TestDependencyManager(PytestConfigAdapter):
         for test_key in skipped_tests_keys:
             self.unregister_test(test_key)
 
-    def synch_tests_with_pytest_list(self, pytest_test_set_keys):
+    def synch_tests_with_pytest_list(self, pytest_test_set_keys) -> None:
         tests_to_remove = [
             test_key
             for test_key in self.tests.keys()
@@ -369,7 +371,7 @@ class TestDependencyManager(PytestConfigAdapter):
         self._log_dep_exec_matrix(tests, exec_steps)
         return exec_steps
 
-    def start_bootstrap_execution(self):
+    def start_bootstrap_execution(self) -> None:
         if self.tests.is_empty or self.tasks.is_empty:
             return
 
