@@ -260,7 +260,7 @@ class TestDependencyManager(PytestConfigAdapter):
         test_obj = FrameworkTest(test_fn, parametrized_name)
         return self.tests.get(test_obj.key)
 
-    def dump_tests(self):
+    def dump_tests(self) -> None:
         logger.debug(f"DUMP TESTS: {len(self.tests.items())}")
         for key, test in self.tests.items():
             logger.debug(f"test key:{key} value: {test}")
@@ -401,40 +401,40 @@ class TestDependencyManager(PytestConfigAdapter):
         self.executor.start(deps_exec_mtx)
         self.executor.wait(is_bootstrap=False)
 
-    def shutdown(self):
+    def shutdown(self) -> None:
         logger.info("Shutting down dependency manager...")
 
         if self.executor is not None:
             self.executor.shutdown()
 
-    def check_all_tests_executed(self):
+    def check_all_tests_executed(self) -> bool:
         executed = [test.is_executed for test in self.tests.values()]
         return all(executed)
 
-    def check_tests_executed(self, tests_keys: List[Tuple[str, ...]]):
+    def check_tests_executed(self, tests_keys: List[Tuple[str, ...]]) -> bool:
         executed = [
             self.tests.get(test_key).is_executed for test_key in tests_keys
         ]
         return all(executed)
 
-    def try_to_unblock_inplace_teardowns(self, test) -> None:
+    def try_to_unblock_inplace_teardowns(self, test: FrameworkTest) -> None:
         inplace_tasks = self.tasks.enumerate_inplace_tasks(test.key)
         for _, _, task in inplace_tasks:
             if self.check_tests_executed(task.forge_test_keys):
                 task.unblock_forge_teardown()
 
-    def teardown_test_dependencies(self, test) -> None:
+    def teardown_test_dependencies(self, test: FrameworkTest) -> None:
         self.try_to_unblock_inplace_teardowns(test)
         tasks = list(self.tasks.enumerate_tasks(test.key))
         for _, _, task in reversed(tasks):
             task.teardown()
 
-    def teardown_test(self, test) -> None:
+    def teardown_test(self, test: FrameworkTest) -> None:
         logger.debug(f"teardown test:{test}")
         test.mark_executed()
         self.teardown_test_dependencies(test)
 
-    def _check_failed_tasks(self, test, done_tasks) -> None:
+    def _check_failed_tasks(self, test: FrameworkTest, done_tasks) -> None:
         failed_tasks = [
             task.forge_key for task in done_tasks if task._setup_errors
         ]

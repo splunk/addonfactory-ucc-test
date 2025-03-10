@@ -19,7 +19,7 @@ class FrameworkTest(ExecutableBase):
     ) -> None:
         super().__init__(function)
         self.forges: Set[str] = set()
-        self._is_executed = False
+        self._is_executed: bool = False
         self._artifacts: Dict[str, Any] = {}
         if altered_name:
             self._fn_name = altered_name

@@ -47,7 +47,7 @@ class TaskGroupProcessor:
 
         self._build_task_list()
 
-    def _build_task_list(self):
+    def _build_task_list(self) -> None:
         logger.debug(f"\npush task group {self._task_group}")
 
         for test_index, test_tasks in enumerate(self._task_group):
@@ -158,10 +158,10 @@ class FrmwkExecutorBase:
     def __init__(self, manager):
         self._manager = manager
 
-    def shutdown(self):
+    def shutdown(self) -> None:
         pass
 
-    def wait(self, is_bootstrap):
+    def wait(self, is_bootstrap: bool) -> None:
         pass
 
     def global_builtin_args_factory(self, test_key):
@@ -205,7 +205,7 @@ class FrmwkParallelExecutor(FrmwkExecutorBase):
         self._is_free = threading.Event()
         self.deploy()
 
-    def deploy(self):
+    def deploy(self) -> None:
         self.threads = [
             threading.Thread(target=self.worker_thread, args=(index,))
             for index in range(self.worker_count)
@@ -219,7 +219,7 @@ class FrmwkParallelExecutor(FrmwkExecutorBase):
         self._is_free.set()
         logger.debug("FrmwkParallelExecutor is set free")
 
-    def wait(self, is_bootstrap=True):
+    def wait(self, is_bootstrap: bool = True) -> None:
         if is_bootstrap:
             wait_timeout = self._manager.bootstrap_wait_timeout
             task_type = "bootstrap"
@@ -249,7 +249,7 @@ class FrmwkParallelExecutor(FrmwkExecutorBase):
         self._manager_queue.put(tasks)
         logger.debug("started")
 
-    def shutdown(self):
+    def shutdown(self) -> None:
         logger.debug("Sending shutdown command to executor...")
         self._manager_queue.put(None)
         logger.debug("Waiting for executor to shutdown...")
@@ -284,7 +284,7 @@ class FrmwkParallelExecutor(FrmwkExecutorBase):
         return False
 
     @log_exceptions_traceback
-    def manager_thread(self):
+    def manager_thread(self) -> None:
         logger.debug("manager has started")
         interrupted = False
         while not interrupted:

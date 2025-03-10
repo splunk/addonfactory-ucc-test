@@ -49,7 +49,7 @@ def attach(*forges: Union[forge, forges]) -> Callable[..., Any]:
 
 
 def define_vendor_client_argument(
-    vendor_client_class: VendorClientBase,
+    vendor_client_class: Type[VendorClientBase],
     vendor_class_argument_name: str = BuiltInArg.VENDOR_CLIENT.value,
 ) -> Callable[..., Any]:
     logger.debug(
@@ -79,8 +79,8 @@ def register_vendor_class(
     logger.debug(f"register_vendor_class {vendor_configuration_class}")
 
     def register_vendor_class_decorator(
-        vendor_client_class: VendorClientBase,
-    ) -> VendorClientBase:
+        vendor_client_class: Type[VendorClientBase],
+    ) -> Type[VendorClientBase]:
         dependency_manager.set_vendor_client_class(
             vendor_configuration_class,
             vendor_client_class,
@@ -92,7 +92,7 @@ def register_vendor_class(
 
 
 def define_splunk_client_argument(
-    splunk_client_class: SplunkClientBase,
+    splunk_client_class: Type[SplunkClientBase],
     splunk_class_argument_name: str = BuiltInArg.SPLUNK_CLIENT.value,
 ) -> Callable[..., Any]:
     logger.debug(
@@ -127,7 +127,7 @@ def register_splunk_class(
     )
 
     def register_splunk_class_decorator(
-        splunk_client_class: SplunkClientBase,
+        splunk_client_class: Type[SplunkClientBase],
     ) -> SplunkClientBase:
         def _bind_swagger_client(self) -> None:
             self.ta_service = ta_base.ConfigurationBase(
