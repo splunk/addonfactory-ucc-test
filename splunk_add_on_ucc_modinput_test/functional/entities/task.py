@@ -5,7 +5,7 @@ import types
 import random
 import traceback
 from copy import deepcopy
-from typing import Any, Callable, Dict, Optional, Tuple, List
+from typing import Any, Callable, Dict, Generator, Optional, Tuple, List
 from splunk_add_on_ucc_modinput_test.functional import logger
 from splunk_add_on_ucc_modinput_test.functional.common.pytest_config_adapter import (
     PytestConfigAdapter,
@@ -51,9 +51,10 @@ class FrameworkTask:
         self._result = None
         self._global_builtin_args: dict[str, Any] = {}
         self._forge_kwargs: dict[str, Any] = {}
-        self._probe = None
-        self._probe_fn = None
-        self._probe_gen = None
+        self._probe: ExecutableBase | None = None
+        self._probe_fn: Callable[..., Any] | None = None
+        # self._probe_gen: Callable[..., float] | None = None   #   probe generally returns float
+        self._probe_gen: Callable[..., Any] | None = None
         self._probe_kwargs: dict[str, Any] = {}
         self.apply_probe(probe_fn)
 
@@ -97,6 +98,7 @@ class FrameworkTask:
     def result(self) -> object:
         return self._result
 
+    # OLEG
     # @property
     # def has_probe(self):
     #     return callable(self._probe_gen)
@@ -110,23 +112,23 @@ class FrameworkTask:
         return self._forge.scope
 
     @property
-    def forge_test_keys(self):
+    def forge_test_keys(self) -> list[object]:
         return list(self._forge.tests_keys)
 
     @property
-    def forge_name(self):
+    def forge_name(self) -> str:
         return self.forge_key[1]
 
     @property
-    def forge_path(self):
+    def forge_path(self) -> str:
         return self.forge_key[0]
 
     @property
-    def forge_full_path(self):
+    def forge_full_path(self) -> str:
         return "::".join(self.forge_key[:2])
 
     @property
-    def test_key(self):
+    def test_key(self) -> tuple[str, ...]:
         return self._test.key
 
     @property
@@ -186,7 +188,7 @@ class FrameworkTask:
         logger.debug(f"UNBLOCK teardown for forge {self._forge.key}")
         self._forge.unblock_teardown()
 
-    def make_kwarg(self, test_result) -> dict[str, Any]:
+    def make_kwarg(self, test_result: dict[str, Any] | None) -> dict[str, Any]:
         if test_result is None:
             return {}
         if not isinstance(test_result, dict):
@@ -202,7 +204,9 @@ class FrameworkTask:
             self._probe_gen = probe_fn
         elif callable(self._probe_fn):
 
-            def _probe_default_gen(**probe_args):
+            def _probe_default_gen(
+                **probe_args: Any,
+            ) -> Generator[float, None, None]:
                 while not probe_fn(**probe_args):
                     yield self._config.probe_invoke_interval
 
@@ -216,14 +220,16 @@ class FrameworkTask:
         else:
             self._probe_required_args = []
 
-    def collect_available_kwargs(self):
+    def collect_available_kwargs(self) -> dict[str, Any]:
         available_kwargs = self._test.artifacts_copy
         available_kwargs.update(self.get_forge_kwargs_copy())
         available_kwargs.update(self._global_builtin_args)
         available_kwargs.update(self._test.builtin_args)
         return available_kwargs
 
-    def prepare_forge_call_args(self, global_builtin_args):
+    def prepare_forge_call_args(
+        self, global_builtin_args: dict[str, Any]
+    ) -> None:
         logger.debug(f"EXECTASK: prepare_forge_call_args {self}")
 
         self._global_builtin_args = global_builtin_args
@@ -237,23 +243,24 @@ class FrameworkTask:
             f"EXECTASK: prepare_forge_call_args for {self.forge_key}:\n\ttest required args: {self._test.required_args_names}\n\ttest artifacts: {self._test.artifacts}\n\tforge initial kwargs: {self._forge_initial_kwargs}\n\tforge kwargs: {self._forge_kwargs}\n\ttask available kwargs: {available_kwargs}"
         )
 
-    def _get_comparable_args(self):
+    def _get_comparable_args(self) -> dict[str, Any]:
         return {
             k: v
             for k, v in self._forge_kwargs.items()
             if not isinstance(v, (SplunkClientBase, VendorClientBase))
         }
 
-    def get_forge_kwargs_copy(self):
+    def get_forge_kwargs_copy(self) -> dict[str, Any]:
         return deepcopy(self._forge_initial_kwargs)
 
-    def get_probe_fn(self):
+    def get_probe_fn(self) -> Callable[..., Any] | None:
         return self._probe_fn
 
-    def invoke_probe(self):
-        yield from self._probe_gen(**self._probe_kwargs)
+    def invoke_probe(self) -> Generator[Callable[..., Any] | None, None, None]:
+        if callable(self._probe_gen):
+            yield from self._probe_gen(**self._probe_kwargs)
 
-    def prepare_probe_kwargs(self, extra_args={}):
+    def prepare_probe_kwargs(self, extra_args: dict[str, Any] = {}) -> None:
         available_kwargs = self.collect_available_kwargs()
         available_kwargs.update(extra_args)
 
@@ -263,7 +270,7 @@ class FrameworkTask:
             if k in self._probe_required_args
         }
 
-    def wait_for_probe(self, last_result):
+    def wait_for_probe(self, last_result: float) -> None:
         logger.debug(
             f"WAIT FOR PROBE started\n\ttest {self.test_key}\n\tforge {self.forge_key}\n\tprobe {self._probe_fn}"
         )
@@ -292,17 +299,19 @@ class FrameworkTask:
             f"Forge probe has been executed successfully, time taken {time.time() - probe_start_time} seconds:{self.summary}"
         )
 
-    def mark_as_failed(self, error, prefix):
-        if isinstance(error, Exception):
-            traceback_info = traceback.format_exc()
-            report = f"{prefix}: {error}{self.summary}\n{traceback_info}"
-        else:
-            report = f"{prefix}: {error}{self.summary}"
+    def mark_as_failed(self, error: Exception, prefix: str) -> None:
+        traceback_info = traceback.format_exc()
+        report = f"{prefix}: {error}{self.summary}\n{traceback_info}"
+        # if isinstance(error, Exception):
+        #     traceback_info = traceback.format_exc()
+        #     report = f"{prefix}: {error}{self.summary}\n{traceback_info}"
+        # else:
+        #     report = f"{prefix}: {error}{self.summary}"
         logger.error(report)
         self._setup_errors.append(report)
         self._is_executed = True
 
-    def mark_as_executed(self):
+    def mark_as_executed(self) -> None:
         self._is_executed = True
         logger.debug(
             f"MARK TASK EXECUTED: {self.forge_full_path},\n\tself id: {id(self)},\n\tscope: {self.forge_scope},\n\texec_id: {self._exec_id},\n\ttest: {self.test_key},\n\tis_executed: {self.is_executed},\n\tis_failed: {self.failed},\n\terrors: {self._setup_errors}"
