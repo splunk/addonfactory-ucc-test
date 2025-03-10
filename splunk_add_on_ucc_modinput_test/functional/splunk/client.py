@@ -6,6 +6,9 @@ from splunk_add_on_ucc_modinput_test.common.splunk_instance import (
     SearchState,
     Index,
 )
+from splunk_add_on_ucc_modinput_test.common.splunk_service_pool import (
+    SplunkServicePool,
+)
 from splunk_add_on_ucc_modinput_test.common.ta_base import ConfigurationBase
 from splunk_add_on_ucc_modinput_test.common.utils import logger
 from splunk_add_on_ucc_modinput_test.functional.common.splunk_instance_file import (  # noqa: E501
@@ -35,12 +38,12 @@ class SplunkClientBase:
         return self._splunk_configuration
 
     @property
-    def splunk(self) -> ConfigurationBase:
+    def splunk(self) -> SplunkServicePool:
         return self._splunk_configuration.service
 
     @property
     def ta_api(self):
-    # def ta_api(self) -> swagger_client.api.default_api.DefaultApi:
+        # def ta_api(self) -> swagger_client.api.default_api.DefaultApi:
         assert (
             self.ta_service is not None
         ), "Make sure you have decorated inherited client class \
@@ -117,29 +120,15 @@ class SplunkClientBase:
     def search(self, searchquery: str) -> SearchState:
         return search(service=self.splunk, searchquery=searchquery)
 
-    # def run_saved_search(
-    #     self, saved_search_name: str
-    # ) -> Tuple[int, Optional[List[object]]]:
-    #     saved_search = self.splunk.saved_searches[saved_search_name]
-    #     state = search(
-    #         service=self.splunk,
-    #         searchquery=saved_search.content["search"],
-    #     )
-    #     logger.debug(
-    #         f"Executed saved search {saved_search_name}, "
-    #         f"count: {state.result_count}, "
-    #         f"query: {saved_search.content['search']}"
-    #     )
-    #     return state.result_count, state.results
-
     def create_index(self, index_name: str) -> Index:
+        _is_cloud = "splunkcloud.com" in self.config.host.lower()
         return self.config.create_index(
             index_name,
             self.splunk,
-            is_cloud="splunkcloud.com" in self.config.host.lower(),
-            acs_stack=self.config.acs_stack,
-            acs_server=self.config.acs_server,
-            splunk_token=self.config.splunk_token,
+            is_cloud=_is_cloud,
+            acs_stack=self.config.acs_stack if _is_cloud else None,
+            acs_server=self.config.acs_server if _is_cloud else None,
+            splunk_token=self.config.splunk_token if _is_cloud else None,
         )
 
     def search_probe(
@@ -194,7 +183,7 @@ class SplunkClientBase:
 
     def repeat_search_until(
         self,
-        spl,
+        spl: str,
         *,
         condition_fn: Optional[Callable[[SearchState], bool]] = None,
         timeout: int = 300,
