@@ -39,7 +39,8 @@ class SplunkClientBase:
         return self._splunk_configuration.service
 
     @property
-    def ta_api(self) -> swagger_client.api.default_api.DefaultApi:
+    def ta_api(self):
+    # def ta_api(self) -> swagger_client.api.default_api.DefaultApi:
         assert (
             self.ta_service is not None
         ), "Make sure you have decorated inherited client class \
