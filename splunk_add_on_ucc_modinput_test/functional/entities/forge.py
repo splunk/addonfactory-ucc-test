@@ -8,6 +8,7 @@ from typing import (
     Dict,
     Generator,
     List,
+    Optional,
     Set,
     Tuple,
     Type,
@@ -18,12 +19,13 @@ from splunk_add_on_ucc_modinput_test.functional import logger
 from splunk_add_on_ucc_modinput_test.functional.entities.executable import (
     ExecutableBase,
 )
+from splunk_add_on_ucc_modinput_test.typing import ForgeType
 
 
 @dataclass
 class ForgeExecData:
     id: str
-    teardown: Callable[..., Any]
+    teardown: Optional[Generator[Any, None, None]]
     kwargs: Dict[str, Any]
     result: object
     errors: List[str]
@@ -34,7 +36,7 @@ class ForgeExecData:
     def __init__(
         self,
         id: str,
-        teardown: Callable[..., Any],
+        teardown: Optional[Generator[Any, None, None]],
         kwargs: Dict[str, Any],
         result: object,
         errors: List[str],
@@ -98,7 +100,7 @@ class ForgePostExec:
     def add(
         self,
         id: str,
-        teardown: Callable[..., Any],
+        teardown: Optional[Generator[Any, None, None]],
         kwargs: Dict[str, Any],
         result: object,
         errors: List[str],
@@ -123,7 +125,7 @@ class ForgePostExec:
         with data.lock:
             data.count += 1
 
-    def get_teardown(self, id: str) -> Callable[..., Any]:
+    def get_teardown(self, id: str) -> Optional[Generator[Any, None, None]]:
         data = self._exec_store.get(id)
         assert data
         return data.teardown
@@ -180,7 +182,7 @@ class ForgePostExec:
 class FrameworkForge(ExecutableBase):
     def __init__(
         self,
-        function: Callable[[Any], Generator[None, None, None]],
+        function: ForgeType,
         scope: str,
     ) -> None:
         super().__init__(function)
@@ -234,7 +236,7 @@ class FrameworkForge(ExecutableBase):
         self,
         id: str,
         *,
-        teardown: Callable[..., Any],
+        teardown: Optional[Generator[Any, None, None]],
         kwargs: Dict[str, Any],
         result: object,
         errors: List[str],

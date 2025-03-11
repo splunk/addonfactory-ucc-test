@@ -27,9 +27,7 @@ from splunk_add_on_ucc_modinput_test.functional.entities.executable import (
 from splunk_add_on_ucc_modinput_test.functional.splunk import SplunkClientBase
 from splunk_add_on_ucc_modinput_test.functional.vendor import VendorClientBase
 
-
-ProbeGenType = Union[Generator[int, None, None], None]
-ProbeFnType = Union[ProbeGenType, Callable[..., Any], None]
+from splunk_add_on_ucc_modinput_test.typing import ProbeFnType, ProbeGenType
 
 
 class FrameworkTask:
@@ -52,12 +50,12 @@ class FrameworkTask:
         self._teardown: Generator[None, None, None] | None = None
         self._setup_errors: list[str] = []
         self._teardown_errors: list[str] = []
-        self._result = None
+        self._result: object | None = None
         self._global_builtin_args: dict[str, Any] = {}
         self._forge_kwargs: dict[str, Any] = {}
         self._probe: ExecutableBase | None = None
-        self._probe_fn: ProbeFnType = None
-        self._probe_gen: ProbeGenType = None
+        self._probe_fn: ProbeFnType | None = None
+        self._probe_gen: ProbeGenType | None = None
         self._probe_kwargs: dict[str, Any] = {}
         self.apply_probe(probe_fn)
 
@@ -186,14 +184,14 @@ class FrameworkTask:
         logger.debug(f"UNBLOCK teardown for forge {self._forge.key}")
         self._forge.unblock_teardown()
 
-    def make_kwarg(self, test_result: float) -> dict[str, Any]:
+    def make_kwarg(self, test_result: object | None) -> dict[str, Any]:
         if test_result is None:
             return {}
         if not isinstance(test_result, dict):
             return {self.default_artifact_name: test_result}
         return test_result
 
-    def apply_probe(self, probe_fn: ProbeFnType) -> None:
+    def apply_probe(self, probe_fn: ProbeFnType | None) -> None:
         self._probe_fn = probe_fn
         if callable(probe_fn):
             self._probe = ExecutableBase(probe_fn)
@@ -204,15 +202,16 @@ class FrameworkTask:
 
             def _probe_default_gen(
                 **probe_args: Any,
-            ) -> Generator[float, None, None]:
-                while not probe_fn(**probe_args):
-                    yield self._config.probe_invoke_interval
+            ) -> Generator[int, None, None]:
+                if probe_fn is not None:
+                    while not probe_fn(**probe_args):
+                        yield self._config.probe_invoke_interval
 
             self._probe_gen = _probe_default_gen
         else:
             self._probe_gen = None
 
-        if self._probe_gen:
+        if self._probe_gen and self._probe_fn is not None:
             sig = inspect.signature(self._probe_fn)
             self._probe_required_args = list(sig.parameters.keys())
         else:
@@ -251,10 +250,10 @@ class FrameworkTask:
     def get_forge_kwargs_copy(self) -> dict[str, Any]:
         return deepcopy(self._forge_initial_kwargs)
 
-    def get_probe_fn(self) -> ProbeFnType:
+    def get_probe_fn(self) -> ProbeFnType | None:
         return self._probe_fn
 
-    def invoke_probe(self) -> Generator[Callable[..., Any] | None, None, None]:
+    def invoke_probe(self) -> Generator[int, None, None]:
         if callable(self._probe_gen):
             yield from self._probe_gen(**self._probe_kwargs)
 
@@ -268,7 +267,7 @@ class FrameworkTask:
             if k in self._probe_required_args
         }
 
-    def wait_for_probe(self, last_result: float) -> None:
+    def wait_for_probe(self, last_result: object | None) -> None:
         logger.debug(
             f"WAIT FOR PROBE started\n\ttest {self.test_key}\n\tforge {self.forge_key}\n\tprobe {self._probe_fn}"
         )
@@ -316,7 +315,7 @@ class FrameworkTask:
         )
 
     def _save_generator_teardown(
-        self, gen: Generator[None, None, None] | None
+        self, gen: Generator[Any, None, None] | None
     ) -> None:
         self._teardown = gen
 

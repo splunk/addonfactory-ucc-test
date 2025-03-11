@@ -1,10 +1,14 @@
 import inspect
-from typing import Any, Callable, Dict, Generator, Tuple, Optional
+from typing import Any, Callable, Dict, Generator, Tuple, Optional, Union
+
+
+from splunk_add_on_ucc_modinput_test.typing import ProbeFnType, ForgeType
 
 
 class ExecutableBase:
     def __init__(
-        self, function: Callable[[Any], Generator[None, None, None]]
+        self,
+        function: Union[ProbeFnType, ForgeType],
     ) -> None:
         assert callable(function)
         self._function = function
