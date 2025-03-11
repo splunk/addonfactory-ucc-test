@@ -1,11 +1,10 @@
 import inspect
-from collections.abc import Callable
-from typing import Any, Dict, Generator, Tuple
+from typing import Any, Callable, Dict, Generator, Tuple, Optional
 
 
 class ExecutableBase:
     def __init__(
-        self, function#: Callable[[Any], Generator[None, None, None]]
+        self, function: Callable[[Any], Generator[None, None, None]]
     ) -> None:
         assert callable(function)
         self._function = function
@@ -16,17 +15,21 @@ class ExecutableBase:
         return self._fn_source_file
 
     @property
-    def key(self):# -> tuple[str, str]:
+    def key(self) -> Tuple[str, ...]:
         return (self._fn_source_file, self.fn_full_name)
 
     @property
-    def original_key(self):# -> tuple[str, str]:
+    def original_key(self) -> Tuple[str, str]:
         return (self._fn_source_file, self.fn_original_full_name)
 
     @property
     def original_name(self) -> str:
         if self._original_name == "__call__":
-            return self._fn_bound_class.lower()
+            return (
+                self._fn_bound_class.lower()
+                if self._fn_bound_class
+                else "__call__"
+            )
         return self._original_name
 
     @property
@@ -44,6 +47,7 @@ class ExecutableBase:
             return self._original_name
 
     def _inspect(self) -> None:
+        self._fn_bound_class: Optional[str] = None
         if inspect.ismethod(self._function):
             self._fn_bound_class = self._function.__self__.__class__.__name__
             self._fn_name = self._function.__name__

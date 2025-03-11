@@ -1,4 +1,4 @@
-from typing import List, Dict, Tuple
+from typing import Any, Callable, Generator, List, Dict, Tuple
 from splunk_add_on_ucc_modinput_test.functional.entities.forge import (
     FrameworkForge,
 )
@@ -13,19 +13,19 @@ from splunk_add_on_ucc_modinput_test.functional import logger
 
 class TestCollection(Dict[Tuple[str, str], FrameworkTest]):
     @property
-    def is_empty(self):
+    def is_empty(self) -> bool:
         return not bool(self)
 
-    def add(self, item):
+    def add(self, item: FrameworkTest) -> None:
         assert isinstance(item, FrameworkTest)
         if item.key not in self:
             self[item.key] = item
 
-    def lookup_by_function(self, fn):
+    def lookup_by_function(self, fn: Callable[..., Any]) -> Tuple[str, str]:
         test = FrameworkTest(fn)
         return self.get(test.key)
 
-    def lookup_by_original_function(self, fn):
+    def lookup_by_original_function(self, fn: Callable) -> List[FrameworkTest]:
         found_tests_keys = set()
         lookup_test = FrameworkTest(fn)
         for key, test in self.items():
@@ -39,7 +39,7 @@ class TestCollection(Dict[Tuple[str, str], FrameworkTest]):
         return list(found_tests_keys)
 
 
-class ForgeCollection(Dict[Tuple[str, str, str], FrameworkForge]):
+class ForgeCollection(Dict[Tuple[str, ...], FrameworkForge]):
     @property
     def is_empty(self):
         return not bool(self)
@@ -54,17 +54,17 @@ class ForgeCollection(Dict[Tuple[str, str, str], FrameworkForge]):
 
 
 class TaskCollection:
-    def __init__(self):
+    def __init__(self) -> None:
         self._tasks = {}
 
     @property
-    def is_empty(self):
+    def is_empty(self) -> bool:
         return not bool(self._tasks)
 
     def remove_test_tasks(self, test_key):
         return self._tasks.pop(test_key, None)
 
-    def add(self, tasks: List[FrameworkTask]):
+    def add(self, tasks: List[FrameworkTask]) -> None:
         if not tasks:
             return
         test_key = tasks[0].test_key
@@ -100,12 +100,14 @@ class TaskCollection:
         logger.debug(f"get_inplace_tasks for {test_key}: {inplace_tasks}")
         return inplace_tasks
 
-    def get_tasks(self, test_key):
+    def get_tasks(self, test_key: Tuple[str, ...]) -> List[FrameworkTask]:
         tasks = self._tasks.get(test_key, [])
         logger.debug(f"get_tasks for {test_key}: {tasks}")
         return tasks
 
-    def enumerate_tasks(self, test_key):
+    def enumerate_tasks(
+        self, test_key: Tuple[str, ...]
+    ) -> Generator[Tuple[int, int, FrameworkTask], None, None]:
         test_tasks = self.get_tasks(test_key)
         for i, parralel_tasks in enumerate(test_tasks):
             for j, task in enumerate(parralel_tasks):

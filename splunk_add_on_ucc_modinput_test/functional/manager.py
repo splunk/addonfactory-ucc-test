@@ -1,6 +1,16 @@
 import time
 
-from typing import Generator, List, Tuple, Optional, Union
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Generator,
+    List,
+    Tuple,
+    Optional,
+    Type,
+    Union,
+)
 from splunk_add_on_ucc_modinput_test.functional import logger
 from splunk_add_on_ucc_modinput_test.functional.exceptions import (
     SplTaFwkDependencyExecutionError,
@@ -43,12 +53,12 @@ from splunk_add_on_ucc_modinput_test.functional.common.identifier_factory import
 class forge:
     def __init__(
         self,
-        forge_fn,
+        forge_fn: Callable[..., Any],
         *,
-        probe=None,
+        probe: Optional[Callable[..., Any]] = None,
         scope: Optional[Union[ForgeScope, str]] = None,
-        **kwargs,
-    ):
+        **kwargs: Dict[str, Any],
+    ) -> None:
         self.forge_fn = forge_fn
         self.probe = probe
         self.scope = scope.value if isinstance(scope, ForgeScope) else scope
@@ -57,14 +67,16 @@ class forge:
 
 class forges:
     def __init__(
-        self, *forge_list, scope: Optional[Union[ForgeScope, str]] = None
-    ):
+        self,
+        *forge_list: forge,
+        scope: Optional[Union[ForgeScope, str]] = None,
+    ) -> None:
         self.forge_list = forge_list
         self.scope = scope.value if isinstance(scope, ForgeScope) else scope
 
 
 class TestDependencyManager(PytestConfigAdapter):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.tests = TestCollection()
         self.forges = ForgeCollection()
@@ -84,20 +96,20 @@ class TestDependencyManager(PytestConfigAdapter):
         }
         self._pytest_config = None
         self._session_id = self.generate_session_id()
-        self._global_builtin_args_pool = {}
+        self._global_builtin_args_pool: Dict[str, Dict[str, str]] = {}
 
     @staticmethod
-    def generate_session_id():
+    def generate_session_id() -> str:
         return create_identifier(
             id_type=IdentifierType.ALPHA, in_uppercase=True
         )
 
     def set_vendor_client_class(
         self,
-        vendor_configuration_class,
-        vendor_client_class,
-        vendor_class_argument_name,
-    ):
+        vendor_configuration_class: Type[VendorConfigurationBase],
+        vendor_client_class: Type[VendorClientBase],
+        vendor_class_argument_name: str,
+    ) -> None:
         logger.debug(
             f"set_vendor_client_class: {vendor_client_class}, {vendor_configuration_class}, {vendor_class_argument_name}"
         )
@@ -108,15 +120,12 @@ class TestDependencyManager(PytestConfigAdapter):
             vendor_configuration_class,
         )
 
-    def create_vendor_client(self):
-        return self._vendor_client_class()
-
     def set_splunk_client_class(
         self,
-        splunk_configuration_class,
-        splunk_client_class,
-        splunk_class_argument_name,
-    ):
+        splunk_configuration_class: Type[SplunkConfigurationBase],
+        splunk_client_class: Type[SplunkClientBase],
+        splunk_class_argument_name: str,
+    ) -> None:
         logger.debug(
             f"set_splunk_client_class: {splunk_configuration_class}, {splunk_client_class}, {splunk_class_argument_name}"
         )
@@ -127,31 +136,33 @@ class TestDependencyManager(PytestConfigAdapter):
             splunk_configuration_class,
         )
 
-    def create_splunk_client(self):
-        return self._splunk_client_class()
+    # OLEG
+    # looks like not used anywhere
+    # def create_splunk_client(self):
+    #     return self._splunk_client_class()
 
-    def create_global_builtin_args(self):
+    def create_global_builtin_args(self) -> Dict[str, Any]:
         global_builtin_args = {
             BuiltInArg.SESSION_ID.value: self.session_id,
         }
 
-        for prop, (client, config) in self._vendor_clients.items():
-            conf_instance = config(self._pytest_config)
-            global_builtin_args[prop] = client(conf_instance)
+        for v_prop, (v_client, v_config) in self._vendor_clients.items():
+            v_conf_instance = v_config(self._pytest_config)
+            global_builtin_args[v_prop] = v_client(v_conf_instance)
             logger.debug(
-                f"create_global_builtin_args, vendor: {prop}, config={conf_instance} config_id={id(conf_instance)}, client: {global_builtin_args[prop]}"
+                f"create_global_builtin_args, vendor: {v_prop}, v_config={v_conf_instance} config_id={id(v_conf_instance)}, v_client: {global_builtin_args[v_prop]}"
             )
 
-        for prop, (client, config) in self._splunk_clients.items():
-            conf_instance = config(self._pytest_config)
-            global_builtin_args[prop] = client(conf_instance)
+        for s_prop, (s_client, s_config) in self._splunk_clients.items():
+            conf_instance = s_config(self._pytest_config)
+            global_builtin_args[s_prop] = s_client(conf_instance)
             logger.debug(
-                f"create_global_builtin_args, splunk: {prop}, config={conf_instance} config_id={id(conf_instance)}, client: {global_builtin_args[prop]}"
+                f"create_global_builtin_args, splunk: {s_prop}, s_config={conf_instance} config_id={id(conf_instance)}, s_client: {global_builtin_args[s_prop]}"
             )
 
         return global_builtin_args
 
-    def get_global_builtin_args(self, test_key):
+    def get_global_builtin_args(self, test_key: str) -> Dict[str, str]:
         if test_key not in self._global_builtin_args_pool:
             logger.debug(f"create_global_builtin_args for test {test_key}:")
             self._global_builtin_args_pool[
@@ -161,7 +172,7 @@ class TestDependencyManager(PytestConfigAdapter):
         return self._global_builtin_args_pool[test_key]
 
     @property
-    def session_id(self):
+    def session_id(self) -> str:
         return self._session_id
 
     def _interpret_scope(
@@ -177,7 +188,9 @@ class TestDependencyManager(PytestConfigAdapter):
 
         return scope
 
-    def forge_find_or_make(self, forge_fn, scope, is_bootstrap):
+    def forge_find_or_make(
+        self, forge_fn: Callable[..., Any], scope: str, is_bootstrap: bool
+    ) -> FrameworkForge:
         frg = FrameworkForge(forge_fn, scope)
         found = self.forges.get(frg.key)
         if not found:
@@ -192,7 +205,13 @@ class TestDependencyManager(PytestConfigAdapter):
             )
         return frg
 
-    def bind(self, test_fn, scope, frg_fns, is_bootstrap):
+    def bind(
+        self,
+        test_fn: Callable[..., Any],
+        scope: Optional[str],
+        frg_fns: List[forge],
+        is_bootstrap: bool,
+    ) -> FrameworkTest:
         logger.debug(f"bind: {test_fn} -> {frg_fns}")
 
         test = self.tests.lookup_by_function(test_fn)
@@ -224,7 +243,7 @@ class TestDependencyManager(PytestConfigAdapter):
 
         return test
 
-    def unregister_test(self, test_key):
+    def unregister_test(self, test_key: FrameworkTest) -> FrameworkTest:
         test = self.tests.pop(test_key, None)
         if test:
             for frg_key in test.forges:
@@ -241,7 +260,7 @@ class TestDependencyManager(PytestConfigAdapter):
         test_obj = FrameworkTest(test_fn, parametrized_name)
         return self.tests.get(test_obj.key)
 
-    def dump_tests(self):
+    def dump_tests(self) -> None:
         logger.debug(f"DUMP TESTS: {len(self.tests.items())}")
         for key, test in self.tests.items():
             logger.debug(f"test key:{key} value: {test}")
@@ -325,7 +344,7 @@ class TestDependencyManager(PytestConfigAdapter):
         for test_key in skipped_tests_keys:
             self.unregister_test(test_key)
 
-    def synch_tests_with_pytest_list(self, pytest_test_set_keys):
+    def synch_tests_with_pytest_list(self, pytest_test_set_keys) -> None:
         tests_to_remove = [
             test_key
             for test_key in self.tests.keys()
@@ -352,7 +371,7 @@ class TestDependencyManager(PytestConfigAdapter):
         self._log_dep_exec_matrix(tests, exec_steps)
         return exec_steps
 
-    def start_bootstrap_execution(self):
+    def start_bootstrap_execution(self) -> None:
         if self.tests.is_empty or self.tasks.is_empty:
             return
 
@@ -382,40 +401,40 @@ class TestDependencyManager(PytestConfigAdapter):
         self.executor.start(deps_exec_mtx)
         self.executor.wait(is_bootstrap=False)
 
-    def shutdown(self):
+    def shutdown(self) -> None:
         logger.info("Shutting down dependency manager...")
 
         if self.executor is not None:
             self.executor.shutdown()
 
-    def check_all_tests_executed(self):
+    def check_all_tests_executed(self) -> bool:
         executed = [test.is_executed for test in self.tests.values()]
         return all(executed)
 
-    def check_tests_executed(self, tests_keys: List[Tuple[str, ...]]):
+    def check_tests_executed(self, tests_keys: List[Tuple[str, ...]]) -> bool:
         executed = [
             self.tests.get(test_key).is_executed for test_key in tests_keys
         ]
         return all(executed)
 
-    def try_to_unblock_inplace_teardowns(self, test) -> None:
+    def try_to_unblock_inplace_teardowns(self, test: FrameworkTest) -> None:
         inplace_tasks = self.tasks.enumerate_inplace_tasks(test.key)
         for _, _, task in inplace_tasks:
             if self.check_tests_executed(task.forge_test_keys):
                 task.unblock_forge_teardown()
 
-    def teardown_test_dependencies(self, test) -> None:
+    def teardown_test_dependencies(self, test: FrameworkTest) -> None:
         self.try_to_unblock_inplace_teardowns(test)
         tasks = list(self.tasks.enumerate_tasks(test.key))
         for _, _, task in reversed(tasks):
             task.teardown()
 
-    def teardown_test(self, test) -> None:
+    def teardown_test(self, test: FrameworkTest) -> None:
         logger.debug(f"teardown test:{test}")
         test.mark_executed()
         self.teardown_test_dependencies(test)
 
-    def _check_failed_tasks(self, test, done_tasks) -> None:
+    def _check_failed_tasks(self, test: FrameworkTest, done_tasks) -> None:
         failed_tasks = [
             task.forge_key for task in done_tasks if task._setup_errors
         ]

@@ -2,7 +2,6 @@ import time
 import random
 import string
 from enum import Enum
-from typing import List, Any
 
 
 class IdentifierType(Enum):
@@ -12,7 +11,7 @@ class IdentifierType(Enum):
     HEX = 4
 
 
-def _convert_to_anybase(number: int, base: List[Any]) -> str:
+def _convert_to_anybase(number: int, base: str) -> str:
     size = len(base)
     if number == 0:
         return base[0]
