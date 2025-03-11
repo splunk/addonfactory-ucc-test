@@ -81,7 +81,9 @@ class TestDependencyManager(PytestConfigAdapter):
         self.tests = TestCollection()
         self.forges = ForgeCollection()
         self.tasks = TaskCollection()
-        self.executor = None
+        self.executor: Optional[
+            Union[FrmwkSequentialExecutor, FrmwkParallelExecutor]
+        ] = None
         self._vendor_clients = {
             BuiltInArg.VENDOR_CLIENT.value: (
                 VendorClientBase,
@@ -136,13 +138,10 @@ class TestDependencyManager(PytestConfigAdapter):
             splunk_configuration_class,
         )
 
-    # OLEG
-    # looks like not used anywhere
-    # def create_splunk_client(self):
-    #     return self._splunk_client_class()
-
     def create_global_builtin_args(self) -> Dict[str, Any]:
-        global_builtin_args = {
+        global_builtin_args: Dict[
+            str, Union[str, VendorClientBase, SplunkClientBase]
+        ] = {
             BuiltInArg.SESSION_ID.value: self.session_id,
         }
 
@@ -285,7 +284,9 @@ class TestDependencyManager(PytestConfigAdapter):
         kwargs.update(extra_kwargs)
         return FrameworkTask(test, frg, is_bootstrap, kwargs, probe, self)
 
-    def expand_parametrized_tests(self, parametrized_tests):
+    def expand_parametrized_tests(
+        self, parametrized_tests: Dict[str, List[Tuple[str, Any]]]
+    ) -> None:
         for test_key, param_tests in parametrized_tests.items():
             test = self.unregister_test(test_key)
             if not test:
@@ -327,7 +328,7 @@ class TestDependencyManager(PytestConfigAdapter):
                         f"parametrized_test.link_forge: {parametrized_test.key}: {frg_list} => {parametrized_test}"
                     )
 
-    def _log_dep_exec_matrix(self, tests, dep_mtx):
+    def _log_dep_exec_matrix(self, tests, dep_mtx) -> None:
         matrix = "\nBootstrap Dependency execution matrix:\n"
         for step_index, group in enumerate(dep_mtx):
             matrix += f"Step {step_index+1}:\n"
@@ -340,7 +341,9 @@ class TestDependencyManager(PytestConfigAdapter):
                     matrix += "\t\tNo depemdemcies at this step\n"
         logger.info(matrix)
 
-    def remove_skipped_tests(self, skipped_tests_keys):
+    def remove_skipped_tests(
+        self, skipped_tests_keys: List[Tuple[str, ...]]
+    ) -> None:
         for test_key in skipped_tests_keys:
             self.unregister_test(test_key)
 
@@ -352,7 +355,7 @@ class TestDependencyManager(PytestConfigAdapter):
         ]
         self.remove_skipped_tests(tests_to_remove)
 
-    def build_bootstrap_matrix(self):
+    def build_bootstrap_matrix(self) -> List[FrameworkTask]:
         tests = list(self.tests.values())
 
         exec_steps = []
@@ -411,7 +414,7 @@ class TestDependencyManager(PytestConfigAdapter):
         executed = [test.is_executed for test in self.tests.values()]
         return all(executed)
 
-    def check_tests_executed(self, tests_keys: List[Tuple[str, ...]]) -> bool:
+    def check_tests_executed(self, tests_keys: List[Tuple[str, str]]) -> bool:
         executed = [
             self.tests.get(test_key).is_executed for test_key in tests_keys
         ]
@@ -486,21 +489,21 @@ class TestDependencyManager(PytestConfigAdapter):
 
     def test_setup_error_report(
         self, test: FrameworkTest
-    ) -> Generator[Tuple[FrameworkTask, Exception], None, None]:
+    ) -> Generator[Tuple[FrameworkTask, str], None, None]:
         for _, _, task in self.tasks.enumerate_tasks(test.key):
             if task.setup_failed:
                 yield task, task.setup_error
 
     def test_teardown_error_report(
         self, test: FrameworkTest
-    ) -> Generator[Tuple[FrameworkTask, Exception], None, None]:
+    ) -> Generator[Tuple[FrameworkTask, str], None, None]:
         for _, _, task in self.tasks.enumerate_tasks(test.key):
             if task.teardown_failed:
                 yield task, task.teardown_error
 
     def test_error_report(
         self, test: FrameworkTest
-    ) -> Generator[Tuple[FrameworkTask, Exception], None, None]:
+    ) -> Generator[Tuple[FrameworkTask, str], None, None]:
         for _, _, task in self.tasks.enumerate_tasks(test.key):
             if task.failed:
                 yield task, task.error

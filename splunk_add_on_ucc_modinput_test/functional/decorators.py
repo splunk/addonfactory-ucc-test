@@ -126,15 +126,15 @@ def register_splunk_class(
         f"configuration {splunk_configuration_class}"
     )
 
+    def _bind_swagger_client(self: SplunkClientBase) -> None:
+        self.ta_service = ta_base.ConfigurationBase(
+            swagger_client=swagger_client,
+            splunk_configuration=self._splunk_configuration,
+        )
+
     def register_splunk_class_decorator(
         splunk_client_class: Type[SplunkClientBase],
-    ) -> SplunkClientBase:
-        def _bind_swagger_client(self) -> None:
-            self.ta_service = ta_base.ConfigurationBase(
-                swagger_client=swagger_client,
-                splunk_configuration=self.splunk_configuration,
-            )
-
+    ) -> Type[SplunkClientBase]:
         splunk_client_class._bind_swagger_client = _bind_swagger_client
         dependency_manager.set_splunk_client_class(
             splunk_configuration_class,

@@ -5,7 +5,7 @@ import types
 import random
 import traceback
 from copy import deepcopy
-from typing import Any, Callable, Dict, Generator, Optional, Tuple, List
+from typing import Any, Callable, Dict, Generator, Optional, Tuple, List, Union
 from splunk_add_on_ucc_modinput_test.functional import logger
 from splunk_add_on_ucc_modinput_test.functional.common.pytest_config_adapter import (
     PytestConfigAdapter,
@@ -28,6 +28,10 @@ from splunk_add_on_ucc_modinput_test.functional.splunk import SplunkClientBase
 from splunk_add_on_ucc_modinput_test.functional.vendor import VendorClientBase
 
 
+ProbeGenType = Union[Generator[int, None, None], None]
+ProbeFnType = Union[ProbeGenType, Callable[..., Any], None]
+
+
 class FrameworkTask:
     def __init__(
         self,
@@ -35,7 +39,7 @@ class FrameworkTask:
         forge: FrameworkForge,
         is_bootstrap: bool,
         forge_kwargs: dict[str, Any],
-        probe_fn: Callable[..., Any],
+        probe_fn: ProbeFnType,
         config: PytestConfigAdapter,
     ):
         self._config = config
@@ -52,9 +56,8 @@ class FrameworkTask:
         self._global_builtin_args: dict[str, Any] = {}
         self._forge_kwargs: dict[str, Any] = {}
         self._probe: ExecutableBase | None = None
-        self._probe_fn: Callable[..., Any] | None = None
-        # self._probe_gen: Callable[..., float] | None = None   #   probe generally returns float
-        self._probe_gen: Callable[..., Any] | None = None
+        self._probe_fn: ProbeFnType = None
+        self._probe_gen: ProbeGenType = None
         self._probe_kwargs: dict[str, Any] = {}
         self.apply_probe(probe_fn)
 
@@ -97,11 +100,6 @@ class FrameworkTask:
     @property
     def result(self) -> object:
         return self._result
-
-    # OLEG
-    # @property
-    # def has_probe(self):
-    #     return callable(self._probe_gen)
 
     @property
     def forge_key(self) -> tuple[str, ...]:
@@ -188,14 +186,14 @@ class FrameworkTask:
         logger.debug(f"UNBLOCK teardown for forge {self._forge.key}")
         self._forge.unblock_teardown()
 
-    def make_kwarg(self, test_result: dict[str, Any] | None) -> dict[str, Any]:
+    def make_kwarg(self, test_result: float) -> dict[str, Any]:
         if test_result is None:
             return {}
         if not isinstance(test_result, dict):
             return {self.default_artifact_name: test_result}
         return test_result
 
-    def apply_probe(self, probe_fn: Callable[..., Any]) -> None:
+    def apply_probe(self, probe_fn: ProbeFnType) -> None:
         self._probe_fn = probe_fn
         if callable(probe_fn):
             self._probe = ExecutableBase(probe_fn)
@@ -253,7 +251,7 @@ class FrameworkTask:
     def get_forge_kwargs_copy(self) -> dict[str, Any]:
         return deepcopy(self._forge_initial_kwargs)
 
-    def get_probe_fn(self) -> Callable[..., Any] | None:
+    def get_probe_fn(self) -> ProbeFnType:
         return self._probe_fn
 
     def invoke_probe(self) -> Generator[Callable[..., Any] | None, None, None]:

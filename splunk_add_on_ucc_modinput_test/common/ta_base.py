@@ -56,7 +56,7 @@ class ConfigurationBase:
         def api_instance(self) -> swagger_client.api.default_api.DefaultApi:  # type: ignore
             return self._api_instance
 
-        ConfigurationBase.api_instance = property(api_instance)
+        ConfigurationBase.api_instance = property(api_instance)  # type: ignore
 
     @property
     def dedicated_index_name(self) -> str:

@@ -1,3 +1,4 @@
+from __future__ import annotations
 import time
 from typing import List, Optional, Tuple, Callable, Generator
 from splunk_add_on_ucc_modinput_test.common.splunk_instance import (
@@ -18,16 +19,16 @@ from splunk_add_on_ucc_modinput_test.functional.common.splunk_instance_file impo
 
 class SplunkClientBase:
     def __init__(
-        self, splunk_configuration: Optional[Configuration] = None
+        self, splunk_configuration: Configuration | None = None
     ) -> None:
-        self.ta_service = None
+        self.ta_service: ConfigurationBase | None = None
         self._splunk_configuration = splunk_configuration or Configuration()
         self._bind_swagger_client()
 
-    def _bind_swagger_client(self) -> None:
-        # this method is replaced in inherited class by the decorator
-        # splunk_add_on_ucc_modinput_test.functional.decorators.register_splunk_class
-        pass
+    _bind_swagger_client: Callable[..., None] = lambda: None
+    # this method is replaced in inherited class by the decorator
+    # splunk_add_on_ucc_modinput_test.functional.decorators.register_splunk_class
+    # pass
 
     @property
     def splunk_configuration(self) -> Configuration:
@@ -42,13 +43,12 @@ class SplunkClientBase:
         return self._splunk_configuration.service
 
     @property
-    def ta_api(self):
-        # def ta_api(self) -> swagger_client.api.default_api.DefaultApi:
+    def ta_api(self) -> swagger_client.api.default_api.DefaultApi:  # type: ignore
         assert (
             self.ta_service is not None
         ), "Make sure you have decorated inherited client class \
             with @register_splunk_class"
-        return self.ta_service.api_instance
+        return self.ta_service._api_instance
 
     @property
     def instance_epoch_time(self) -> int:
@@ -93,7 +93,7 @@ class SplunkClientBase:
     @property
     def instance_file_helper(self) -> SplunkInstanceFileHelper:
         assert (
-            hasattr(self.config, "home") and self.config.splunk_home
+            hasattr(self.config, "home") and self.config.splunk_home  # type: ignore
         ), self._make_conf_error("home")
         connect = dict(
             splunk_url=f"https://{self.config.host}:{self.config.port}",
@@ -126,20 +126,20 @@ class SplunkClientBase:
             index_name,
             self.splunk,
             is_cloud=_is_cloud,
-            acs_stack=self.config.acs_stack if _is_cloud else None,
+            acs_stack=self.config.acs_stack if _is_cloud else None,  # type: ignore
             acs_server=self.config.acs_server if _is_cloud else None,
-            splunk_token=self.config.splunk_token if _is_cloud else None,
+            splunk_token=self.config.splunk_token if _is_cloud else None,  # type: ignore
         )
 
     def search_probe(
         self,
         probe_spl: str,
         *,
-        verify_fn: Optional[Callable[[SearchState], bool]] = None,
+        verify_fn: Callable[[SearchState], bool] | None = None,
         timeout: int = 300,
         interval: int = 5,
-        probe_name: Optional[str] = "probe",
-    ) -> Generator[int, None, Optional[SearchState]]:
+        probe_name: str | None = "probe",
+    ) -> Generator[int, None, SearchState | None]:
         """
         Probe state by search until it returns verify function return true.
         Default verify function checks for non empty search result.
@@ -180,15 +180,16 @@ class SplunkClientBase:
             yield interval
 
         logger.error(f"{probe_name} is still negative after {timeout} seconds")
+        return None
 
     def repeat_search_until(
         self,
         spl: str,
         *,
-        condition_fn: Optional[Callable[[SearchState], bool]] = None,
+        condition_fn: Callable[[SearchState], bool] | None = None,
         timeout: int = 300,
         interval: int = 5,
-    ) -> Optional[SearchState]:
+    ) -> SearchState | None:
         """
         Repeats search until condition function returns True.
         Default condition function checks for non empty search result.
