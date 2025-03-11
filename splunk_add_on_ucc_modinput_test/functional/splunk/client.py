@@ -157,7 +157,7 @@ class SplunkClientBase:
         @param verify_fn: function to verify search state.
         @param timeout: how long in seconds to wait for positive result.
         @param interval: interval to repeat search.
-        @return: SearchState object.
+        @return: True, if probe conditions met before expiration, otherwise False.
         """
 
         def non_empty_result(state: SearchState) -> bool:
@@ -181,14 +181,15 @@ class SplunkClientBase:
                     f"{probe_name} has successfully finished after "
                     f"{time.time() - start_time} seconds"
                 )
-                return search_state
+                return True
             logger.debug(
                 f"{probe_name} is negative after "
                 f"{time.time()-start_time} seconds"
             )
             yield interval
 
-        logger.error(f"{probe_name} is still negative after {timeout} seconds")
+        logger.info(f"{probe_name} is still negative after {timeout} seconds")
+        return False
 
     def repeat_search_until(
         self,

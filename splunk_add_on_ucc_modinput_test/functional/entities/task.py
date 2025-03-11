@@ -5,7 +5,7 @@ import types
 import random
 import traceback
 from copy import deepcopy
-from typing import Tuple
+from typing import Tuple, Optional, Dict
 from splunk_add_on_ucc_modinput_test.functional import logger
 from splunk_add_on_ucc_modinput_test.functional.common.pytest_config_adapter import (
     PytestConfigAdapter,
@@ -257,7 +257,7 @@ class FrameworkTask:
             if k in self._probe_required_args
         }
 
-    def wait_for_probe(self, last_result):
+    def wait_for_probe(self, last_result:Dict[str, object]) -> Optional[object]:
         logger.debug(
             f"WAIT FOR PROBE started\n\ttest {self.test_key}\n\tforge {self.forge_key}\n\tprobe {self._probe_fn}"
         )
@@ -271,20 +271,29 @@ class FrameworkTask:
         logger.debug(
             f"WAIT FOR PROBE\n\ttest {self.test_key}\n\tforge {self.forge_key}\n\tprobe {self._probe_fn}\n\tprobe_gen {self._probe_gen}\n\tprobe_args {self._probe_kwargs}"
         )
-        for interval in self.invoke_probe():
-            if time.time() > expire_time:
-                msg = f"Test {self.test_key}, forge {self.forge_key}: probe {self._probe_fn} exceeded {self._config.probe_wait_timeout} seconds timeout"
-                raise SplTaFwkWaitForProbeTimeout(msg)
+        
+        result = None
+        try:
+            it = self.invoke_probe()
+            while True:
+                interval = next(it)
+                if time.time() > expire_time:
+                    msg = f"Test {self.test_key}, forge {self.forge_key}: probe {self._probe_fn} exceeded {self._config.probe_wait_timeout} seconds timeout"
+                    raise SplTaFwkWaitForProbeTimeout(msg)
 
-            if interval > ForgeProbe.MAX_INTERVAL.value:
-                interval = ForgeProbe.MAX_INTERVAL.value
-            elif interval < ForgeProbe.MIN_INTERVAL.value:
-                interval = ForgeProbe.MIN_INTERVAL.value
-            time.sleep(interval)
+                if interval > ForgeProbe.MAX_INTERVAL.value:
+                    interval = ForgeProbe.MAX_INTERVAL.value
+                elif interval < ForgeProbe.MIN_INTERVAL.value:
+                    interval = ForgeProbe.MIN_INTERVAL.value
+                time.sleep(interval)
+        except StopIteration as sie:
+            result = sie.value
 
         logger.info(
-            f"Forge probe has been executed successfully, time taken {time.time() - probe_start_time} seconds:{self.summary}"
+            f"Forge probe has finished execution, result: {result}, time taken {time.time() - probe_start_time} seconds:{self.summary}"
         )
+        
+        return result
 
     def mark_as_failed(self, error, prefix):
         if isinstance(error, Exception):
@@ -414,7 +423,7 @@ class FrameworkTask:
                 logger.error(report)
                 self._setup_errors.append(report)
 
-            self._result = result
+            self._result = self.make_kwarg(result)
             self._forge.register_execution(
                 self._exec_id,
                 teardown=self._teardown,
@@ -427,7 +436,11 @@ class FrameworkTask:
 
         try:
             if not self.setup_failed:
-                self.wait_for_probe(result)
+                probe_res = self.wait_for_probe(result)
+                if probe_res is not None:
+                    probe_name = self.get_probe_fn().__name__
+                    self._result[probe_name] = probe_res
+                    
         except Exception as e:
             traceback_info = traceback.format_exc()
             report = f"Forge probe has failed to execute: {e}{self.summary}\n{traceback_info}"
