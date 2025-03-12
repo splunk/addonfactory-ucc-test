@@ -172,11 +172,11 @@ class FrameworkTask:
     def default_artifact_name(self):
         return self._forge.original_name
 
-    def block_forge_teardown(self):
+    def block_forge_teardown(self) -> None:
         logger.debug(f"BLOCK teardown for forge {self._forge.key}")
         self._forge.block_teardown()
 
-    def unblock_forge_teardown(self):
+    def unblock_forge_teardown(self) -> None:
         logger.debug(f"UNBLOCK teardown for forge {self._forge.key}")
         self._forge.unblock_teardown()
 
@@ -257,7 +257,7 @@ class FrameworkTask:
             if k in self._probe_required_args
         }
 
-    def wait_for_probe(self, last_result:Dict[str, object]) -> Optional[object]:
+    def wait_for_probe(self, last_result: dict[str, object]) -> object | None:
         logger.debug(
             f"WAIT FOR PROBE started\n\ttest {self.test_key}\n\tforge {self.forge_key}\n\tprobe {self._probe_fn}"
         )
@@ -271,7 +271,7 @@ class FrameworkTask:
         logger.debug(
             f"WAIT FOR PROBE\n\ttest {self.test_key}\n\tforge {self.forge_key}\n\tprobe {self._probe_fn}\n\tprobe_gen {self._probe_gen}\n\tprobe_args {self._probe_kwargs}"
         )
-        
+
         result = None
         try:
             it = self.invoke_probe()
@@ -292,7 +292,7 @@ class FrameworkTask:
         logger.info(
             f"Forge probe has finished execution, result: {result}, time taken {time.time() - probe_start_time} seconds:{self.summary}"
         )
-        
+
         return result
 
     def mark_as_failed(self, error, prefix):
@@ -305,16 +305,16 @@ class FrameworkTask:
         self._setup_errors.append(report)
         self._is_executed = True
 
-    def mark_as_executed(self):
+    def mark_as_executed(self) -> None:
         self._is_executed = True
         logger.debug(
             f"MARK TASK EXECUTED: {self.forge_full_path},\n\tself id: {id(self)},\n\tscope: {self.forge_scope},\n\texec_id: {self._exec_id},\n\ttest: {self.test_key},\n\tis_executed: {self.is_executed},\n\tis_failed: {self.failed},\n\terrors: {self._setup_errors}"
         )
 
-    def _save_generator_teardown(self, gen):
+    def _save_generator_teardown(self, gen) -> None:
         self._teardown = gen
 
-    def _save_class_teardown(self):
+    def _save_class_teardown(self) -> None:
         if not isinstance(self._forge._function, types.FunctionType):
             attr = getattr(self._forge._function, "teardown", None)
             if callable(attr):
@@ -369,7 +369,7 @@ class FrameworkTask:
 
     def use_previous_executions(
         self, args_to_match
-    ) -> Tuple[bool, object | None]:
+    ) -> tuple[bool, object | None]:
         logger.debug(
             f"Dep {self.forge_key}: look for {self._forge_kwargs} in {self._forge.executions}"
         )
@@ -385,7 +385,7 @@ class FrameworkTask:
                 return True, prev_exec.result
         return False, None
 
-    def execute(self):
+    def execute(self) -> None:
         logger.debug(
             f"EXECTASK: execute {self} - executions {self._forge.executions}, dep_kwargs: {self._forge_kwargs}"
         )
@@ -423,33 +423,33 @@ class FrameworkTask:
                 logger.error(report)
                 self._setup_errors.append(report)
 
-            self._result = self.make_kwarg(result)
-            self._forge.register_execution(
-                self._exec_id,
-                teardown=self._teardown,
-                kwargs=comp_kwargs,
-                result=result,
-                errors=self._setup_errors,
-            )
-            if not self.is_bootstrap:
-                self.block_forge_teardown()
-
         try:
             if not self.setup_failed:
                 probe_res = self.wait_for_probe(result)
                 if probe_res is not None:
                     probe_name = self.get_probe_fn().__name__
-                    self._result[probe_name] = probe_res
-                    
+                    result[probe_name] = probe_res
         except Exception as e:
             traceback_info = traceback.format_exc()
             report = f"Forge probe has failed to execute: {e}{self.summary}\n{traceback_info}"
             logger.error(report)
             self._setup_errors.append(report)
 
+        if not reuse:
+            self._result = self.make_kwarg(result)
+            self._forge.register_execution(
+                self._exec_id,
+                teardown=self._teardown,
+                kwargs=comp_kwargs,
+                result=self._result,
+                errors=self._setup_errors,
+            )
+            if not self.is_bootstrap:
+                self.block_forge_teardown()
+
         self.mark_as_executed()
 
-    def teardown(self):
+    def teardown(self) -> None:
         logger.debug(
             f"Teardown task\n\t_exec_id: {self._exec_id}\n\tforge: {self.forge_full_path},\n\tscope: {self.forge_scope},\n\ttask: {self.test_key}\n\tteardown {self._teardown}"
         )
