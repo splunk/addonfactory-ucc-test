@@ -46,13 +46,13 @@ class TaskGroupProcessor:
 
     def __init__(
         self,
-        group: List[List[FrameworkTask]],
+        group: TaskSetListType,
         global_builtin_args_factory: Callable[
             [ExecutableKeyType], ArtifactsType
         ],
     ) -> None:
         self._global_builtin_args_factory = global_builtin_args_factory
-        self._task_group: List[List[FrameworkTask]] = group
+        self._task_group: TaskSetListType = group
         self._jobs: List[TaskGroupProcessor.Job] = []
         self._matched_tasks: Dict[Tuple[int, int], Tuple[int, int]] = {}
         self._result_collector: List[Optional[List[Optional[object]]]] = [
