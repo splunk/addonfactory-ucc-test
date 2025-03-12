@@ -3,13 +3,17 @@ import queue
 import traceback
 import time
 from dataclasses import dataclass
-from typing import Any, Callable, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 from splunk_add_on_ucc_modinput_test.functional import logger
 from splunk_add_on_ucc_modinput_test.functional.entities.task import (
     FrameworkTask,
 )
 from splunk_add_on_ucc_modinput_test.functional.exceptions import (
     SplTaFwkWaitForDependenciesTimeout,
+)
+from splunk_add_on_ucc_modinput_test.typing import (
+    ArtifactsType,
+    ExecutableKeyType,
 )
 
 
@@ -37,13 +41,19 @@ class TaskGroupProcessor:
         def id(self) -> Tuple[int, int]:
             return self.test_index, self.task_index
 
-    def __init__(self, group, global_builtin_args_factory):
+    def __init__(
+        self,
+        group: List[List[FrameworkTask]],
+        global_builtin_args_factory: Callable[[None], ArtifactsType],
+    ) -> None:
         self._global_builtin_args_factory = global_builtin_args_factory
-        self._task_group = group
-        self._jobs = []
-        self._matched_tasks = {}
-        self._result_collector = [None] * len(self._task_group)
-        self._done = {}
+        self._task_group: List[List[FrameworkTask]] = group
+        self._jobs: List[TaskGroupProcessor.Job] = []
+        self._matched_tasks: Dict[Tuple[int, int], Tuple[int, int]] = {}
+        self._result_collector: List[Optional[List[Optional[object]]]] = [
+            None
+        ] * len(self._task_group)
+        self._done: Dict[Tuple[int, int], bool] = {}
 
         self._build_task_list()
 
@@ -62,14 +72,16 @@ class TaskGroupProcessor:
             self._done[job.id] = False
 
     @property
-    def jobs(self):
+    def jobs(self) -> List[Job]:
         return self._jobs
 
     @property
-    def all_tasks_done(self):
+    def all_tasks_done(self) -> bool:
         return all(self._done.values())
 
-    def _process_test_tasks(self, test_index, test_tasks):
+    def _process_test_tasks(
+        self, test_index: int, test_tasks: List[FrameworkTask]
+    ) -> List[Job]:
         processed_tasks = []
         for task_index, task in enumerate(test_tasks):
             try:
@@ -164,7 +176,9 @@ class FrmwkExecutorBase:
     def wait(self, is_bootstrap: bool) -> None:
         pass
 
-    def global_builtin_args_factory(self, test_key):
+    def global_builtin_args_factory(
+        self, test_key: ExecutableKeyType
+    ) -> ArtifactsType:
         return self._manager.get_global_builtin_args(test_key)
 
     def _execute_request(self, job, worker_id=0):

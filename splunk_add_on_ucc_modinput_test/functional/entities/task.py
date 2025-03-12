@@ -355,7 +355,7 @@ class FrameworkTask:
 
         return args1 == args2
 
-    def same_tasks(self, other_task: Any) -> bool:
+    def same_tasks(self, other_task: FrameworkTask) -> bool:
         if self.forge_key != other_task.forge_key:
             return False
 
@@ -458,7 +458,9 @@ class FrameworkTask:
         )
         try:
             teardown_start_time = time.time()
-            if self._forge.teardown(self._exec_id):
+            if self._exec_id is not None and self._forge.teardown(
+                self._exec_id
+            ):
                 logger.info(
                     f"Forge teardown has been executed successfully, time taken {time.time() - teardown_start_time} seconds:{self.summary}"
                 )

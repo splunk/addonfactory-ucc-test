@@ -48,6 +48,10 @@ from splunk_add_on_ucc_modinput_test.functional.common.identifier_factory import
     create_identifier,
     IdentifierType,
 )
+from splunk_add_on_ucc_modinput_test.typing import (
+    ArtifactsType,
+    ExecutableKeyType,
+)
 
 
 class forge:
@@ -57,7 +61,7 @@ class forge:
         *,
         probe: Optional[Callable[..., Any]] = None,
         scope: Optional[Union[ForgeScope, str]] = None,
-        **kwargs: Dict[str, Any],
+        **kwargs: ArtifactsType,
     ) -> None:
         self.forge_fn = forge_fn
         self.probe = probe
@@ -98,7 +102,9 @@ class TestDependencyManager(PytestConfigAdapter):
         }
         self._pytest_config = None
         self._session_id = self.generate_session_id()
-        self._global_builtin_args_pool: Dict[str, Dict[str, str]] = {}
+        self._global_builtin_args_pool: Dict[
+            ExecutableKeyType, ArtifactsType
+        ] = {}
 
     @staticmethod
     def generate_session_id() -> str:
@@ -138,7 +144,9 @@ class TestDependencyManager(PytestConfigAdapter):
             splunk_configuration_class,
         )
 
-    def create_global_builtin_args(self) -> Dict[str, Any]:
+    def create_global_builtin_args(
+        self,
+    ) -> Dict[str, Union[str, VendorClientBase, SplunkClientBase]]:
         global_builtin_args: Dict[
             str, Union[str, VendorClientBase, SplunkClientBase]
         ] = {
@@ -161,7 +169,9 @@ class TestDependencyManager(PytestConfigAdapter):
 
         return global_builtin_args
 
-    def get_global_builtin_args(self, test_key: str) -> Dict[str, str]:
+    def get_global_builtin_args(
+        self, test_key: ExecutableKeyType
+    ) -> Dict[str, Any]:
         if test_key not in self._global_builtin_args_pool:
             logger.debug(f"create_global_builtin_args for test {test_key}:")
             self._global_builtin_args_pool[
