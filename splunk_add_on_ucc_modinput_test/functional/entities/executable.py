@@ -2,7 +2,11 @@ import inspect
 from typing import Any, Callable, Dict, Generator, Tuple, Optional, Union
 
 
-from splunk_add_on_ucc_modinput_test.typing import ProbeFnType, ForgeType
+from splunk_add_on_ucc_modinput_test.typing import (
+    ExecutableKeyType,
+    ProbeFnType,
+    ForgeType,
+)
 
 
 class ExecutableBase:
@@ -19,11 +23,11 @@ class ExecutableBase:
         return self._fn_source_file
 
     @property
-    def key(self) -> Tuple[str, ...]:
+    def key(self) -> ExecutableKeyType:
         return (self._fn_source_file, self.fn_full_name)
 
     @property
-    def original_key(self) -> Tuple[str, str]:
+    def original_key(self) -> ExecutableKeyType:
         return (self._fn_source_file, self.fn_original_full_name)
 
     @property

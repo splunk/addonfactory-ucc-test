@@ -11,6 +11,9 @@ from splunk_add_on_ucc_modinput_test.functional.entities.task import (
 from splunk_add_on_ucc_modinput_test.functional.exceptions import (
     SplTaFwkWaitForDependenciesTimeout,
 )
+from splunk_add_on_ucc_modinput_test.functional.manager import (
+    TestDependencyManager,
+)
 from splunk_add_on_ucc_modinput_test.typing import (
     ArtifactsType,
     ExecutableKeyType,
@@ -44,7 +47,9 @@ class TaskGroupProcessor:
     def __init__(
         self,
         group: List[List[FrameworkTask]],
-        global_builtin_args_factory: Callable[[None], ArtifactsType],
+        global_builtin_args_factory: Callable[
+            [ExecutableKeyType], ArtifactsType
+        ],
     ) -> None:
         self._global_builtin_args_factory = global_builtin_args_factory
         self._task_group: List[List[FrameworkTask]] = group
@@ -97,7 +102,9 @@ class TaskGroupProcessor:
 
         return processed_tasks
 
-    def _try_skip_task(self, test_index, task_index):
+    def _try_skip_task(
+        self, test_index: int, task_index: int
+    ) -> Optional[Tuple[int, int]]:
         task = self._task_group[test_index][task_index]
         same_task = self._find_same_task(task)
         logger.debug(f"{task.forge_key} SAME TASK IS  {same_task}")
@@ -108,7 +115,9 @@ class TaskGroupProcessor:
             self._matched_tasks[(test_index, task_index)] = same_task
         return same_task
 
-    def _find_same_task(self, task):
+    def _find_same_task(
+        self, task: FrameworkTask
+    ) -> Optional[Tuple[int, int]]:
         for i, test_tasks in enumerate(self._task_group):
             if test_tasks is None:
                 continue
@@ -119,7 +128,7 @@ class TaskGroupProcessor:
                     return i, j
         return None
 
-    def _update_test_artifacts(self, test_index):
+    def _update_test_artifacts(self, test_index: int) -> None:
         test_results = self._result_collector[test_index]
         if test_results:
             for task_index, test_result in enumerate(test_results):
@@ -133,41 +142,48 @@ class TaskGroupProcessor:
                     f"ARTIFACTS UPDATED dep: {task.forge_key}, test {task.test_key}, artifacts: {task._test.artifacts}"
                 )
 
-    def _copy_result_to_matching_tasks(self, src_test_i, src_task_j):
+    def _copy_result_to_matching_tasks(
+        self, src_test_i: int, src_task_j: int
+    ) -> None:
         src_task = self._task_group[src_test_i][src_task_j]
         for dst, src in self._matched_tasks.items():
             if src == (src_test_i, src_task_j):
                 dst_test_i, dst_task_j = dst
-                self._result_collector[dst_test_i][
-                    dst_task_j
-                ] = src_task._result
-                dst_task = self._task_group[dst_test_i][dst_task_j]
-                dst_task.reuse_forge_execution(
-                    src_task._exec_id, src_task._result, src_task._setup_errors
-                )
-                dst_task.mark_as_executed()
-                self._update_test_artifacts(dst_test_i)
 
-    def process_response(self, job):
+                row = self._result_collector[dst_test_i]
+                if row is not None:
+                    row[dst_task_j] = src_task._result
+
+                    dst_task = self._task_group[dst_test_i][dst_task_j]
+                    if src_task._exec_id is not None:
+                        dst_task.reuse_forge_execution(
+                            src_task._exec_id,
+                            src_task._result,
+                            src_task._setup_errors,
+                        )
+                        dst_task.mark_as_executed()
+                        self._update_test_artifacts(dst_test_i)
+
+    def process_response(self, job: Job) -> None:
         finished_task = self._task_group[job.test_index][job.task_index]
         assert finished_task is job.task, "Task is not the same!"
         logger.debug(
             f"manager got finished task {job.id}, TEST KEY: {finished_task.test_key}, DEP KEY: {finished_task.forge_key}, DEP RES: {finished_task.result}, RES {job.task.result}"
         )
 
-        self._result_collector[job.test_index][
-            job.task_index
-        ] = job.task.result
-        self._update_test_artifacts(job.test_index)
-        self._copy_result_to_matching_tasks(job.test_index, job.task_index)
-        self._done[job.id] = True
-        logger.debug(
-            f"manager is waiting for tasks {self._done}, results: {self._result_collector}"
-        )
+        row = self._result_collector[job.test_index]
+        if row is not None:
+            row[job.task_index] = job.task.result
+            self._update_test_artifacts(job.test_index)
+            self._copy_result_to_matching_tasks(job.test_index, job.task_index)
+            self._done[job.id] = True
+            logger.debug(
+                f"manager is waiting for tasks {self._done}, results: {self._result_collector}"
+            )
 
 
 class FrmwkExecutorBase:
-    def __init__(self, manager):
+    def __init__(self, manager: TestDependencyManager) -> None:
         self._manager = manager
 
     def shutdown(self) -> None:

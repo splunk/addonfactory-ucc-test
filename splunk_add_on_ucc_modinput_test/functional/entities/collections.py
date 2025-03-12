@@ -1,4 +1,4 @@
-from typing import Any, Callable, Generator, List, Dict, Tuple
+from typing import Any, Callable, Generator, List, Dict, Optional, Tuple
 from splunk_add_on_ucc_modinput_test.functional.entities.forge import (
     FrameworkForge,
 )
@@ -9,9 +9,10 @@ from splunk_add_on_ucc_modinput_test.functional.entities.task import (
     FrameworkTask,
 )
 from splunk_add_on_ucc_modinput_test.functional import logger
+from splunk_add_on_ucc_modinput_test.typing import ExecutableKeyType
 
 
-class TestCollection(Dict[Tuple[str, str], FrameworkTest]):
+class TestCollection(Dict[ExecutableKeyType, FrameworkTest]):
     @property
     def is_empty(self) -> bool:
         return not bool(self)
@@ -21,11 +22,15 @@ class TestCollection(Dict[Tuple[str, str], FrameworkTest]):
         if item.key not in self:
             self[item.key] = item
 
-    def lookup_by_function(self, fn: Callable[..., Any]) -> Tuple[str, str]:
+    def lookup_by_function(
+        self, fn: Callable[..., Any]
+    ) -> Optional[FrameworkTest]:
         test = FrameworkTest(fn)
         return self.get(test.key)
 
-    def lookup_by_original_function(self, fn: Callable) -> List[FrameworkTest]:
+    def lookup_by_original_function(
+        self, fn: Callable[..., Any]
+    ) -> List[ExecutableKeyType]:
         found_tests_keys = set()
         lookup_test = FrameworkTest(fn)
         for key, test in self.items():
@@ -41,16 +46,16 @@ class TestCollection(Dict[Tuple[str, str], FrameworkTest]):
 
 class ForgeCollection(Dict[Tuple[str, ...], FrameworkForge]):
     @property
-    def is_empty(self):
+    def is_empty(self) -> bool:
         return not bool(self)
 
-    def add(self, item: FrameworkForge):
+    def add(self, item: FrameworkForge) -> None:
         if item.key not in self:
             self[item.key] = item
 
-    def lookup_by_function(self, fn):
-        forge = FrameworkForge(fn)
-        return self.get(forge.key)
+    # def lookup_by_function(self, fn: Callable[..., Any]) -> FrameworkForge:
+    #     forge = FrameworkForge(fn)
+    #     return self.get(forge.key)
 
 
 class TaskCollection:
