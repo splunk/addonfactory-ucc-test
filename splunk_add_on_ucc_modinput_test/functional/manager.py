@@ -1,3 +1,11 @@
+# from __future__ import annotations
+# from typing import TYPE_CHECKING
+
+# if TYPE_CHECKING:
+from splunk_add_on_ucc_modinput_test.typing import (
+    ArtifactsType,
+    ExecutableKeyType,
+)
 import time
 
 from typing import (
@@ -48,10 +56,6 @@ from splunk_add_on_ucc_modinput_test.functional.common.identifier_factory import
     create_identifier,
     IdentifierType,
 )
-from splunk_add_on_ucc_modinput_test.typing import (
-    ArtifactsType,
-    ExecutableKeyType,
-)
 
 
 class forge:
@@ -59,8 +63,8 @@ class forge:
         self,
         forge_fn: Callable[..., Any],
         *,
-        probe: Optional[Callable[..., Any]] = None,
-        scope: Optional[Union[ForgeScope, str]] = None,
+        probe: Optional[ Callable[..., Any] ] = None,
+        scope: Optional[ Union [ForgeScope , str ]] = None,
         **kwargs: ArtifactsType,
     ) -> None:
         self.forge_fn = forge_fn
@@ -73,7 +77,7 @@ class forges:
     def __init__(
         self,
         *forge_list: forge,
-        scope: Optional[Union[ForgeScope, str]] = None,
+        scope: Optional[Union [ForgeScope , str ]] = None,
     ) -> None:
         self.forge_list = forge_list
         self.scope = scope.value if isinstance(scope, ForgeScope) else scope
@@ -85,9 +89,9 @@ class TestDependencyManager(PytestConfigAdapter):
         self.tests = TestCollection()
         self.forges = ForgeCollection()
         self.tasks = TaskCollection()
-        self.executor: Optional[
-            Union[FrmwkSequentialExecutor, FrmwkParallelExecutor]
-        ] = None
+        self.executor: None | (
+            FrmwkSequentialExecutor | FrmwkParallelExecutor
+        ) = None
         self._vendor_clients = {
             BuiltInArg.VENDOR_CLIENT.value: (
                 VendorClientBase,
@@ -102,7 +106,7 @@ class TestDependencyManager(PytestConfigAdapter):
         }
         self._pytest_config = None
         self._session_id = self.generate_session_id()
-        self._global_builtin_args_pool: Dict[
+        self._global_builtin_args_pool: dict[
             ExecutableKeyType, ArtifactsType
         ] = {}
 
@@ -114,8 +118,8 @@ class TestDependencyManager(PytestConfigAdapter):
 
     def set_vendor_client_class(
         self,
-        vendor_configuration_class: Type[VendorConfigurationBase],
-        vendor_client_class: Type[VendorClientBase],
+        vendor_configuration_class: type[VendorConfigurationBase],
+        vendor_client_class: type[VendorClientBase],
         vendor_class_argument_name: str,
     ) -> None:
         logger.debug(
@@ -130,8 +134,8 @@ class TestDependencyManager(PytestConfigAdapter):
 
     def set_splunk_client_class(
         self,
-        splunk_configuration_class: Type[SplunkConfigurationBase],
-        splunk_client_class: Type[SplunkClientBase],
+        splunk_configuration_class: type[SplunkConfigurationBase],
+        splunk_client_class: type[SplunkClientBase],
         splunk_class_argument_name: str,
     ) -> None:
         logger.debug(
@@ -146,10 +150,8 @@ class TestDependencyManager(PytestConfigAdapter):
 
     def create_global_builtin_args(
         self,
-    ) -> Dict[str, Union[str, VendorClientBase, SplunkClientBase]]:
-        global_builtin_args: Dict[
-            str, Union[str, VendorClientBase, SplunkClientBase]
-        ] = {
+    ) -> Dict[str, Union[str , VendorClientBase ,SplunkClientBase]]:
+        global_builtin_args: Dict[str, Union[str , VendorClientBase ,SplunkClientBase]] = {
             BuiltInArg.SESSION_ID.value: self.session_id,
         }
 
@@ -171,7 +173,7 @@ class TestDependencyManager(PytestConfigAdapter):
 
     def get_global_builtin_args(
         self, test_key: ExecutableKeyType
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         if test_key not in self._global_builtin_args_pool:
             logger.debug(f"create_global_builtin_args for test {test_key}:")
             self._global_builtin_args_pool[
@@ -185,8 +187,8 @@ class TestDependencyManager(PytestConfigAdapter):
         return self._session_id
 
     def _interpret_scope(
-        self, scope: Optional[str], test: FrameworkTest
-    ) -> Optional[str]:
+        self, scope: Optional[str ], test: FrameworkTest
+    ) -> Optional[str ]:
         if scope is None:
             return None
 
@@ -217,8 +219,8 @@ class TestDependencyManager(PytestConfigAdapter):
     def bind(
         self,
         test_fn: Callable[..., Any],
-        scope: Optional[str],
-        frg_fns: List[forge],
+        scope:Optional[str ],
+        frg_fns: list[forge],
         is_bootstrap: bool,
     ) -> FrameworkTest:
         logger.debug(f"bind: {test_fn} -> {frg_fns}")
@@ -295,7 +297,7 @@ class TestDependencyManager(PytestConfigAdapter):
         return FrameworkTask(test, frg, is_bootstrap, kwargs, probe, self)
 
     def expand_parametrized_tests(
-        self, parametrized_tests: Dict[str, List[Tuple[str, Any]]]
+        self, parametrized_tests: dict[str, list[tuple[str, Any]]]
     ) -> None:
         for test_key, param_tests in parametrized_tests.items():
             test = self.unregister_test(test_key)
@@ -352,7 +354,7 @@ class TestDependencyManager(PytestConfigAdapter):
         logger.info(matrix)
 
     def remove_skipped_tests(
-        self, skipped_tests_keys: List[Tuple[str, ...]]
+        self, skipped_tests_keys: list[tuple[str, ...]]
     ) -> None:
         for test_key in skipped_tests_keys:
             self.unregister_test(test_key)
@@ -365,7 +367,7 @@ class TestDependencyManager(PytestConfigAdapter):
         ]
         self.remove_skipped_tests(tests_to_remove)
 
-    def build_bootstrap_matrix(self) -> List[FrameworkTask]:
+    def build_bootstrap_matrix(self) -> list[FrameworkTask]:
         tests = list(self.tests.values())
 
         exec_steps = []
@@ -424,7 +426,7 @@ class TestDependencyManager(PytestConfigAdapter):
         executed = [test.is_executed for test in self.tests.values()]
         return all(executed)
 
-    def check_tests_executed(self, tests_keys: List[Tuple[str, str]]) -> bool:
+    def check_tests_executed(self, tests_keys: list[tuple[str, str]]) -> bool:
         executed = [
             self.tests.get(test_key).is_executed for test_key in tests_keys
         ]
@@ -499,21 +501,21 @@ class TestDependencyManager(PytestConfigAdapter):
 
     def test_setup_error_report(
         self, test: FrameworkTest
-    ) -> Generator[Tuple[FrameworkTask, str], None, None]:
+    ) -> Generator[tuple[FrameworkTask, str], None, None]:
         for _, _, task in self.tasks.enumerate_tasks(test.key):
             if task.setup_failed:
                 yield task, task.setup_error
 
     def test_teardown_error_report(
         self, test: FrameworkTest
-    ) -> Generator[Tuple[FrameworkTask, str], None, None]:
+    ) -> Generator[tuple[FrameworkTask, str], None, None]:
         for _, _, task in self.tasks.enumerate_tasks(test.key):
             if task.teardown_failed:
                 yield task, task.teardown_error
 
     def test_error_report(
         self, test: FrameworkTest
-    ) -> Generator[Tuple[FrameworkTask, str], None, None]:
+    ) -> Generator[tuple[FrameworkTask, str], None, None]:
         for _, _, task in self.tasks.enumerate_tasks(test.key):
             if task.failed:
                 yield task, task.error

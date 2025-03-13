@@ -1,18 +1,20 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from splunk_add_on_ucc_modinput_test.typing import (
+        ExecutableKeyType,
+        ProbeFnType,
+        ForgeType,
+    )
 import inspect
 from typing import Any, Callable, Dict, Generator, Tuple, Optional, Union
-
-
-from splunk_add_on_ucc_modinput_test.typing import (
-    ExecutableKeyType,
-    ProbeFnType,
-    ForgeType,
-)
 
 
 class ExecutableBase:
     def __init__(
         self,
-        function: Union[ProbeFnType, ForgeType],
+        function: ProbeFnType | ForgeType,
     ) -> None:
         assert callable(function)
         self._function = function
@@ -55,7 +57,7 @@ class ExecutableBase:
             return self._original_name
 
     def _inspect(self) -> None:
-        self._fn_bound_class: Optional[str] = None
+        self._fn_bound_class: str | None = None
         if inspect.ismethod(self._function):
             self._fn_bound_class = self._function.__self__.__class__.__name__
             self._fn_name = self._function.__name__
@@ -83,8 +85,8 @@ class ExecutableBase:
         self._required_args = list(sig.parameters.keys())
 
     @property
-    def required_args_names(self) -> Tuple[str, ...]:
+    def required_args_names(self) -> tuple[str, ...]:
         return tuple(self._required_args)
 
-    def filter_requied_kwargs(self, kwargs: Dict[str, Any]) -> Dict[str, Any]:
+    def filter_requied_kwargs(self, kwargs: dict[str, Any]) -> dict[str, Any]:
         return {k: v for k, v in kwargs.items() if k in self._required_args}

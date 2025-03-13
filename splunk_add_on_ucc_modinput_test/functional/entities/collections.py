@@ -1,3 +1,13 @@
+# from __future__ import annotations
+# from typing import TYPE_CHECKING
+
+# if TYPE_CHECKING:
+from splunk_add_on_ucc_modinput_test.typing import (
+    ExecutableKeyType,
+    # TaskSetListType,
+)
+
+
 from typing import Any, Callable, Generator, List, Dict, Optional, Tuple
 from splunk_add_on_ucc_modinput_test.functional.entities.forge import (
     FrameworkForge,
@@ -7,15 +17,12 @@ from splunk_add_on_ucc_modinput_test.functional.entities.test import (
 )
 from splunk_add_on_ucc_modinput_test.functional.entities.task import (
     FrameworkTask,
-)
-from splunk_add_on_ucc_modinput_test.functional import logger
-from splunk_add_on_ucc_modinput_test.typing import (
-    ExecutableKeyType,
     TaskSetListType,
 )
+from splunk_add_on_ucc_modinput_test.functional import logger
 
 
-class TestCollection(Dict[ExecutableKeyType, FrameworkTest]):
+class TestCollection(Dict["ExecutableKeyType", FrameworkTest]):
     @property
     def is_empty(self) -> bool:
         return not bool(self)
@@ -33,7 +40,7 @@ class TestCollection(Dict[ExecutableKeyType, FrameworkTest]):
 
     def lookup_by_original_function(
         self, fn: Callable[..., Any]
-    ) -> List[ExecutableKeyType]:
+    ) -> list[ExecutableKeyType]:
         found_tests_keys = set()
         lookup_test = FrameworkTest(fn)
         for key, test in self.items():
@@ -63,7 +70,7 @@ class ForgeCollection(Dict[Tuple[str, ...], FrameworkForge]):
 
 class TaskCollection:
     def __init__(self) -> None:
-        self._tasks: Dict[ExecutableKeyType, TaskSetListType] = {}
+        self._tasks: dict[ExecutableKeyType, TaskSetListType] = {}
 
     @property
     def is_empty(self) -> bool:
@@ -74,7 +81,7 @@ class TaskCollection:
     ) -> Optional[TaskSetListType]:
         return self._tasks.pop(test_key, None)
 
-    def add(self, tasks: List[FrameworkTask]) -> None:
+    def add(self, tasks: list[FrameworkTask]) -> None:
         if not tasks:
             return
         test_key = tasks[0].test_key
@@ -84,7 +91,7 @@ class TaskCollection:
 
     def get_tasks_by_type(
         self, test_key: ExecutableKeyType
-    ) -> Tuple[TaskSetListType, TaskSetListType]:
+    ) -> tuple[TaskSetListType, TaskSetListType]:
         all_tasks = self.get_tasks(test_key)
         inplace_tasks, bootstrap_tasks = [], []
         for step_tasks in all_tasks:
@@ -122,8 +129,8 @@ class TaskCollection:
         return tasks
 
     def enumerate_tasks(
-        self, test_key: Tuple[str, ...]
-    ) -> Generator[Tuple[int, int, FrameworkTask], None, None]:
+        self, test_key: tuple[str, ...]
+    ) -> Generator[tuple[int, int, FrameworkTask], None, None]:
         test_tasks = self.get_tasks(test_key)
         for i, parralel_tasks in enumerate(test_tasks):
             for j, task in enumerate(parralel_tasks):
@@ -131,7 +138,7 @@ class TaskCollection:
 
     def enumerate_bootstrap_tasks(
         self, test_key: ExecutableKeyType
-    ) -> Generator[Tuple[int, int, FrameworkTask], None, None]:
+    ) -> Generator[tuple[int, int, FrameworkTask], None, None]:
         bootstrap_tasks = self.get_bootstrap_tasks(test_key)
         for i, parralel_tasks in enumerate(bootstrap_tasks):
             for j, task in enumerate(parralel_tasks):
@@ -139,7 +146,7 @@ class TaskCollection:
 
     def enumerate_inplace_tasks(
         self, test_key: ExecutableKeyType
-    ) -> Generator[Tuple[int, int, FrameworkTask], None, None]:
+    ) -> Generator[tuple[int, int, FrameworkTask], None, None]:
         inplace_tasks = self.get_inplace_tasks(test_key)
         for i, parralel_tasks in enumerate(inplace_tasks):
             for j, task in enumerate(parralel_tasks):
@@ -147,7 +154,7 @@ class TaskCollection:
 
     def bootstrap_tasks_by_state(
         self, test_key: ExecutableKeyType
-    ) -> Tuple[List[FrameworkTask], List[FrameworkTask]]:
+    ) -> tuple[list[FrameworkTask], list[FrameworkTask]]:
         done, pending = [], []
         for _, _, task in self.enumerate_bootstrap_tasks(test_key):
             if task.is_executed:

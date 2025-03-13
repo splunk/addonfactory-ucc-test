@@ -1,3 +1,12 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
+# if TYPE_CHECKING:
+from splunk_add_on_ucc_modinput_test.typing import (
+    ArtifactsType,
+    ExecutableKeyType,
+)
+
 import threading
 import queue
 import traceback
@@ -7,21 +16,20 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 from splunk_add_on_ucc_modinput_test.functional import logger
 from splunk_add_on_ucc_modinput_test.functional.entities.task import (
     FrameworkTask,
+    TaskSetListType,
 )
 from splunk_add_on_ucc_modinput_test.functional.exceptions import (
     SplTaFwkWaitForDependenciesTimeout,
 )
-from splunk_add_on_ucc_modinput_test.functional.manager import (
-    TestDependencyManager,
-)
-from splunk_add_on_ucc_modinput_test.typing import (
-    ArtifactsType,
-    ExecutableKeyType,
-)
+
+if TYPE_CHECKING:
+    from splunk_add_on_ucc_modinput_test.functional.manager import (
+        TestDependencyManager,
+    )
 
 
 def log_exceptions_traceback(fn: Callable[..., Any]) -> Callable[..., Any]:
-    def wrapper(*args: Any, **kwargs: Any) -> Optional[Any]:
+    def wrapper(*args: Any, **kwargs: Any) -> Any | None:
         try:
             return fn(*args, **kwargs)
         except Exception as e:
@@ -41,7 +49,7 @@ class TaskGroupProcessor:
         task: FrameworkTask
 
         @property
-        def id(self) -> Tuple[int, int]:
+        def id(self) -> tuple[int, int]:
             return self.test_index, self.task_index
 
     def __init__(
@@ -53,12 +61,12 @@ class TaskGroupProcessor:
     ) -> None:
         self._global_builtin_args_factory = global_builtin_args_factory
         self._task_group: TaskSetListType = group
-        self._jobs: List[TaskGroupProcessor.Job] = []
-        self._matched_tasks: Dict[Tuple[int, int], Tuple[int, int]] = {}
-        self._result_collector: List[Optional[List[Optional[object]]]] = [
+        self._jobs: list[TaskGroupProcessor.Job] = []
+        self._matched_tasks: dict[tuple[int, int], tuple[int, int]] = {}
+        self._result_collector: list[list[object | None] | None] = [
             None
         ] * len(self._task_group)
-        self._done: Dict[Tuple[int, int], bool] = {}
+        self._done: dict[tuple[int, int], bool] = {}
 
         self._build_task_list()
 
@@ -77,7 +85,7 @@ class TaskGroupProcessor:
             self._done[job.id] = False
 
     @property
-    def jobs(self) -> List[Job]:
+    def jobs(self) -> list[Job]:
         return self._jobs
 
     @property
@@ -85,8 +93,8 @@ class TaskGroupProcessor:
         return all(self._done.values())
 
     def _process_test_tasks(
-        self, test_index: int, test_tasks: List[FrameworkTask]
-    ) -> List[Job]:
+        self, test_index: int, test_tasks: list[FrameworkTask]
+    ) -> list[Job]:
         processed_tasks = []
         for task_index, task in enumerate(test_tasks):
             try:
@@ -104,7 +112,7 @@ class TaskGroupProcessor:
 
     def _try_skip_task(
         self, test_index: int, task_index: int
-    ) -> Optional[Tuple[int, int]]:
+    ) -> tuple[int, int] | None:
         task = self._task_group[test_index][task_index]
         same_task = self._find_same_task(task)
         logger.debug(f"{task.forge_key} SAME TASK IS  {same_task}")
@@ -115,9 +123,7 @@ class TaskGroupProcessor:
             self._matched_tasks[(test_index, task_index)] = same_task
         return same_task
 
-    def _find_same_task(
-        self, task: FrameworkTask
-    ) -> Optional[Tuple[int, int]]:
+    def _find_same_task(self, task: FrameworkTask) -> tuple[int, int] | None:
         for i, test_tasks in enumerate(self._task_group):
             if test_tasks is None:
                 continue

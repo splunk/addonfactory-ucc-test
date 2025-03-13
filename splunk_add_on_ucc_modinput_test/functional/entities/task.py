@@ -1,4 +1,12 @@
 from __future__ import annotations
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from splunk_add_on_ucc_modinput_test.typing import (
+        ProbeFnType,
+        ProbeGenType,
+    )
+
 import inspect
 import time
 import types
@@ -26,8 +34,6 @@ from splunk_add_on_ucc_modinput_test.functional.entities.executable import (
 )
 from splunk_add_on_ucc_modinput_test.functional.splunk import SplunkClientBase
 from splunk_add_on_ucc_modinput_test.functional.vendor import VendorClientBase
-
-from splunk_add_on_ucc_modinput_test.typing import ProbeFnType, ProbeGenType
 
 
 class FrameworkTask:
@@ -469,3 +475,6 @@ class FrameworkTask:
             report = f"Forge teardown has failed to execute: {e}{self.summary}\n{traceback_info}"
             logger.error(report)
             self._teardown_errors.append(report)
+
+
+TaskSetListType = List[List[FrameworkTask]]
