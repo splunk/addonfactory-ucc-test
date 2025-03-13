@@ -1,14 +1,13 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
-# if TYPE_CHECKING:
 from splunk_add_on_ucc_modinput_test.typing import (
     ArtifactsType,
     ExecutableKeyType,
 )
 
 import threading
-import queue
+from queue import Queue
 import traceback
 import time
 from dataclasses import dataclass
@@ -49,7 +48,7 @@ class TaskGroupProcessor:
         task: FrameworkTask
 
         @property
-        def id(self) -> tuple[int, int]:
+        def id(self) -> Tuple[int, int]:
             return self.test_index, self.task_index
 
     def __init__(
@@ -61,12 +60,12 @@ class TaskGroupProcessor:
     ) -> None:
         self._global_builtin_args_factory = global_builtin_args_factory
         self._task_group: TaskSetListType = group
-        self._jobs: list[TaskGroupProcessor.Job] = []
-        self._matched_tasks: dict[tuple[int, int], tuple[int, int]] = {}
-        self._result_collector: list[list[object | None] | None] = [
+        self._jobs: List[TaskGroupProcessor.Job] = []
+        self._matched_tasks: Dict[Tuple[int, int], Tuple[int, int]] = {}
+        self._result_collector: List[List[object | None] | None] = [
             None
         ] * len(self._task_group)
-        self._done: dict[tuple[int, int], bool] = {}
+        self._done: Dict[Tuple[int, int], bool] = {}
 
         self._build_task_list()
 
@@ -85,7 +84,7 @@ class TaskGroupProcessor:
             self._done[job.id] = False
 
     @property
-    def jobs(self) -> list[Job]:
+    def jobs(self) -> List[Job]:
         return self._jobs
 
     @property
@@ -93,8 +92,8 @@ class TaskGroupProcessor:
         return all(self._done.values())
 
     def _process_test_tasks(
-        self, test_index: int, test_tasks: list[FrameworkTask]
-    ) -> list[Job]:
+        self, test_index: int, test_tasks: List[FrameworkTask]
+    ) -> List[Job]:
         processed_tasks = []
         for task_index, task in enumerate(test_tasks):
             try:
@@ -112,7 +111,7 @@ class TaskGroupProcessor:
 
     def _try_skip_task(
         self, test_index: int, task_index: int
-    ) -> tuple[int, int] | None:
+    ) -> Tuple[int, int] | None:
         task = self._task_group[test_index][task_index]
         same_task = self._find_same_task(task)
         logger.debug(f"{task.forge_key} SAME TASK IS  {same_task}")
@@ -123,7 +122,7 @@ class TaskGroupProcessor:
             self._matched_tasks[(test_index, task_index)] = same_task
         return same_task
 
-    def _find_same_task(self, task: FrameworkTask) -> tuple[int, int] | None:
+    def _find_same_task(self, task: FrameworkTask) -> Tuple[int, int] | None:
         for i, test_tasks in enumerate(self._task_group):
             if test_tasks is None:
                 continue
@@ -203,7 +202,7 @@ class FrmwkExecutorBase:
     ) -> ArtifactsType:
         return self._manager.get_global_builtin_args(test_key)
 
-    def _execute_request(self, job, worker_id=0):
+    def _execute_request(self, job: TaskGroupProcessor.Job, worker_id:int=0) -> None:
         try:
             task_info = f"{job.id}, task: {id(job.task)} - {job.task}, dep: {id(job.task._forge)} - {job.task._forge} - {job.task.forge_key}, call_args: {job.task._forge_kwargs}"
             logger.debug(f"worker {worker_id}, task started {task_info}")
@@ -219,7 +218,7 @@ class FrmwkExecutorBase:
 
 
 class FrmwkSequentialExecutor(FrmwkExecutorBase):
-    def start(self, tasks):
+    def start(self, tasks: List[TaskSetListType]) -> None:
         logger.debug(f"sequential executor has started with tasks {tasks}")
         for task_group in tasks:
             proc = TaskGroupProcessor(
@@ -233,12 +232,12 @@ class FrmwkSequentialExecutor(FrmwkExecutorBase):
 
 
 class FrmwkParallelExecutor(FrmwkExecutorBase):
-    def __init__(self, manager, worker_count=10):
+    def __init__(self, manager:TestDependencyManager, worker_count:int=10) -> None:
         super().__init__(manager)
         self.worker_count = worker_count
-        self.task_queue = queue.Queue()
-        self._manager_queue = queue.Queue()
-        self._is_free = threading.Event()
+        self.task_queue: Queue[Optional[TaskGroupProcessor.Job]] = Queue()
+        self._manager_queue: Queue[Optional[List[TaskSetListType]]] = Queue()
+        self._is_free:threading.Event = threading.Event()
         self.deploy()
 
     def deploy(self) -> None:
@@ -246,7 +245,9 @@ class FrmwkParallelExecutor(FrmwkExecutorBase):
             threading.Thread(target=self.worker_thread, args=(index,))
             for index in range(self.worker_count)
         ]
-        [thread.start() for thread in self.threads]
+        
+        for thread in self.threads:
+            thread.start()
 
         self._manager_thread = threading.Thread(target=self.manager_thread)
         self._manager_thread.start()
@@ -273,7 +274,7 @@ class FrmwkParallelExecutor(FrmwkExecutorBase):
                 f"Still waiting for executor to process all {task_type} tasks"
             )
 
-    def start(self, tasks):
+    def start(self, tasks: List[TaskSetListType]) -> None:
         logger.debug("FrmwkParallelExecutor::start - wait for previoues tasks")
         self.wait()
         logger.debug(
@@ -292,7 +293,7 @@ class FrmwkParallelExecutor(FrmwkExecutorBase):
         self._manager_thread.join()
         logger.info("Executor has shutdown.")
 
-    def _receive_tasks(self):
+    def _receive_tasks(self) -> Tuple[bool, Optional[List[TaskSetListType]]]:
         logger.debug(
             "FrmwkParallelExecutor::_receive_tasks - set waiting for tasks"
         )
@@ -306,7 +307,7 @@ class FrmwkParallelExecutor(FrmwkExecutorBase):
             return True, []
         return False, tasks
 
-    def _collect_results(self, proc):
+    def _collect_results(self, proc: TaskGroupProcessor) -> bool:
         while not proc.all_tasks_done:
             job = self._manager_queue.get()
             logger.debug(f"manager got finished task {job}")
@@ -326,16 +327,17 @@ class FrmwkParallelExecutor(FrmwkExecutorBase):
         while not interrupted:
             interrupted, tasks = self._receive_tasks()
             logger.debug(f"manager got tasks {tasks}")
-            for task_group in tasks:
-                proc = TaskGroupProcessor(
-                    task_group, self.global_builtin_args_factory
-                )
-                for job in proc.jobs:
-                    self.task_queue.put(job)
+            if tasks is not None:
+                for task_group in tasks:
+                    proc = TaskGroupProcessor(
+                        task_group, self.global_builtin_args_factory
+                    )
+                    for job in proc.jobs:
+                        self.task_queue.put(job)
 
-                interrupted = self._collect_results(proc)
-                if interrupted:
-                    break
+                    interrupted = self._collect_results(proc)
+                    if interrupted:
+                        break
 
             self._is_free.set()
             logger.debug("FrmwkParallelExecutor is set free")
@@ -349,7 +351,7 @@ class FrmwkParallelExecutor(FrmwkExecutorBase):
         logger.debug("manager has finished")
 
     @log_exceptions_traceback
-    def worker_thread(self, wid):
+    def worker_thread(self, wid: int) -> None:
         while True:
             job = self.task_queue.get()
             logger.debug(f"worker {wid} task recieved {job}")

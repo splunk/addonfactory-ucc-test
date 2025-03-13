@@ -1,6 +1,6 @@
 from splunklib import client
 from threading import Lock
-from typing import Any, Union
+from typing import Any, Union, List
 from splunk_add_on_ucc_modinput_test.common.utils import logger
 
 
@@ -48,7 +48,7 @@ class SplunkServicePool:
         self._password = password
         self._pool_initial_size = pool_initial_size
         self._pool_size_inc = pool_size_inc
-        self._pool: list[SplunkServiceProxy] = []
+        self._pool: List[SplunkServiceProxy] = []
         self.__increase_pool(self._pool_initial_size)
 
     def __increase_pool(self, increment_size: int) -> None:

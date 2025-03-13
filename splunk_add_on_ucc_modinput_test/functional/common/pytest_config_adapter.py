@@ -17,7 +17,7 @@ class PytestConfigAdapter:
         self._pytest_config = pytest_config
 
     @property
-    def pytest_config(self) -> Config:
+    def pytest_config(self) -> Optional[Config]:
         return self._pytest_config
 
     @property

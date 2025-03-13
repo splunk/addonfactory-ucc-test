@@ -9,6 +9,7 @@ from splunk_add_on_ucc_modinput_test.functional.common.identifier_factory import
     create_identifier,
     IdentifierType,
 )
+from splunk_add_on_ucc_modinput_test.typing import ExecutableKeyType
 
 
 class FrameworkTest(ExecutableBase):
@@ -70,7 +71,7 @@ class FrameworkTest(ExecutableBase):
         logger.debug(f"TEST: mark_executed {self}")
         self._is_executed = True
 
-    def link_forge(self, forge_key: str) -> None:
+    def link_forge(self, forge_key: ExecutableKeyType) -> None:
         assert forge_key not in self.forges
         self.forges.add(forge_key)
 

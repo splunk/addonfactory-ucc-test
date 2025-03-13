@@ -5,4 +5,5 @@ from .collections import (
     TestCollection,
     ForgeCollection,
     TaskCollection,
+    TaskSetListType
 )  # noqa: F401

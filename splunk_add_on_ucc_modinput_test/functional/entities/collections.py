@@ -70,7 +70,7 @@ class ForgeCollection(Dict[Tuple[str, ...], FrameworkForge]):
 
 class TaskCollection:
     def __init__(self) -> None:
-        self._tasks: dict[ExecutableKeyType, TaskSetListType] = {}
+        self._tasks: Dict[ExecutableKeyType, TaskSetListType] = {}
 
     @property
     def is_empty(self) -> bool:
@@ -81,7 +81,7 @@ class TaskCollection:
     ) -> Optional[TaskSetListType]:
         return self._tasks.pop(test_key, None)
 
-    def add(self, tasks: list[FrameworkTask]) -> None:
+    def add(self, tasks: List[FrameworkTask]) -> None:
         if not tasks:
             return
         test_key = tasks[0].test_key
@@ -91,7 +91,7 @@ class TaskCollection:
 
     def get_tasks_by_type(
         self, test_key: ExecutableKeyType
-    ) -> tuple[TaskSetListType, TaskSetListType]:
+    ) -> Tuple[TaskSetListType, TaskSetListType]:
         all_tasks = self.get_tasks(test_key)
         inplace_tasks, bootstrap_tasks = [], []
         for step_tasks in all_tasks:
@@ -129,8 +129,8 @@ class TaskCollection:
         return tasks
 
     def enumerate_tasks(
-        self, test_key: tuple[str, ...]
-    ) -> Generator[tuple[int, int, FrameworkTask], None, None]:
+        self, test_key: Tuple[str, ...]
+    ) -> Generator[Tuple[int, int, FrameworkTask], None, None]:
         test_tasks = self.get_tasks(test_key)
         for i, parralel_tasks in enumerate(test_tasks):
             for j, task in enumerate(parralel_tasks):
@@ -138,7 +138,7 @@ class TaskCollection:
 
     def enumerate_bootstrap_tasks(
         self, test_key: ExecutableKeyType
-    ) -> Generator[tuple[int, int, FrameworkTask], None, None]:
+    ) -> Generator[Tuple[int, int, FrameworkTask], None, None]:
         bootstrap_tasks = self.get_bootstrap_tasks(test_key)
         for i, parralel_tasks in enumerate(bootstrap_tasks):
             for j, task in enumerate(parralel_tasks):
@@ -146,7 +146,7 @@ class TaskCollection:
 
     def enumerate_inplace_tasks(
         self, test_key: ExecutableKeyType
-    ) -> Generator[tuple[int, int, FrameworkTask], None, None]:
+    ) -> Generator[Tuple[int, int, FrameworkTask], None, None]:
         inplace_tasks = self.get_inplace_tasks(test_key)
         for i, parralel_tasks in enumerate(inplace_tasks):
             for j, task in enumerate(parralel_tasks):
@@ -154,7 +154,7 @@ class TaskCollection:
 
     def bootstrap_tasks_by_state(
         self, test_key: ExecutableKeyType
-    ) -> tuple[list[FrameworkTask], list[FrameworkTask]]:
+    ) -> Tuple[List[FrameworkTask], List[FrameworkTask]]:
         done, pending = [], []
         for _, _, task in self.enumerate_bootstrap_tasks(test_key):
             if task.is_executed:
