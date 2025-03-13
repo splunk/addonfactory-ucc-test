@@ -40,7 +40,7 @@ def wait_for_proxy(
     # No return value is expected
 
     if error is not None:
-        return
+        return False
 
     start = time.time()
     expire = time.time() + PROBE_PROXY_CHECK_TIMEOUT
@@ -50,7 +50,7 @@ def wait_for_proxy(
             logger.debug(
                 f"probe wait_for_proxy successful after {time.time() - start} seconds"
             )
-            return
+            return True
         logger.debug(f"probe wait_for_proxy failed after {time.time() - start} seconds")
         yield PROBE_PROXY_CHECK_INTERVAL
 
@@ -58,6 +58,7 @@ def wait_for_proxy(
         f"probe wait_for_proxy expired with failed status after {time.time() - start} seconds"
     )
 
+    return False
 
 def wait_for_loglevel(
     splunk_client: SplunkClient, expected_loglevel: str, error=None
@@ -67,7 +68,7 @@ def wait_for_loglevel(
     # If vertification was not successfull probe yields value defining interval after which framework should invoke the probe again, otherwize the probe exits
     # No return value is expected
     if error is not None:
-        return
+        return False
 
     start = time.time()
     expire = start + PROBE_LOGLEVEL_CHECK_TIMEOUT
@@ -77,7 +78,7 @@ def wait_for_loglevel(
             logger.debug(
                 f"probe wait_for_loglevel successful after {time.time() - start} seconds"
             )
-            return
+            return True
         logger.debug(
             f"probe wait_for_loglevel failed after {time.time() - start} seconds"
         )
@@ -86,3 +87,4 @@ def wait_for_loglevel(
     logger.debug(
         f"probe wait_for_loglevel expired with failed status after {time.time() - start} seconds"
     )
+    return False

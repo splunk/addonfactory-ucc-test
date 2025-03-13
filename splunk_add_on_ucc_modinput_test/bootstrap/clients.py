@@ -107,6 +107,7 @@ class SplunkClientBootstrup:
         self.args_specs: Dict[str, List[str]] = {}
         self.ta_api_prefixes: List[str] = []
         self.methods: List[str] = []
+        self.method_specs: Dict[str,Dict[str, List[str]]] = {}
 
         templates_search_path = os.path.join(
             os.path.dirname(__file__), "templates"
@@ -120,38 +121,39 @@ class SplunkClientBootstrup:
     def _make_method_name(self, api_name_no_prefix: str) -> str:
         if api_name_no_prefix.endswith("_name_get"):
             if "name" in self.args_specs:
-                return "get_" + api_name_no_prefix[:-9]
+                return ("get_" + api_name_no_prefix[:-9], "get")
             else:
-                return "get_" + api_name_no_prefix[:-4]
+                return ("get_" + api_name_no_prefix[:-4], "get")
 
-        if api_name_no_prefix.endswith("_get"):
+        if api_name_no_prefix.endswith("_get"):            
             for check in ["proxy", "settings", "logging"]:
                 if check in api_name_no_prefix:
-                    return "get_" + api_name_no_prefix[:-4]
+                    return ("get_" + api_name_no_prefix[:-4], "get")
 
-            if "name" not in self.args_specs:
-                return "get_" + api_name_no_prefix[:-4] + "_list"
+            if "name" not in self.args_specs:                
+                return ("get_" + api_name_no_prefix[:-4] + "_list", "list")
 
         if api_name_no_prefix.endswith("_name_post"):
             if "name" in self.args_specs:
-                return "update_" + api_name_no_prefix[:-10]
+                return ("update_" + api_name_no_prefix[:-10], "create")
             else:
+                method_type = "create"
                 return "create_" + api_name_no_prefix[:-5]
 
         if api_name_no_prefix.endswith("_post"):
             for check in ["proxy", "settings", "logging"]:
                 if check in api_name_no_prefix:
-                    return "update_" + api_name_no_prefix[:-5]
+                    return ("update_" + api_name_no_prefix[:-5], "update")
 
-            return "create_" + api_name_no_prefix[:-5]
+            return ("create_" + api_name_no_prefix[:-5], "create")
 
         if api_name_no_prefix.endswith("_name_delete"):
             if "name" in self.args_specs:
-                return "delete_" + api_name_no_prefix[:-12]
+                return ("delete_" + api_name_no_prefix[:-12], "delete")
             else:
-                return "delete_" + api_name_no_prefix[:-7]
+                return ("delete_" + api_name_no_prefix[:-7], "delete")
 
-        return api_name_no_prefix
+        return api_name_no_prefix, "unknown"
 
     def _remove_prefix(self, api_name: str) -> str:
         for prefix in self.ta_api_prefixes:
@@ -249,6 +251,7 @@ class SplunkClientBootstrup:
 
         self.methods = []
         for sample in samples:
+            self.args_specs = {}
             for line in sample.splitlines():
                 line = line.strip()
                 if not line:
@@ -265,7 +268,7 @@ class SplunkClientBootstrup:
                     api_name = call[: call.find("(")]
 
                     api_name_no_prefix = self._remove_prefix(api_name)
-                    method_name = self._make_method_name(api_name_no_prefix)
+                    method_name, method_type = self._make_method_name(api_name_no_prefix)
 
                     fst = call.find("(") + 1
                     lst = call.rfind(")")
@@ -273,13 +276,15 @@ class SplunkClientBootstrup:
                     api_args_str, method_args_str = self._parse_args(call_args)
 
                     method_str = method_template.render(
+                        method_type=method_type,
                         method_name=method_name,
                         method_args=method_args_str,
                         api_name=api_name,
                         api_args=api_args_str,
                     )
                     self.methods.append(method_str)
-
+                    self.method_specs[method_str] = self.args_specs
+                    self.args_specs = {}
                     break
 
                 self._parse_arg_descriptor(arg_name, res[1])

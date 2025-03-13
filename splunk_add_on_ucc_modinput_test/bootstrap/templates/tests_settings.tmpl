@@ -22,9 +22,8 @@ from tests.ucc_modinput_functional.splunk.probes.settings import (
 
 
 @attach(forge(set_loglevel, loglevel="CRITICAL", probe=wait_for_loglevel))
-def test_valid_loglevel(splunk_client: SplunkClient, expected_loglevel: str) -> None:
-    loglevel = splunk_client.get_settings_logging().get("agent")
-    assert loglevel == expected_loglevel
+def test_valid_loglevel(splunk_client: SplunkClient, wait_for_loglevel: bool) -> None:
+    assert wait_for_loglevel is True
 
 @pytest.mark.parametrize(
     "overwrite,expected_error",
