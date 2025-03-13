@@ -199,6 +199,7 @@ class FrameworkTask:
             def _probe_default_gen(**probe_args):
                 while not probe_fn(**probe_args):
                     yield self._config.probe_invoke_interval
+                return True
 
             self._probe_gen = _probe_default_gen
         else:
@@ -245,7 +246,8 @@ class FrameworkTask:
         return self._probe_fn
 
     def invoke_probe(self):
-        yield from self._probe_gen(**self._probe_kwargs)
+        result = yield from self._probe_gen(**self._probe_kwargs)
+        return result
 
     def prepare_probe_kwargs(self, extra_args={}):
         available_kwargs = self.collect_available_kwargs()
@@ -278,6 +280,7 @@ class FrameworkTask:
             while True:
                 interval = next(it)
                 if time.time() > expire_time:
+                    result = False
                     msg = f"Test {self.test_key}, forge {self.forge_key}: probe {self._probe_fn} exceeded {self._config.probe_wait_timeout} seconds timeout"
                     raise SplTaFwkWaitForProbeTimeout(msg)
 
