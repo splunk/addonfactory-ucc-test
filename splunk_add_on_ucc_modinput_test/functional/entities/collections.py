@@ -22,7 +22,7 @@ from splunk_add_on_ucc_modinput_test.functional.entities.task import (
 from splunk_add_on_ucc_modinput_test.functional import logger
 
 
-class TestCollection(Dict["ExecutableKeyType", FrameworkTest]):
+class TestCollection(Dict[ExecutableKeyType, FrameworkTest]):
     @property
     def is_empty(self) -> bool:
         return not bool(self)
@@ -54,7 +54,7 @@ class TestCollection(Dict["ExecutableKeyType", FrameworkTest]):
         return list(found_tests_keys)
 
 
-class ForgeCollection(Dict[Tuple[str, ...], FrameworkForge]):
+class ForgeCollection(Dict[ExecutableKeyType, FrameworkForge]):
     @property
     def is_empty(self) -> bool:
         return not bool(self)
@@ -93,22 +93,24 @@ class TaskCollection:
         self, test_key: ExecutableKeyType
     ) -> Tuple[TaskSetListType, TaskSetListType]:
         all_tasks = self.get_tasks(test_key)
-        inplace_tasks, bootstrap_tasks = [], []
+        inplace_tasks:TaskSetListType = []
+        bootstrap_tasks:TaskSetListType = []
         for step_tasks in all_tasks:
-            if step_tasks[0].is_bootstrap:
-                bootstrap_tasks.append(step_tasks)
-            else:
-                inplace_tasks.append(step_tasks)
+            if step_tasks is not None:
+                if step_tasks[0].is_bootstrap:
+                    bootstrap_tasks.append(step_tasks)
+                else:
+                    inplace_tasks.append(step_tasks)
         return inplace_tasks, bootstrap_tasks
 
     def get_bootstrap_tasks(
         self, test_key: ExecutableKeyType
     ) -> TaskSetListType:
         all_tasks = self.get_tasks(test_key)
-        if all_tasks:
-            bootstrap_tasks = [t for t in all_tasks if t[0].is_bootstrap]
-        else:
-            bootstrap_tasks = []
+        bootstrap_tasks: TaskSetListType = []
+        for t in all_tasks:
+            if t is not None and t[0].is_bootstrap:
+                bootstrap_tasks.append(t)
         logger.debug(f"get_bootstrap_tasks for {test_key}: {bootstrap_tasks}")
         return bootstrap_tasks
 
@@ -116,10 +118,10 @@ class TaskCollection:
         self, test_key: ExecutableKeyType
     ) -> TaskSetListType:
         all_tasks = self.get_tasks(test_key)
-        if all_tasks:
-            inplace_tasks = [t for t in all_tasks if not t[0].is_bootstrap]
-        else:
-            inplace_tasks = []
+        inplace_tasks: TaskSetListType = []
+        for t in all_tasks:
+            if t is not None and not t[0].is_bootstrap:
+                inplace_tasks.append(t)
         logger.debug(f"get_inplace_tasks for {test_key}: {inplace_tasks}")
         return inplace_tasks
 
@@ -133,24 +135,27 @@ class TaskCollection:
     ) -> Generator[Tuple[int, int, FrameworkTask], None, None]:
         test_tasks = self.get_tasks(test_key)
         for i, parralel_tasks in enumerate(test_tasks):
-            for j, task in enumerate(parralel_tasks):
-                yield i, j, task
+            if parralel_tasks is not None:
+                for j, task in enumerate(parralel_tasks):
+                    yield i, j, task
 
     def enumerate_bootstrap_tasks(
         self, test_key: ExecutableKeyType
     ) -> Generator[Tuple[int, int, FrameworkTask], None, None]:
         bootstrap_tasks = self.get_bootstrap_tasks(test_key)
         for i, parralel_tasks in enumerate(bootstrap_tasks):
-            for j, task in enumerate(parralel_tasks):
-                yield i, j, task
+            if parralel_tasks is not None:
+                for j, task in enumerate(parralel_tasks):
+                    yield i, j, task
 
     def enumerate_inplace_tasks(
         self, test_key: ExecutableKeyType
     ) -> Generator[Tuple[int, int, FrameworkTask], None, None]:
         inplace_tasks = self.get_inplace_tasks(test_key)
         for i, parralel_tasks in enumerate(inplace_tasks):
-            for j, task in enumerate(parralel_tasks):
-                yield i, j, task
+            if parralel_tasks is not None:
+                for j, task in enumerate(parralel_tasks):
+                    yield i, j, task
 
     def bootstrap_tasks_by_state(
         self, test_key: ExecutableKeyType

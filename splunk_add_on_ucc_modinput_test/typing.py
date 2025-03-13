@@ -13,6 +13,8 @@ ProbeFnType = Union[ProbeGenType, Callable[..., Any]]
 ForgeType = Union[
     Callable[..., Generator[Any, None, None]], Callable[..., Any]
 ]
+TestFnType = Callable[..., Any]
+
 ArtifactsType = Dict[str, Any]
 ExecutableKeyType = Tuple[str, ...]
 # TaskSetListType = List[List[FrameworkTask]]

@@ -5,6 +5,7 @@
 from splunk_add_on_ucc_modinput_test.typing import (
     ArtifactsType,
     ExecutableKeyType,
+    TestFnType,
 )
 import time
 
@@ -18,6 +19,7 @@ from typing import (
     Optional,
     Type,
     Union,
+    Set,
 )
 from splunk_add_on_ucc_modinput_test.functional import logger
 from splunk_add_on_ucc_modinput_test.functional.exceptions import (
@@ -261,7 +263,7 @@ class TestDependencyManager(PytestConfigAdapter):
 
         return test
 
-    def unregister_test(self, test_key: FrameworkTest) -> FrameworkTest:
+    def unregister_test(self, test_key: ExecutableKeyType) -> Optional[FrameworkTest]:
         test = self.tests.pop(test_key, None)
         if test:
             for frg_key in test.forges:
@@ -274,7 +276,7 @@ class TestDependencyManager(PytestConfigAdapter):
 
         return test
 
-    def find_test(self, test_fn, parametrized_name):
+    def find_test(self, test_fn: TestFnType, parametrized_name: str) -> Optional[FrameworkTest]:
         test_obj = FrameworkTest(test_fn, parametrized_name)
         return self.tests.get(test_obj.key)
 
@@ -284,8 +286,8 @@ class TestDependencyManager(PytestConfigAdapter):
             logger.debug(f"test key:{key} value: {test}")
 
     def copy_task_for_parametrized_test(
-        self, test, extra_kwargs, src_task, is_function_scope
-    ):
+        self, test:FrameworkTest, extra_kwargs:ArtifactsType, src_task: FrameworkTask, is_function_scope: bool
+    ) -> FrameworkTask:
         if is_function_scope:
             frg = self.forge_find_or_make(
                 forge_fn=src_task._forge._function,
@@ -304,12 +306,12 @@ class TestDependencyManager(PytestConfigAdapter):
         return FrameworkTask(test, frg, is_bootstrap, kwargs, probe, self)
 
     def expand_parametrized_tests(
-        self, parametrized_tests: Dict[str, List[Tuple[str, Any]]]
+        self, parametrized_tests: Dict[ExecutableKeyType, List[Tuple[str, Any]]]
     ) -> None:
         for test_key, param_tests in parametrized_tests.items():
             test = self.unregister_test(test_key)
-            if not test:
-                logger.debug(f"TEST NOT FOUND: {test.key}")
+            if test is None:
+                logger.debug(f"TEST NOT FOUND: {test_key}")
                 continue
 
             logger.debug(f"Test found: {test.key}")
@@ -327,19 +329,20 @@ class TestDependencyManager(PytestConfigAdapter):
 
                 for parallel_tasks in test_tasks:
                     frg_list = []
-                    for src_task in parallel_tasks:
-                        is_function_scope = (
-                            src_task._forge.scope == test.full_path
-                        )
-                        parametrized_task = (
-                            self.copy_task_for_parametrized_test(
-                                parametrized_test,
-                                parametrized_kwargs,
-                                src_task,
-                                is_function_scope,
+                    if parallel_tasks is not None:
+                        for src_task in parallel_tasks:
+                            is_function_scope = (
+                                src_task._forge.scope == test.full_path
                             )
-                        )
-                        frg_list.append(parametrized_task)
+                            parametrized_task = (
+                                self.copy_task_for_parametrized_test(
+                                    parametrized_test,
+                                    parametrized_kwargs,
+                                    src_task,
+                                    is_function_scope,
+                                )
+                            )
+                            frg_list.append(parametrized_task)
 
                     self.tasks.add(frg_list)
 
@@ -347,7 +350,7 @@ class TestDependencyManager(PytestConfigAdapter):
                         f"parametrized_test.link_forge: {parametrized_test.key}: {frg_list} => {parametrized_test}"
                     )
 
-    def _log_dep_exec_matrix(self, tests, dep_mtx) -> None:
+    def _log_dep_exec_matrix(self, tests: List[FrameworkTest], dep_mtx: List[TaskSetListType]) -> None:
         matrix = "\nBootstrap Dependency execution matrix:\n"
         for step_index, group in enumerate(dep_mtx):
             matrix += f"Step {step_index+1}:\n"
@@ -366,7 +369,7 @@ class TestDependencyManager(PytestConfigAdapter):
         for test_key in skipped_tests_keys:
             self.unregister_test(test_key)
 
-    def synch_tests_with_pytest_list(self, pytest_test_set_keys) -> None:
+    def synch_tests_with_pytest_list(self, pytest_test_set_keys:Set[ExecutableKeyType]) -> None:
         tests_to_remove = [
             test_key
             for test_key in self.tests.keys()
@@ -380,7 +383,7 @@ class TestDependencyManager(PytestConfigAdapter):
         exec_steps = []
         step_index = 0
         while True:
-            step_tasks = [None] * len(tests)
+            step_tasks:List[Optional[List[FrameworkTask]]] = [None] * len(tests)
             for pos, test in enumerate(tests):
                 tasks = self.tasks.get_bootstrap_tasks(test.key)
                 if step_index < len(tasks):
@@ -411,7 +414,7 @@ class TestDependencyManager(PytestConfigAdapter):
             self._execution_timeout = time.time() + self.bootstrap_wait_timeout
             self.executor.start(deps_exec_mtx)
 
-    def inplace_tasks_execution(self, deps_exec_mtx):
+    def inplace_tasks_execution(self, deps_exec_mtx: List[TaskSetListType]) -> None:
         logger.debug(f"start inplace_tasks_execution:{deps_exec_mtx}")
         if not deps_exec_mtx:
             return
@@ -433,10 +436,12 @@ class TestDependencyManager(PytestConfigAdapter):
         executed = [test.is_executed for test in self.tests.values()]
         return all(executed)
 
-    def check_tests_executed(self, tests_keys: List[Tuple[str, str]]) -> bool:
-        executed = [
-            self.tests.get(test_key).is_executed for test_key in tests_keys
-        ]
+    def check_tests_executed(self, tests_keys: List[ExecutableKeyType]) -> bool:
+        executed = []
+        for test_key in tests_keys:
+            test = self.tests.get(test_key)
+            if test is not None:
+                executed.append(test.is_executed)
         return all(executed)
 
     def try_to_unblock_inplace_teardowns(self, test: FrameworkTest) -> None:
@@ -456,7 +461,7 @@ class TestDependencyManager(PytestConfigAdapter):
         test.mark_executed()
         self.teardown_test_dependencies(test)
 
-    def _check_failed_tasks(self, test: FrameworkTest, done_tasks) -> None:
+    def _check_failed_tasks(self, test: FrameworkTest, done_tasks: List[FrameworkTask]) -> None:
         failed_tasks = [
             task.forge_key for task in done_tasks if task._setup_errors
         ]
@@ -471,7 +476,7 @@ class TestDependencyManager(PytestConfigAdapter):
                 logger.error(msg)
                 raise SplTaFwkDependencyExecutionError(msg)
 
-    def _report_timeout(self, test: FrameworkTest, pending_tasks) -> None:
+    def _report_timeout(self, test: FrameworkTest, pending_tasks:List[FrameworkTask]) -> None:
         msg = f"{test} exceeded {self.bootstrap_wait_timeout} seconds timeout while waiting for dependencies:"
         for task in pending_tasks:
             msg += f"\n\t{task.forge_full_path}, self id: {id(task)}, scope: {task.forge_scope}, exec_id: {task._exec_id} is_executed: {task.is_executed}, is_failed: {task.setup_failed}"

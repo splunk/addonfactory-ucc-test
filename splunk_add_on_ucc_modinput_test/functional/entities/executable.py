@@ -6,6 +6,7 @@ if TYPE_CHECKING:
         ExecutableKeyType,
         ProbeFnType,
         ForgeType,
+        TestFnType,
     )
 import inspect
 from typing import Any, Callable, Dict, Generator, Tuple, Optional, Union
@@ -14,7 +15,7 @@ from typing import Any, Callable, Dict, Generator, Tuple, Optional, Union
 class ExecutableBase:
     def __init__(
         self,
-        function: ProbeFnType | ForgeType,
+        function: ProbeFnType | ForgeType | TestFnType,
     ) -> None:
         assert callable(function)
         self._function = function

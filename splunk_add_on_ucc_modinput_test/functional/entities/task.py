@@ -5,6 +5,7 @@ if TYPE_CHECKING:
     from splunk_add_on_ucc_modinput_test.typing import (
         ProbeFnType,
         ProbeGenType,
+        ExecutableKeyType
     )
 
 import inspect
@@ -43,7 +44,7 @@ class FrameworkTask:
         forge: FrameworkForge,
         is_bootstrap: bool,
         forge_kwargs: Dict[str, Any],
-        probe_fn: ProbeFnType,
+        probe_fn: Optional[ProbeFnType],
         config: PytestConfigAdapter,
     ):
         self._config = config
@@ -114,7 +115,7 @@ class FrameworkTask:
         return self._forge.scope
 
     @property
-    def forge_test_keys(self) -> List[object]:
+    def forge_test_keys(self) -> List[ExecutableKeyType]:
         return list(self._forge.tests_keys)
 
     @property
@@ -477,4 +478,4 @@ class FrameworkTask:
             self._teardown_errors.append(report)
 
 
-TaskSetListType = List[List[FrameworkTask]]
+TaskSetListType = List[Optional[List[FrameworkTask]]]

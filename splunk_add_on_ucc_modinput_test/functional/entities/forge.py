@@ -191,7 +191,7 @@ class FrameworkForge(ExecutableBase):
     ) -> None:
         super().__init__(function)
         self._scope = scope
-        self.tests: set[object] = set()
+        self.tests: Set[ExecutableKeyType] = set()
         self._executions = ForgePostExec()
 
     @property
@@ -208,7 +208,7 @@ class FrameworkForge(ExecutableBase):
         return self._scope
 
     @property
-    def tests_keys(self) -> List[object]:
+    def tests_keys(self) -> List[ExecutableKeyType]:
         return list(self.tests)
 
     @property
@@ -259,13 +259,13 @@ class FrameworkForge(ExecutableBase):
     # def is_executed(self) -> bool:
     #     return self._is_executed
 
-    def __contains__(self, test_key: object) -> bool:
+    def __contains__(self, test_key: ExecutableKeyType) -> bool:
         return test_key in self.tests
 
-    def unlink_test(self, test_key: object) -> None:
+    def unlink_test(self, test_key: ExecutableKeyType) -> None:
         self.tests.discard(test_key)
 
-    def link_test(self, test_key: object) -> None:
+    def link_test(self, test_key: ExecutableKeyType) -> None:
         if test_key not in self.tests:
             self.tests.add(test_key)
 
