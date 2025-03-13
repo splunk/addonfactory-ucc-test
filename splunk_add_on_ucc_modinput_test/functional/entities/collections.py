@@ -40,7 +40,7 @@ class TestCollection(Dict["ExecutableKeyType", FrameworkTest]):
 
     def lookup_by_original_function(
         self, fn: Callable[..., Any]
-    ) -> list[ExecutableKeyType]:
+    ) -> List[ExecutableKeyType]:
         found_tests_keys = set()
         lookup_test = FrameworkTest(fn)
         for key, test in self.items():

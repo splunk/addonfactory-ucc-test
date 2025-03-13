@@ -63,8 +63,8 @@ class forge:
         self,
         forge_fn: Callable[..., Any],
         *,
-        probe: Optional[ Callable[..., Any] ] = None,
-        scope: Optional[ Union [ForgeScope , str ]] = None,
+        probe: Optional[Callable[..., Any]] = None,
+        scope: Optional[Union[ForgeScope, str]] = None,
         **kwargs: ArtifactsType,
     ) -> None:
         self.forge_fn = forge_fn
@@ -77,7 +77,7 @@ class forges:
     def __init__(
         self,
         *forge_list: forge,
-        scope: Optional[Union [ForgeScope , str ]] = None,
+        scope: Optional[Union[ForgeScope, str]] = None,
     ) -> None:
         self.forge_list = forge_list
         self.scope = scope.value if isinstance(scope, ForgeScope) else scope
@@ -150,8 +150,10 @@ class TestDependencyManager(PytestConfigAdapter):
 
     def create_global_builtin_args(
         self,
-    ) -> Dict[str, Union[str , VendorClientBase ,SplunkClientBase]]:
-        global_builtin_args: Dict[str, Union[str , VendorClientBase ,SplunkClientBase]] = {
+    ) -> Dict[str, Union[str, VendorClientBase, SplunkClientBase]]:
+        global_builtin_args: Dict[
+            str, Union[str, VendorClientBase, SplunkClientBase]
+        ] = {
             BuiltInArg.SESSION_ID.value: self.session_id,
         }
 
@@ -187,8 +189,8 @@ class TestDependencyManager(PytestConfigAdapter):
         return self._session_id
 
     def _interpret_scope(
-        self, scope: Optional[str ], test: FrameworkTest
-    ) -> Optional[str ]:
+        self, scope: Optional[str], test: FrameworkTest
+    ) -> Optional[str]:
         if scope is None:
             return None
 
@@ -219,7 +221,7 @@ class TestDependencyManager(PytestConfigAdapter):
     def bind(
         self,
         test_fn: Callable[..., Any],
-        scope:Optional[str ],
+        scope: Optional[str],
         frg_fns: list[forge],
         is_bootstrap: bool,
     ) -> FrameworkTest:
