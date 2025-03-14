@@ -16,23 +16,20 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # meta:
-  #   runs-on: ubuntu-22.04
-  #   outputs:
-  #     # matrix_supportedSplunk: ${{ steps.matrix.outputs.supportedSplunk }}
-  #     matrix_supportedPython: "3.7,3.9,3.13"
-  #   # steps:
-  #   #   - uses: actions/checkout@v4
-  #   #   - id: matrix
-  #   #     uses: splunk/addonfactory-test-matrix-action@v3.0
 
   pre-commit:
     runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        python-version:
+          - "3.7"
+          - "3.9"
+          - "3.13"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.7"
+          python-version: ${{ matrix.python-version }}
       - uses: pre-commit/action@v3.0.0
 
   build:
