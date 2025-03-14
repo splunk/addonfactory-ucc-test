@@ -18,7 +18,7 @@ class SplunkClientBootstrup:
     vendor_base_dir = os.path.join(unified_tests_root_dir, "vendor")
     vendor_client_dir = os.path.join(vendor_base_dir, "client")
 
-    scema = {
+    schema = {
         tests_root_dir: [
             {
                 "file": "__init__.py",
@@ -29,6 +29,13 @@ class SplunkClientBootstrup:
             {
                 "file": "__init__.py",
                 "template": "unified_tests_init.tmpl",
+                "overwrite": False,
+            }
+            ,
+                       {
+                "file": "tests_settings.py",
+                                "template": "tests_settings.tmpl",
+
                 "overwrite": False,
             },
             {
@@ -311,7 +318,7 @@ class SplunkClientBootstrup:
                 file.write(content)
 
     def _write_other_classes(self) -> None:
-        for folder_path, folder_files in self.scema.items():
+        for folder_path, folder_files in self.schema.items():
             os.makedirs(folder_path, exist_ok=True)
             for file_info in folder_files:
                 file_name = str(file_info["file"])
