@@ -1,5 +1,5 @@
 from copy import deepcopy
-from typing import Any, Callable, Dict, Generator, Optional, Set
+from typing import Any, Dict, Optional, Set
 from splunk_add_on_ucc_modinput_test.functional import logger
 from splunk_add_on_ucc_modinput_test.functional.constants import BuiltInArg
 from splunk_add_on_ucc_modinput_test.functional.entities.executable import (
@@ -9,16 +9,20 @@ from splunk_add_on_ucc_modinput_test.functional.common.identifier_factory import
     create_identifier,
     IdentifierType,
 )
+from splunk_add_on_ucc_modinput_test.typing import (
+    ExecutableKeyType,
+    TestFnType,
+)
 
 
 class FrameworkTest(ExecutableBase):
     def __init__(
         self,
-        function: Callable[[Any], Generator[None, None, None]],
+        function: TestFnType,
         altered_name: Optional[str] = None,
     ) -> None:
         super().__init__(function)
-        self.forges: Set[str] = set()
+        self.forges: Set[ExecutableKeyType] = set()
         self._is_executed: bool = False
         self._artifacts: Dict[str, Any] = {}
         if altered_name:
@@ -70,7 +74,7 @@ class FrameworkTest(ExecutableBase):
         logger.debug(f"TEST: mark_executed {self}")
         self._is_executed = True
 
-    def link_forge(self, forge_key: str) -> None:
+    def link_forge(self, forge_key: ExecutableKeyType) -> None:
         assert forge_key not in self.forges
         self.forges.add(forge_key)
 

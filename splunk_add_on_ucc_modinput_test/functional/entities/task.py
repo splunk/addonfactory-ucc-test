@@ -1,11 +1,20 @@
 from __future__ import annotations
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from splunk_add_on_ucc_modinput_test.typing import (
+        ProbeFnType,
+        ProbeGenType,
+        ExecutableKeyType,
+    )
+
 import inspect
 import time
 import types
 import random
 import traceback
 from copy import deepcopy
-from typing import Any, Callable, Dict, Generator, Optional, Tuple, List
+from typing import Any, Generator, Optional, List
 from splunk_add_on_ucc_modinput_test.functional import logger
 from splunk_add_on_ucc_modinput_test.functional.common.pytest_config_adapter import (
     PytestConfigAdapter,
@@ -35,7 +44,7 @@ class FrameworkTask:
         forge: FrameworkForge,
         is_bootstrap: bool,
         forge_kwargs: dict[str, Any],
-        probe_fn: Callable[..., Any],
+        probe_fn: ProbeFnType | None,
         config: PytestConfigAdapter,
     ):
         self._config = config
@@ -48,13 +57,12 @@ class FrameworkTask:
         self._teardown: Generator[None, None, None] | None = None
         self._setup_errors: list[str] = []
         self._teardown_errors: list[str] = []
-        self._result = None
+        self._result: object | None = None
         self._global_builtin_args: dict[str, Any] = {}
         self._forge_kwargs: dict[str, Any] = {}
         self._probe: ExecutableBase | None = None
-        self._probe_fn: Callable[..., Any] | None = None
-        # self._probe_gen: Callable[..., float] | None = None   #   probe generally returns float
-        self._probe_gen: Callable[..., Any] | None = None
+        self._probe_fn: ProbeFnType | None = None
+        self._probe_gen: ProbeGenType | None = None
         self._probe_kwargs: dict[str, Any] = {}
         self.apply_probe(probe_fn)
 
@@ -98,11 +106,6 @@ class FrameworkTask:
     def result(self) -> object:
         return self._result
 
-    # OLEG
-    # @property
-    # def has_probe(self):
-    #     return callable(self._probe_gen)
-
     @property
     def forge_key(self) -> tuple[str, ...]:
         return self._forge.key
@@ -112,7 +115,7 @@ class FrameworkTask:
         return self._forge.scope
 
     @property
-    def forge_test_keys(self) -> list[object]:
+    def forge_test_keys(self) -> list[ExecutableKeyType]:
         return list(self._forge.tests_keys)
 
     @property
@@ -188,14 +191,14 @@ class FrameworkTask:
         logger.debug(f"UNBLOCK teardown for forge {self._forge.key}")
         self._forge.unblock_teardown()
 
-    def make_kwarg(self, test_result: dict[str, Any] | None) -> dict[str, Any]:
+    def make_kwarg(self, test_result: object | None) -> dict[str, Any]:
         if test_result is None:
             return {}
         if not isinstance(test_result, dict):
             return {self.default_artifact_name: test_result}
         return test_result
 
-    def apply_probe(self, probe_fn: Callable[..., Any]) -> None:
+    def apply_probe(self, probe_fn: ProbeFnType | None) -> None:
         self._probe_fn = probe_fn
         if callable(probe_fn):
             self._probe = ExecutableBase(probe_fn)
@@ -206,15 +209,16 @@ class FrameworkTask:
 
             def _probe_default_gen(
                 **probe_args: Any,
-            ) -> Generator[float, None, None]:
-                while not probe_fn(**probe_args):
-                    yield self._config.probe_invoke_interval
+            ) -> Generator[int, None, None]:
+                if probe_fn is not None:
+                    while not probe_fn(**probe_args):
+                        yield self._config.probe_invoke_interval
 
             self._probe_gen = _probe_default_gen
         else:
             self._probe_gen = None
 
-        if self._probe_gen:
+        if self._probe_gen and self._probe_fn is not None:
             sig = inspect.signature(self._probe_fn)
             self._probe_required_args = list(sig.parameters.keys())
         else:
@@ -253,10 +257,10 @@ class FrameworkTask:
     def get_forge_kwargs_copy(self) -> dict[str, Any]:
         return deepcopy(self._forge_initial_kwargs)
 
-    def get_probe_fn(self) -> Callable[..., Any] | None:
+    def get_probe_fn(self) -> ProbeFnType | None:
         return self._probe_fn
 
-    def invoke_probe(self) -> Generator[Callable[..., Any] | None, None, None]:
+    def invoke_probe(self) -> Generator[int, None, None]:
         if callable(self._probe_gen):
             yield from self._probe_gen(**self._probe_kwargs)
 
@@ -270,7 +274,7 @@ class FrameworkTask:
             if k in self._probe_required_args
         }
 
-    def wait_for_probe(self, last_result: float) -> None:
+    def wait_for_probe(self, last_result: object | None) -> None:
         logger.debug(
             f"WAIT FOR PROBE started\n\ttest {self.test_key}\n\tforge {self.forge_key}\n\tprobe {self._probe_fn}"
         )
@@ -318,7 +322,7 @@ class FrameworkTask:
         )
 
     def _save_generator_teardown(
-        self, gen: Generator[None, None, None] | None
+        self, gen: Generator[Any, None, None] | None
     ) -> None:
         self._teardown = gen
 
@@ -358,7 +362,7 @@ class FrameworkTask:
 
         return args1 == args2
 
-    def same_tasks(self, other_task: Any) -> bool:
+    def same_tasks(self, other_task: FrameworkTask) -> bool:
         if self.forge_key != other_task.forge_key:
             return False
 
@@ -461,7 +465,9 @@ class FrameworkTask:
         )
         try:
             teardown_start_time = time.time()
-            if self._forge.teardown(self._exec_id):
+            if self._exec_id is not None and self._forge.teardown(
+                self._exec_id
+            ):
                 logger.info(
                     f"Forge teardown has been executed successfully, time taken {time.time() - teardown_start_time} seconds:{self.summary}"
                 )
@@ -470,3 +476,6 @@ class FrameworkTask:
             report = f"Forge teardown has failed to execute: {e}{self.summary}\n{traceback_info}"
             logger.error(report)
             self._teardown_errors.append(report)
+
+
+TaskSetListType = List[Optional[List[FrameworkTask]]]

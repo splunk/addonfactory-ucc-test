@@ -9,6 +9,8 @@ from splunk_add_on_ucc_modinput_test.functional.manager import (
 from pytest import Item
 from _pytest.mark.structures import Mark
 
+from splunk_add_on_ucc_modinput_test.typing import ExecutableKeyType
+
 
 def _extract_parametrized_data(pyfuncitem: Item) -> Tuple[str, Any]:
     callspec_params = {}
@@ -17,7 +19,9 @@ def _extract_parametrized_data(pyfuncitem: Item) -> Tuple[str, Any]:
     return pyfuncitem.keywords.node.name, callspec_params
 
 
-def _map_forged_tests_to_pytest_items(items: List[Item]) -> Dict[str, Item]:
+def _map_forged_tests_to_pytest_items(
+    items: List[Item],
+) -> Dict[ExecutableKeyType, Item]:
     forged_tests = {}
     for item in items:
         test = dependency_manager.tests.lookup_by_function(item._obj)
@@ -28,8 +32,8 @@ def _map_forged_tests_to_pytest_items(items: List[Item]) -> Dict[str, Item]:
 
 def _collect_parametrized_tests(
     items: List[Item],
-) -> Dict[str, List[Tuple[str, Any]]]:
-    parametrized_tests: Dict[str, List[Tuple[str, Any]]] = {}
+) -> Dict[ExecutableKeyType, List[Tuple[str, Any]]]:
+    parametrized_tests: Dict[ExecutableKeyType, List[Tuple[str, Any]]] = {}
     for item in items:
         parametrized_markers = [
             marker
@@ -116,8 +120,9 @@ def _log_test_order(items: List[Item]) -> None:
             test_tasks = dependency_manager.tasks.get_bootstrap_tasks(test.key)
             for level, tasks in enumerate(test_tasks):
                 order += f"\tLevel {level}\n"
-                for task in tasks:
-                    order += f"\t\t{task.forge_full_path}\n"
+                if tasks is not None:
+                    for task in tasks:
+                        order += f"\t\t{task.forge_full_path}\n"
         else:
             logger.debug(f"NOT FOUND: {item}, {pytest_funcname} ")
 
