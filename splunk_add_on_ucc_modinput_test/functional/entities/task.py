@@ -5,7 +5,7 @@ if TYPE_CHECKING:
     from splunk_add_on_ucc_modinput_test.typing import (
         ProbeFnType,
         ProbeGenType,
-        ExecutableKeyType
+        ExecutableKeyType,
     )
 
 import inspect
@@ -14,7 +14,7 @@ import types
 import random
 import traceback
 from copy import deepcopy
-from typing import Any, Callable, Dict, Generator, Optional, Tuple, List, Union
+from typing import Any, Generator, Optional, List
 from splunk_add_on_ucc_modinput_test.functional import logger
 from splunk_add_on_ucc_modinput_test.functional.common.pytest_config_adapter import (
     PytestConfigAdapter,
@@ -43,8 +43,8 @@ class FrameworkTask:
         test: FrameworkTest,
         forge: FrameworkForge,
         is_bootstrap: bool,
-        forge_kwargs: Dict[str, Any],
-        probe_fn: Optional[ProbeFnType],
+        forge_kwargs: dict[str, Any],
+        probe_fn: ProbeFnType | None,
         config: PytestConfigAdapter,
     ):
         self._config = config
@@ -55,15 +55,15 @@ class FrameworkTask:
         self._exec_id: str | None = None
         self._is_executed = False
         self._teardown: Generator[None, None, None] | None = None
-        self._setup_errors: List[str] = []
-        self._teardown_errors: List[str] = []
+        self._setup_errors: list[str] = []
+        self._teardown_errors: list[str] = []
         self._result: object | None = None
-        self._global_builtin_args: Dict[str, Any] = {}
-        self._forge_kwargs: Dict[str, Any] = {}
+        self._global_builtin_args: dict[str, Any] = {}
+        self._forge_kwargs: dict[str, Any] = {}
         self._probe: ExecutableBase | None = None
         self._probe_fn: ProbeFnType | None = None
         self._probe_gen: ProbeGenType | None = None
-        self._probe_kwargs: Dict[str, Any] = {}
+        self._probe_kwargs: dict[str, Any] = {}
         self.apply_probe(probe_fn)
 
     def __repr__(self) -> str:
@@ -107,7 +107,7 @@ class FrameworkTask:
         return self._result
 
     @property
-    def forge_key(self) -> Tuple[str, ...]:
+    def forge_key(self) -> tuple[str, ...]:
         return self._forge.key
 
     @property
@@ -115,7 +115,7 @@ class FrameworkTask:
         return self._forge.scope
 
     @property
-    def forge_test_keys(self) -> List[ExecutableKeyType]:
+    def forge_test_keys(self) -> list[ExecutableKeyType]:
         return list(self._forge.tests_keys)
 
     @property
@@ -131,7 +131,7 @@ class FrameworkTask:
         return "::".join(self.forge_key[:2])
 
     @property
-    def test_key(self) -> Tuple[str, ...]:
+    def test_key(self) -> tuple[str, ...]:
         return self._test.key
 
     @property
@@ -191,7 +191,7 @@ class FrameworkTask:
         logger.debug(f"UNBLOCK teardown for forge {self._forge.key}")
         self._forge.unblock_teardown()
 
-    def make_kwarg(self, test_result: object | None) -> Dict[str, Any]:
+    def make_kwarg(self, test_result: object | None) -> dict[str, Any]:
         if test_result is None:
             return {}
         if not isinstance(test_result, dict):
@@ -224,7 +224,7 @@ class FrameworkTask:
         else:
             self._probe_required_args = []
 
-    def collect_available_kwargs(self) -> Dict[str, Any]:
+    def collect_available_kwargs(self) -> dict[str, Any]:
         available_kwargs = self._test.artifacts_copy
         available_kwargs.update(self.get_forge_kwargs_copy())
         available_kwargs.update(self._global_builtin_args)
@@ -232,7 +232,7 @@ class FrameworkTask:
         return available_kwargs
 
     def prepare_forge_call_args(
-        self, global_builtin_args: Dict[str, Any]
+        self, global_builtin_args: dict[str, Any]
     ) -> None:
         logger.debug(f"EXECTASK: prepare_forge_call_args {self}")
 
@@ -247,14 +247,14 @@ class FrameworkTask:
             f"EXECTASK: prepare_forge_call_args for {self.forge_key}:\n\ttest required args: {self._test.required_args_names}\n\ttest artifacts: {self._test.artifacts}\n\tforge initial kwargs: {self._forge_initial_kwargs}\n\tforge kwargs: {self._forge_kwargs}\n\ttask available kwargs: {available_kwargs}"
         )
 
-    def _get_comparable_args(self) -> Dict[str, Any]:
+    def _get_comparable_args(self) -> dict[str, Any]:
         return {
             k: v
             for k, v in self._forge_kwargs.items()
             if not isinstance(v, (SplunkClientBase, VendorClientBase))
         }
 
-    def get_forge_kwargs_copy(self) -> Dict[str, Any]:
+    def get_forge_kwargs_copy(self) -> dict[str, Any]:
         return deepcopy(self._forge_initial_kwargs)
 
     def get_probe_fn(self) -> ProbeFnType | None:
@@ -264,7 +264,7 @@ class FrameworkTask:
         if callable(self._probe_gen):
             yield from self._probe_gen(**self._probe_kwargs)
 
-    def prepare_probe_kwargs(self, extra_args: Dict[str, Any] = {}) -> None:
+    def prepare_probe_kwargs(self, extra_args: dict[str, Any] = {}) -> None:
         available_kwargs = self.collect_available_kwargs()
         available_kwargs.update(extra_args)
 
@@ -332,7 +332,7 @@ class FrameworkTask:
             if callable(attr):
                 self._teardown = attr
 
-    def update_test_artifacts(self, artifacts: Dict[str, Any]) -> None:
+    def update_test_artifacts(self, artifacts: dict[str, Any]) -> None:
         self._test.update_artifacts(artifacts)
 
     @staticmethod
@@ -371,7 +371,7 @@ class FrameworkTask:
         return FrameworkTask.same_args(args1, args2)
 
     def reuse_forge_execution(
-        self, exec_id: str, result: Any, errors: List[str]
+        self, exec_id: str, result: Any, errors: list[str]
     ) -> None:
         logger.debug(
             f"reuse execution {exec_id}:\n\tTask: {self.test_key}\n\tDep: {self.forge_key}\n\tresult: {result}\n\terrors: {errors}"
@@ -382,8 +382,8 @@ class FrameworkTask:
         self._setup_errors = errors
 
     def use_previous_executions(
-        self, args_to_match: Dict[str, Any]
-    ) -> Tuple[bool, object | None]:
+        self, args_to_match: dict[str, Any]
+    ) -> tuple[bool, object | None]:
         logger.debug(
             f"Dep {self.forge_key}: look for {self._forge_kwargs} in {self._forge.executions}"
         )

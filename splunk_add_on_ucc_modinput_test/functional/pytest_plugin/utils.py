@@ -11,6 +11,7 @@ from _pytest.mark.structures import Mark
 
 from splunk_add_on_ucc_modinput_test.typing import ExecutableKeyType
 
+
 def _extract_parametrized_data(pyfuncitem: Item) -> Tuple[str, Any]:
     callspec_params = {}
     if hasattr(pyfuncitem, "callspec"):
@@ -18,7 +19,9 @@ def _extract_parametrized_data(pyfuncitem: Item) -> Tuple[str, Any]:
     return pyfuncitem.keywords.node.name, callspec_params
 
 
-def _map_forged_tests_to_pytest_items(items: List[Item]) -> Dict[ExecutableKeyType, Item]:
+def _map_forged_tests_to_pytest_items(
+    items: List[Item],
+) -> Dict[ExecutableKeyType, Item]:
     forged_tests = {}
     for item in items:
         test = dependency_manager.tests.lookup_by_function(item._obj)

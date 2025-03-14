@@ -9,7 +9,10 @@ from splunk_add_on_ucc_modinput_test.functional.common.identifier_factory import
     create_identifier,
     IdentifierType,
 )
-from splunk_add_on_ucc_modinput_test.typing import ExecutableKeyType, TestFnType
+from splunk_add_on_ucc_modinput_test.typing import (
+    ExecutableKeyType,
+    TestFnType,
+)
 
 
 class FrameworkTest(ExecutableBase):

@@ -5,7 +5,6 @@ from __future__ import annotations
 import time
 import pytest
 import requests  # type: ignore
-from typing import List, Tuple, Dict
 from requests.adapters import HTTPAdapter, Retry  # type: ignore
 from splunklib.client import Service
 from splunklib.client import Job
@@ -110,7 +109,7 @@ class Configuration:
         utils.logger.debug(f"Index {index_name} has just been created")
         return created_index
 
-    __instances: Dict[Tuple[str, str, str], Configuration] = {}
+    __instances: dict[tuple[str, str, str], Configuration] = {}
 
     @classmethod
     def collect_host(cls) -> str | None:
@@ -321,7 +320,7 @@ class SearchState:
         return self._result_count
 
     @property
-    def results(self) -> List[object] | None:
+    def results(self) -> list[object] | None:
         return self._results
 
 

@@ -9,7 +9,7 @@ if TYPE_CHECKING:
         TestFnType,
     )
 import inspect
-from typing import Any, Callable, Dict, Generator, Tuple, Optional, Union
+from typing import Any
 
 
 class ExecutableBase:
@@ -86,8 +86,8 @@ class ExecutableBase:
         self._required_args = list(sig.parameters.keys())
 
     @property
-    def required_args_names(self) -> Tuple[str, ...]:
+    def required_args_names(self) -> tuple[str, ...]:
         return tuple(self._required_args)
 
-    def filter_requied_kwargs(self, kwargs: Dict[str, Any]) -> Dict[str, Any]:
+    def filter_requied_kwargs(self, kwargs: dict[str, Any]) -> dict[str, Any]:
         return {k: v for k, v in kwargs.items() if k in self._required_args}

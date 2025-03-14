@@ -93,8 +93,8 @@ class TaskCollection:
         self, test_key: ExecutableKeyType
     ) -> Tuple[TaskSetListType, TaskSetListType]:
         all_tasks = self.get_tasks(test_key)
-        inplace_tasks:TaskSetListType = []
-        bootstrap_tasks:TaskSetListType = []
+        inplace_tasks: TaskSetListType = []
+        bootstrap_tasks: TaskSetListType = []
         for step_tasks in all_tasks:
             if step_tasks is not None:
                 if step_tasks[0].is_bootstrap:

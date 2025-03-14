@@ -2,7 +2,10 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from splunk_add_on_ucc_modinput_test.typing import ForgeType, ExecutableKeyType
+    from splunk_add_on_ucc_modinput_test.typing import (
+        ForgeType,
+        ExecutableKeyType,
+    )
 
 import threading
 import inspect
@@ -10,15 +13,7 @@ import contextlib
 import time
 from typing import (
     Any,
-    Callable,
-    Dict,
     Generator,
-    List,
-    Optional,
-    Set,
-    Tuple,
-    Type,
-    Union,
 )
 from dataclasses import dataclass, replace
 from splunk_add_on_ucc_modinput_test.functional import logger
@@ -26,13 +21,14 @@ from splunk_add_on_ucc_modinput_test.functional.entities.executable import (
     ExecutableBase,
 )
 
+
 @dataclass
 class ForgeExecData:
     id: str
     teardown: Generator[Any, None, None] | None
-    kwargs: Dict[str, Any]
+    kwargs: dict[str, Any]
     result: object
-    errors: List[str]
+    errors: list[str]
     count: int
     lock: threading.Lock
     is_teardown_executed: bool = False
@@ -41,9 +37,9 @@ class ForgeExecData:
         self,
         id: str,
         teardown: Generator[Any, None, None] | None,
-        kwargs: Dict[str, Any],
+        kwargs: dict[str, Any],
         result: object,
-        errors: List[str],
+        errors: list[str],
         count: int,
     ) -> None:
         self.lock = threading.Lock()
@@ -68,7 +64,7 @@ class ForgeExecData:
 class ForgePostExec:
     def __init__(self) -> None:
         self.lock = threading.Lock()
-        self._exec_store: Dict[str, ForgeExecData] = {}
+        self._exec_store: dict[str, ForgeExecData] = {}
         self._teardown_is_blocked = False
 
     def summary(self, data: ForgeExecData) -> str:
@@ -105,9 +101,9 @@ class ForgePostExec:
         self,
         id: str,
         teardown: Generator[Any, None, None] | None,
-        kwargs: Dict[str, Any],
+        kwargs: dict[str, Any],
         result: object,
-        errors: List[str],
+        errors: list[str],
     ) -> None:
         if id not in self._exec_store:
             with self.lock:
@@ -149,7 +145,7 @@ class ForgePostExec:
         assert data
         return data.is_teardown_executed
 
-    def list(self) -> Tuple[ForgeExecData, ...]:
+    def list(self) -> tuple[ForgeExecData, ...]:
         return tuple(self._exec_store.values())
 
     def execute_teardown(self, data: ForgeExecData) -> None:
@@ -191,7 +187,7 @@ class FrameworkForge(ExecutableBase):
     ) -> None:
         super().__init__(function)
         self._scope = scope
-        self.tests: Set[ExecutableKeyType] = set()
+        self.tests: set[ExecutableKeyType] = set()
         self._executions = ForgePostExec()
 
     @property
@@ -208,7 +204,7 @@ class FrameworkForge(ExecutableBase):
         return self._scope
 
     @property
-    def tests_keys(self) -> List[ExecutableKeyType]:
+    def tests_keys(self) -> list[ExecutableKeyType]:
         return list(self.tests)
 
     @property
@@ -224,7 +220,7 @@ class FrameworkForge(ExecutableBase):
         return "::".join(self.key[:2])
 
     @property
-    def executions(self) -> Tuple[ForgeExecData, ...]:
+    def executions(self) -> tuple[ForgeExecData, ...]:
         return self._executions.list()
 
     def block_teardown(self) -> None:
@@ -241,9 +237,9 @@ class FrameworkForge(ExecutableBase):
         id: str,
         *,
         teardown: Generator[Any, None, None] | None,
-        kwargs: Dict[str, Any],
+        kwargs: dict[str, Any],
         result: object,
-        errors: List[str],
+        errors: list[str],
     ) -> None:
         self._executions.add(id, teardown, kwargs, result, errors)
 
