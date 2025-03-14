@@ -298,7 +298,7 @@ class FrmwkParallelExecutor(FrmwkExecutorBase):
         self._manager_thread.join()
         logger.info("Executor has shutdown.")
 
-    def _receive_tasks(self) -> Tuple[bool, Optional[List[TaskSetListType]]]:
+    def _receive_tasks(self) -> Tuple[bool, Optional[Union[List[TaskSetListType],TaskGroupProcessor.Job]]]:
         logger.debug(
             "FrmwkParallelExecutor::_receive_tasks - set waiting for tasks"
         )
@@ -320,8 +320,9 @@ class FrmwkParallelExecutor(FrmwkExecutorBase):
                 logger.debug("manager is interrupted")
                 return True
 
-            proc.process_response(job)
-            self._manager_queue.task_done()
+            if isinstance(job, TaskGroupProcessor.Job):
+                proc.process_response(job)
+                self._manager_queue.task_done()
 
         return False
 
@@ -332,7 +333,7 @@ class FrmwkParallelExecutor(FrmwkExecutorBase):
         while not interrupted:
             interrupted, tasks = self._receive_tasks()
             logger.debug(f"manager got tasks {tasks}")
-            if tasks is not None:
+            if isinstance(tasks, list):
                 for task_group in tasks:
                     proc = TaskGroupProcessor(
                         task_group, self.global_builtin_args_factory
