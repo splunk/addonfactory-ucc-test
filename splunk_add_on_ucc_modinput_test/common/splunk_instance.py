@@ -3,7 +3,6 @@ from __future__ import annotations
 # mypy: disable-error-code="attr-defined,arg-type"
 
 import time
-from typing import Dict, Tuple
 import pytest
 import requests  # type: ignore
 from requests.adapters import HTTPAdapter, Retry  # type: ignore
@@ -83,9 +82,9 @@ class Configuration:
         client_service: SplunkServicePool,
         *,
         is_cloud: bool = False,
-        acs_stack: str = None,
-        acs_server: str = None,
-        splunk_token: str = None,
+        acs_stack: str | None = None,
+        acs_server: str | None = None,
+        splunk_token: str | None = None,
     ) -> Index:
         if Configuration.get_index(index_name, client_service):
             reason = f"Index {index_name} already exists"
@@ -110,24 +109,24 @@ class Configuration:
         utils.logger.debug(f"Index {index_name} has just been created")
         return created_index
 
-    __instances: Dict[Tuple[str, str, str], Configuration] = {}
+    __instances: dict[tuple[str, str, str], Configuration] = {}
 
     @classmethod
-    def collect_host(cls) -> str:
+    def collect_host(cls) -> str | None:
         return utils.get_from_environment_variable("MODINPUT_TEST_SPLUNK_HOST")
 
     @classmethod
-    def collect_port(cls) -> str:
+    def collect_port(cls) -> str | None:
         return utils.get_from_environment_variable("MODINPUT_TEST_SPLUNK_PORT")
 
     @classmethod
-    def collect_username(cls) -> str:
+    def collect_username(cls) -> str | None:
         return utils.get_from_environment_variable(
             "MODINPUT_TEST_SPLUNK_USERNAME"
         )
 
     @classmethod
-    def collect_password(cls) -> str:
+    def collect_password(cls) -> str | None:
         return utils.get_from_environment_variable(
             "MODINPUT_TEST_SPLUNK_PASSWORD_BASE64",
             string_function=utils.Base64.decode,
@@ -148,7 +147,7 @@ class Configuration:
         )
 
     @classmethod
-    def collect_splunk_token(cls, is_optional) -> str | None:
+    def collect_splunk_token(cls, is_optional: bool) -> str | None:
         return utils.get_from_environment_variable(
             "MODINPUT_TEST_SPLUNK_TOKEN_BASE64",
             string_function=utils.Base64.decode,
@@ -156,14 +155,14 @@ class Configuration:
         )
 
     @classmethod
-    def collect_acs_server(cls, is_optional) -> str | None:
+    def collect_acs_server(cls, is_optional: bool) -> str | None:
         return utils.get_from_environment_variable(
             "MODINPUT_TEST_ACS_SERVER",
             is_optional=is_optional,
         )
 
     @classmethod
-    def collect_acs_stack(cls, is_optional) -> str | None:
+    def collect_acs_stack(cls, is_optional: bool) -> str | None:
         return utils.get_from_environment_variable(
             "MODINPUT_TEST_ACS_STACK",
             is_optional=is_optional,
@@ -173,6 +172,10 @@ class Configuration:
         host = cls.collect_host()
         port = cls.collect_port()
         username = cls.collect_username()
+
+        if host is None or port is None or username is None:
+            raise ValueError("Host, port, and username must not be None")
+
         connection_key = (host, port, username)
         if connection_key in cls.__instances:
             return cls.__instances[connection_key]

@@ -107,7 +107,7 @@ class SplunkClientBootstrup:
         self.args_specs: Dict[str, List[str]] = {}
         self.ta_api_prefixes: List[str] = []
         self.methods: List[str] = []
-        self.method_specs: Dict[str,Dict[str, List[str]]] = {}
+        self.method_specs: Dict[str, Dict[str, List[str]]] = {}
 
         templates_search_path = os.path.join(
             os.path.dirname(__file__), "templates"
@@ -118,27 +118,26 @@ class SplunkClientBootstrup:
             autoescape=select_autoescape(),
         )
 
-    def _make_method_name(self, api_name_no_prefix: str) -> str:
+    def _make_method_name(self, api_name_no_prefix: str) -> Tuple[str, str]:
         if api_name_no_prefix.endswith("_name_get"):
             if "name" in self.args_specs:
                 return ("get_" + api_name_no_prefix[:-9], "get")
             else:
                 return ("get_" + api_name_no_prefix[:-4], "get")
 
-        if api_name_no_prefix.endswith("_get"):            
+        if api_name_no_prefix.endswith("_get"):
             for check in ["proxy", "settings", "logging"]:
                 if check in api_name_no_prefix:
                     return ("get_" + api_name_no_prefix[:-4], "get")
 
-            if "name" not in self.args_specs:                
+            if "name" not in self.args_specs:
                 return ("get_" + api_name_no_prefix[:-4] + "_list", "list")
 
         if api_name_no_prefix.endswith("_name_post"):
             if "name" in self.args_specs:
                 return ("update_" + api_name_no_prefix[:-10], "create")
             else:
-                method_type = "create"
-                return "create_" + api_name_no_prefix[:-5]
+                return ("create_" + api_name_no_prefix[:-5], "create")
 
         if api_name_no_prefix.endswith("_post"):
             for check in ["proxy", "settings", "logging"]:
@@ -268,7 +267,9 @@ class SplunkClientBootstrup:
                     api_name = call[: call.find("(")]
 
                     api_name_no_prefix = self._remove_prefix(api_name)
-                    method_name, method_type = self._make_method_name(api_name_no_prefix)
+                    method_name, method_type = self._make_method_name(
+                        api_name_no_prefix
+                    )
 
                     fst = call.find("(") + 1
                     lst = call.rfind(")")

@@ -1,49 +1,57 @@
+from __future__ import annotations
 import time
-from typing import List, Optional, Tuple, Callable, Generator
+from typing import Callable
 from splunk_add_on_ucc_modinput_test.common.splunk_instance import (
     search,
     Configuration,
     SearchState,
     Index,
 )
+from splunk_add_on_ucc_modinput_test.common.splunk_service_pool import (
+    SplunkServicePool,
+)
+from splunk_add_on_ucc_modinput_test.common.ta_base import ConfigurationBase
 from splunk_add_on_ucc_modinput_test.common.utils import logger
 from splunk_add_on_ucc_modinput_test.functional.common.splunk_instance_file import (  # noqa: E501
     SplunkInstanceFileHelper,
 )
+from splunk_add_on_ucc_modinput_test.typing import ProbeGenType
 
 
 class SplunkClientBase:
     def __init__(
-        self, splunk_configuration: Optional[Configuration] = None
+        self, splunk_configuration: Configuration | None = None
     ) -> None:
-        self.ta_service = None
+        self.ta_service: ConfigurationBase | None = None
         self._splunk_configuration = splunk_configuration or Configuration()
         self._bind_swagger_client()
 
-    def _bind_swagger_client(self) -> None:
-        # this method is replaced in inherited class by the decorator
-        # splunk_add_on_ucc_modinput_test.functional.decorators.register_splunk_class
-        pass
+    _bind_swagger_client: Callable[..., None] = lambda: None
+    # this method is replaced in inherited class by the decorator
+    # splunk_add_on_ucc_modinput_test.functional.decorators.register_splunk_class
+    # pass
 
     @property
-    def splunk_configuration(self):
+    def splunk_configuration(self) -> Configuration:
         return self._splunk_configuration
 
     @property
-    def config(self):  # short alias for splunk_configuration
+    def config(self) -> Configuration:  # short alias for splunk_configuration
         return self._splunk_configuration
 
     @property
-    def splunk(self):
+    def splunk(self) -> SplunkServicePool:
         return self._splunk_configuration.service
 
     @property
-    def ta_api(self):
+    def ta_api(
+        self,
+    ) -> swagger_client.api.default_api.DefaultApi:  # type: ignore    # noqa: E501, F821
         assert (
             self.ta_service is not None
         ), "Make sure you have decorated inherited client class \
             with @register_splunk_class"
-        return self.ta_service.api_instance
+        return self.ta_service._api_instance
 
     @property
     def instance_epoch_time(self) -> int:
@@ -72,7 +80,7 @@ class SplunkClientBase:
                 results"
         )
 
-    def _make_conf_error(self, prop_name: str):
+    def _make_conf_error(self, prop_name: str) -> str:
         return f"Make sure you have '{prop_name}' attribute in your Splunk \
             configuration class {self.config.__class__.__name__}"
 
@@ -88,7 +96,8 @@ class SplunkClientBase:
     @property
     def instance_file_helper(self) -> SplunkInstanceFileHelper:
         assert (
-            hasattr(self.config, "home") and self.config.splunk_home
+            hasattr(self.config, "home")
+            and self.config.splunk_home  # type: ignore
         ), self._make_conf_error("home")
         connect = dict(
             splunk_url=f"https://{self.config.host}:{self.config.port}",
@@ -115,40 +124,30 @@ class SplunkClientBase:
     def search(self, searchquery: str) -> SearchState:
         return search(service=self.splunk, searchquery=searchquery)
 
-    def run_saved_search(
-        self, saved_search_name: str
-    ) -> Tuple[int, Optional[List[object]]]:
-        saved_search = self.splunk.saved_searches[saved_search_name]
-        state = search(
-            service=self.splunk,
-            searchquery=saved_search.content["search"],
-        )
-        logger.debug(
-            f"Executed saved search {saved_search_name}, "
-            f"count: {state.result_count}, "
-            f"query: {saved_search.content['search']}"
-        )
-        return state.result_count, state.results
-
     def create_index(self, index_name: str) -> Index:
+        _is_cloud = "splunkcloud.com" in self.config.host.lower()
         return self.config.create_index(
             index_name,
             self.splunk,
-            is_cloud="splunkcloud.com" in self.config.host.lower(),
-            acs_stack=self.config.acs_stack,
-            acs_server=self.config.acs_server,
-            splunk_token=self.config.splunk_token,
+            is_cloud=_is_cloud,
+            acs_stack=self.config.acs_stack  # type: ignore
+            if _is_cloud
+            else None,
+            acs_server=self.config.acs_server if _is_cloud else None,
+            splunk_token=self.config.splunk_token  # type: ignore
+            if _is_cloud
+            else None,
         )
 
     def search_probe(
         self,
         probe_spl: str,
         *,
-        verify_fn: Optional[Callable[[SearchState], bool]] = None,
+        verify_fn: Callable[[SearchState], bool] | None = None,
         timeout: int = 300,
         interval: int = 5,
-        probe_name: Optional[str] = "probe",
-    ) -> Generator[int, None, Optional[SearchState]]:
+        probe_name: str | None = "probe",
+    ) -> ProbeGenType:
         """
         Probe state by search until it returns verify function return true.
         Default verify function checks for non empty search result.
@@ -157,7 +156,8 @@ class SplunkClientBase:
         @param verify_fn: function to verify search state.
         @param timeout: how long in seconds to wait for positive result.
         @param interval: interval to repeat search.
-        @return: True, if probe conditions met before expiration, otherwise False.
+        @return: True, if probe conditions met before expiration,
+            otherwise False.
         """
 
         def non_empty_result(state: SearchState) -> bool:
@@ -193,12 +193,12 @@ class SplunkClientBase:
 
     def repeat_search_until(
         self,
-        spl,
+        spl: str,
         *,
-        condition_fn: Optional[Callable[[SearchState], bool]] = None,
+        condition_fn: Callable[[SearchState], bool] | None = None,
         timeout: int = 300,
         interval: int = 5,
-    ) -> Optional[SearchState]:
+    ) -> SearchState | None:
         """
         Repeats search until condition function returns True.
         Default condition function checks for non empty search result.

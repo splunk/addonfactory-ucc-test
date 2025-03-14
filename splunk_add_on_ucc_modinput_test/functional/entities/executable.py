@@ -1,11 +1,21 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from splunk_add_on_ucc_modinput_test.typing import (
+        ExecutableKeyType,
+        ProbeFnType,
+        ForgeFnType,
+        TestFnType,
+    )
 import inspect
-from collections.abc import Callable
-from typing import Any, Dict, Generator, Tuple
+from typing import Any
 
 
 class ExecutableBase:
     def __init__(
-        self, function#: Callable[[Any], Generator[None, None, None]]
+        self,
+        function: ProbeFnType | ForgeFnType | TestFnType,
     ) -> None:
         assert callable(function)
         self._function = function
@@ -16,17 +26,21 @@ class ExecutableBase:
         return self._fn_source_file
 
     @property
-    def key(self):# -> tuple[str, str]:
+    def key(self) -> ExecutableKeyType:
         return (self._fn_source_file, self.fn_full_name)
 
     @property
-    def original_key(self):# -> tuple[str, str]:
+    def original_key(self) -> ExecutableKeyType:
         return (self._fn_source_file, self.fn_original_full_name)
 
     @property
     def original_name(self) -> str:
         if self._original_name == "__call__":
-            return self._fn_bound_class.lower()
+            return (
+                self._fn_bound_class.lower()
+                if self._fn_bound_class
+                else "__call__"
+            )
         return self._original_name
 
     @property
@@ -44,6 +58,7 @@ class ExecutableBase:
             return self._original_name
 
     def _inspect(self) -> None:
+        self._fn_bound_class: str | None = None
         if inspect.ismethod(self._function):
             self._fn_bound_class = self._function.__self__.__class__.__name__
             self._fn_name = self._function.__name__
@@ -71,8 +86,8 @@ class ExecutableBase:
         self._required_args = list(sig.parameters.keys())
 
     @property
-    def required_args_names(self) -> Tuple[str, ...]:
+    def required_args_names(self) -> tuple[str, ...]:
         return tuple(self._required_args)
 
-    def filter_requied_kwargs(self, kwargs: Dict[str, Any]) -> Dict[str, Any]:
+    def filter_requied_kwargs(self, kwargs: dict[str, Any]) -> dict[str, Any]:
         return {k: v for k, v in kwargs.items() if k in self._required_args}
