@@ -1,20 +1,18 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from copy import deepcopy
+from typing import TYPE_CHECKING, Any, Generator
 
 if TYPE_CHECKING:
     from splunk_add_on_ucc_modinput_test.typing import (
-        ForgeType,
+        ForgeFnType,
         ExecutableKeyType,
+        ArtifactsType,
     )
 
 import threading
 import inspect
 import contextlib
 import time
-from typing import (
-    Any,
-    Generator,
-)
 from dataclasses import dataclass, replace
 from splunk_add_on_ucc_modinput_test.functional import logger
 from splunk_add_on_ucc_modinput_test.functional.entities.executable import (
@@ -27,7 +25,7 @@ class ForgeExecData:
     id: str
     teardown: Generator[Any, None, None] | None
     kwargs: dict[str, Any]
-    result: object
+    result: ArtifactsType
     errors: list[str]
     count: int
     lock: threading.Lock
@@ -38,7 +36,7 @@ class ForgeExecData:
         id: str,
         teardown: Generator[Any, None, None] | None,
         kwargs: dict[str, Any],
-        result: object,
+        result: ArtifactsType,
         errors: list[str],
         count: int,
     ) -> None:
@@ -46,7 +44,7 @@ class ForgeExecData:
         self.id = id
         self.teardown = teardown
         self.kwargs = kwargs
-        self.result = result
+        self.result = deepcopy(result)
         self.errors = errors
         self.count = count
 
@@ -102,7 +100,7 @@ class ForgePostExec:
         id: str,
         teardown: Generator[Any, None, None] | None,
         kwargs: dict[str, Any],
-        result: object,
+        result: ArtifactsType,
         errors: list[str],
     ) -> None:
         if id not in self._exec_store:
@@ -182,10 +180,11 @@ class ForgePostExec:
 class FrameworkForge(ExecutableBase):
     def __init__(
         self,
-        function: ForgeType,
+        function: ForgeFnType,
         scope: str,
     ) -> None:
         super().__init__(function)
+        self._function: ForgeFnType = function
         self._scope = scope
         self.tests: set[ExecutableKeyType] = set()
         self._executions = ForgePostExec()
@@ -238,7 +237,7 @@ class FrameworkForge(ExecutableBase):
         *,
         teardown: Generator[Any, None, None] | None,
         kwargs: dict[str, Any],
-        result: object,
+        result: ArtifactsType,
         errors: list[str],
     ) -> None:
         self._executions.add(id, teardown, kwargs, result, errors)

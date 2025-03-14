@@ -5,6 +5,8 @@
 from splunk_add_on_ucc_modinput_test.typing import (
     ArtifactsType,
     ExecutableKeyType,
+    ForgeFnType,
+    ProbeFnType,
     TestFnType,
 )
 import time
@@ -64,9 +66,9 @@ from splunk_add_on_ucc_modinput_test.functional.common.identifier_factory import
 class forge:
     def __init__(
         self,
-        forge_fn: Callable[..., Any],
+        forge_fn: ForgeFnType,
         *,
-        probe: Optional[Callable[..., Any]] = None,
+        probe: Optional[ProbeFnType] = None,
         scope: Optional[Union[ForgeScope, str]] = None,
         **kwargs: ArtifactsType,
     ) -> None:

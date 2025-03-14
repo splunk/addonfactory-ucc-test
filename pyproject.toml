@@ -40,7 +40,9 @@ filelock = "3.12.2"
 mypy_extensions = "^1.0.0"
 charset-normalizer = "3.3.2"
 urllib3 = ">=1.21.1,<2" # to stay consistent with PSA
+jinja2 = "^3.1.6"
 importlib-metadata = "^6.7.0"
+
 
 
 [tool.poetry.dev-dependencies]

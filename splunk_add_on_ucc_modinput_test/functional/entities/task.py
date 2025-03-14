@@ -1,10 +1,16 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
+from splunk_add_on_ucc_modinput_test.typing import (
+    ArtifactsType,
+    ForgeGenType,
+    ProbeGenType,
+)
+
 if TYPE_CHECKING:
     from splunk_add_on_ucc_modinput_test.typing import (
         ProbeFnType,
-        ProbeGenType,
+        ProbeGenFnType,
         ExecutableKeyType,
     )
 
@@ -62,7 +68,7 @@ class FrameworkTask:
         self._forge_kwargs: dict[str, Any] = {}
         self._probe: ExecutableBase | None = None
         self._probe_fn: ProbeFnType | None = None
-        self._probe_gen: ProbeGenType | None = None
+        self._probe_gen: ProbeGenFnType | None = None
         self._probe_kwargs: dict[str, Any] = {}
         self.apply_probe(probe_fn)
 
@@ -191,12 +197,13 @@ class FrameworkTask:
         logger.debug(f"UNBLOCK teardown for forge {self._forge.key}")
         self._forge.unblock_teardown()
 
-    def make_kwarg(self, test_result: object | None) -> dict[str, Any]:
+    def make_kwarg(self, test_result: object | None) -> ArtifactsType:
         if test_result is None:
             return {}
-        if not isinstance(test_result, dict):
+        elif not isinstance(test_result, dict):
             return {self.default_artifact_name: test_result}
-        return test_result
+        else:
+            return test_result
 
     def apply_probe(self, probe_fn: ProbeFnType | None) -> None:
         self._probe_fn = probe_fn
@@ -209,10 +216,11 @@ class FrameworkTask:
 
             def _probe_default_gen(
                 **probe_args: Any,
-            ) -> Generator[int, None, None]:
+            ) -> Generator[int, None, bool]:
                 if probe_fn is not None:
                     while not probe_fn(**probe_args):
                         yield self._config.probe_invoke_interval
+                return True
 
             self._probe_gen = _probe_default_gen
         else:
@@ -260,9 +268,11 @@ class FrameworkTask:
     def get_probe_fn(self) -> ProbeFnType | None:
         return self._probe_fn
 
-    def invoke_probe(self) -> Generator[int, None, None]:
+    def invoke_probe(self) -> ProbeGenType:
         if callable(self._probe_gen):
-            yield from self._probe_gen(**self._probe_kwargs)
+            result = yield from self._probe_gen(**self._probe_kwargs)
+            return result
+        return None
 
     def prepare_probe_kwargs(self, extra_args: dict[str, Any] = {}) -> None:
         available_kwargs = self.collect_available_kwargs()
@@ -274,43 +284,50 @@ class FrameworkTask:
             if k in self._probe_required_args
         }
 
-    def wait_for_probe(self, last_result: object | None) -> None:
+    def wait_for_probe(self, last_result: ArtifactsType) -> bool | None:
         logger.debug(
             f"WAIT FOR PROBE started\n\ttest {self.test_key}\n\tforge {self.forge_key}\n\tprobe {self._probe_fn}"
         )
         if not self._probe_gen:
-            return
+            return None
 
         probe_start_time = time.time()
-        extra_args = self.make_kwarg(last_result)
-        self.prepare_probe_kwargs(extra_args)
+        self.prepare_probe_kwargs(last_result)
         expire_time = time.time() + self._config.probe_wait_timeout
         logger.debug(
             f"WAIT FOR PROBE\n\ttest {self.test_key}\n\tforge {self.forge_key}\n\tprobe {self._probe_fn}\n\tprobe_gen {self._probe_gen}\n\tprobe_args {self._probe_kwargs}"
         )
-        for interval in self.invoke_probe():
-            if time.time() > expire_time:
-                msg = f"Test {self.test_key}, forge {self.forge_key}: probe {self._probe_fn} exceeded {self._config.probe_wait_timeout} seconds timeout"
-                raise SplTaFwkWaitForProbeTimeout(msg)
 
-            if interval > ForgeProbe.MAX_INTERVAL.value:
-                interval = ForgeProbe.MAX_INTERVAL.value
-            elif interval < ForgeProbe.MIN_INTERVAL.value:
-                interval = ForgeProbe.MIN_INTERVAL.value
-            time.sleep(interval)
+        result = None
+        try:
+            it = self.invoke_probe()
+            while True:
+                interval = next(it)
+                if time.time() > expire_time:
+                    result = False
+                    msg = f"Test {self.test_key}, forge {self.forge_key}: probe {self._probe_fn} exceeded {self._config.probe_wait_timeout} seconds timeout"
+                    raise SplTaFwkWaitForProbeTimeout(msg)
+
+                if interval > ForgeProbe.MAX_INTERVAL.value:
+                    interval = ForgeProbe.MAX_INTERVAL.value
+                elif interval < ForgeProbe.MIN_INTERVAL.value:
+                    interval = ForgeProbe.MIN_INTERVAL.value
+                time.sleep(interval)
+        except StopIteration as sie:
+            result = sie.value
 
         logger.info(
-            f"Forge probe has been executed successfully, time taken {time.time() - probe_start_time} seconds:{self.summary}"
+            f"Forge probe has finished execution, result: {result}, time taken {time.time() - probe_start_time} seconds:{self.summary}"
         )
 
-    def mark_as_failed(self, error: Exception, prefix: str) -> None:
-        traceback_info = traceback.format_exc()
-        report = f"{prefix}: {error}{self.summary}\n{traceback_info}"
-        # if isinstance(error, Exception):
-        #     traceback_info = traceback.format_exc()
-        #     report = f"{prefix}: {error}{self.summary}\n{traceback_info}"
-        # else:
-        #     report = f"{prefix}: {error}{self.summary}"
+        return result
+
+    def mark_as_failed(self, error: str | Exception, prefix: str) -> None:
+        if isinstance(error, Exception):
+            traceback_info = traceback.format_exc()
+            report = f"{prefix}: {error}{self.summary}\n{traceback_info}"
+        else:
+            report = f"{prefix}: {error}{self.summary}"
         logger.error(report)
         self._setup_errors.append(report)
         self._is_executed = True
@@ -321,9 +338,7 @@ class FrameworkTask:
             f"MARK TASK EXECUTED: {self.forge_full_path},\n\tself id: {id(self)},\n\tscope: {self.forge_scope},\n\texec_id: {self._exec_id},\n\ttest: {self.test_key},\n\tis_executed: {self.is_executed},\n\tis_failed: {self.failed},\n\terrors: {self._setup_errors}"
         )
 
-    def _save_generator_teardown(
-        self, gen: Generator[Any, None, None] | None
-    ) -> None:
+    def _save_generator_teardown(self, gen: ForgeGenType | None) -> None:
         self._teardown = gen
 
     def _save_class_teardown(self) -> None:
@@ -382,8 +397,8 @@ class FrameworkTask:
         self._setup_errors = errors
 
     def use_previous_executions(
-        self, args_to_match: dict[str, Any]
-    ) -> tuple[bool, object | None]:
+        self, args_to_match: ArtifactsType
+    ) -> tuple[bool, ArtifactsType]:
         logger.debug(
             f"Dep {self.forge_key}: look for {self._forge_kwargs} in {self._forge.executions}"
         )
@@ -397,7 +412,7 @@ class FrameworkTask:
                 )
                 logger.info(f"Forge execution has been REUSED:{self.summary}")
                 return True, prev_exec.result
-        return False, None
+        return False, {}
 
     def execute(self) -> None:
         logger.debug(
@@ -413,7 +428,6 @@ class FrameworkTask:
                 f"\nEXECTASK self id: {id(self)}: execute {self} - similar executions not found,\n\tTEST: {self.test_key},\n\tself._required_args: {self._forge._required_args},\n\tself._forge_initial_kwargs: {self._forge_initial_kwargs},\n\tcall_args: {self._forge_kwargs},\n\ttest artifacts: {self._test.artifacts}"
             )
             try:
-                result = None
                 forge_start_time = time.time()
                 if self._forge._is_generatorfunction:
                     logger.debug(
@@ -421,12 +435,14 @@ class FrameworkTask:
                     )
                     it = self._forge._function(**self._forge_kwargs)
                     try:
-                        result = next(it)
+                        result = self.make_kwarg(next(it))
                         self._save_generator_teardown(it)
                     except StopIteration as sie:
-                        result = sie.value
+                        result = self.make_kwarg(sie.value)
                 else:
-                    result = self._forge._function(**self._forge_kwargs)
+                    result = self.make_kwarg(
+                        self._forge._function(**self._forge_kwargs)
+                    )
                     self._save_class_teardown()
                 logger.info(
                     f"Forge has been executed successfully, time taken {time.time() - forge_start_time} seconds:{self.summary}"
@@ -437,25 +453,32 @@ class FrameworkTask:
                 logger.error(report)
                 self._setup_errors.append(report)
 
-            self._result = result
-            self._forge.register_execution(
-                self._exec_id,
-                teardown=self._teardown,
-                kwargs=comp_kwargs,
-                result=result,
-                errors=self._setup_errors,
-            )
-            if not self.is_bootstrap:
-                self.block_forge_teardown()
-
         try:
             if not self.setup_failed:
-                self.wait_for_probe(result)
+                probe_res = self.wait_for_probe(result)
+                probe_fn = self.get_probe_fn()
+                if probe_res is not None and probe_fn is not None:
+                    result[probe_fn.__name__] = probe_res
         except Exception as e:
             traceback_info = traceback.format_exc()
             report = f"Forge probe has failed to execute: {e}{self.summary}\n{traceback_info}"
             logger.error(report)
             self._setup_errors.append(report)
+
+        if not reuse:
+            self._result = result
+            assert (
+                self._exec_id is not None
+            ), "_exec_id must be assigned earlier in this method"
+            self._forge.register_execution(
+                self._exec_id,
+                teardown=self._teardown,
+                kwargs=comp_kwargs,
+                result=self._result,
+                errors=self._setup_errors,
+            )
+            if not self.is_bootstrap:
+                self.block_forge_teardown()
 
         self.mark_as_executed()
 

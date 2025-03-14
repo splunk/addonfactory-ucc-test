@@ -1,6 +1,6 @@
 from __future__ import annotations
 import time
-from typing import Callable, Generator
+from typing import Callable
 from splunk_add_on_ucc_modinput_test.common.splunk_instance import (
     search,
     Configuration,
@@ -15,6 +15,7 @@ from splunk_add_on_ucc_modinput_test.common.utils import logger
 from splunk_add_on_ucc_modinput_test.functional.common.splunk_instance_file import (  # noqa: E501
     SplunkInstanceFileHelper,
 )
+from splunk_add_on_ucc_modinput_test.typing import ProbeGenType
 
 
 class SplunkClientBase:
@@ -146,7 +147,7 @@ class SplunkClientBase:
         timeout: int = 300,
         interval: int = 5,
         probe_name: str | None = "probe",
-    ) -> Generator[int, None, SearchState | None]:
+    ) -> ProbeGenType:
         """
         Probe state by search until it returns verify function return true.
         Default verify function checks for non empty search result.
@@ -155,7 +156,8 @@ class SplunkClientBase:
         @param verify_fn: function to verify search state.
         @param timeout: how long in seconds to wait for positive result.
         @param interval: interval to repeat search.
-        @return: SearchState object.
+        @return: True, if probe conditions met before expiration,
+            otherwise False.
         """
 
         def non_empty_result(state: SearchState) -> bool:
@@ -179,15 +181,15 @@ class SplunkClientBase:
                     f"{probe_name} has successfully finished after "
                     f"{time.time() - start_time} seconds"
                 )
-                return search_state
+                return True
             logger.debug(
                 f"{probe_name} is negative after "
                 f"{time.time()-start_time} seconds"
             )
             yield interval
 
-        logger.error(f"{probe_name} is still negative after {timeout} seconds")
-        return None
+        logger.info(f"{probe_name} is still negative after {timeout} seconds")
+        return False
 
     def repeat_search_until(
         self,

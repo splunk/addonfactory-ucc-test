@@ -1,10 +1,15 @@
-from typing import Any, Callable, Dict, Generator, Tuple, Union
+from typing import Any, Callable, Dict, Generator, Tuple, Union, Optional
 
-ProbeGenType = Union[Callable[..., Generator[int, None, None]]]
-ProbeFnType = Union[ProbeGenType, Callable[..., Any]]
-ForgeType = Union[
-    Callable[..., Generator[Any, None, None]], Callable[..., Any]
-]
+ProbeGenType = Generator[int, None, Optional[bool]]
+ProbeGenFnType = Callable[..., ProbeGenType]
+ProbeRegularFnType = Callable[..., Any]
+ProbeFnType = Union[ProbeGenFnType, ProbeRegularFnType]
+
+ForgeGenType = Generator[Any, None, None]
+ForgeGenFnType = Callable[..., ForgeGenType]
+ForgeRegularFnType = Callable[..., Any]
+ForgeFnType = Union[ForgeGenFnType, ForgeRegularFnType]
+
 TestFnType = Callable[..., Any]
 
 ArtifactsType = Dict[str, Any]

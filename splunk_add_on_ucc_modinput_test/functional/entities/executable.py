@@ -5,7 +5,7 @@ if TYPE_CHECKING:
     from splunk_add_on_ucc_modinput_test.typing import (
         ExecutableKeyType,
         ProbeFnType,
-        ForgeType,
+        ForgeFnType,
         TestFnType,
     )
 import inspect
@@ -15,7 +15,7 @@ from typing import Any
 class ExecutableBase:
     def __init__(
         self,
-        function: ProbeFnType | ForgeType | TestFnType,
+        function: ProbeFnType | ForgeFnType | TestFnType,
     ) -> None:
         assert callable(function)
         self._function = function
