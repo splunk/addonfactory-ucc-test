@@ -1,4 +1,3 @@
-
 from typing import Any, Callable, Dict, Generator, Tuple, Union
 
 ProbeGenType = Union[Callable[..., Generator[int, None, None]]]

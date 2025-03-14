@@ -1,6 +1,6 @@
 from __future__ import annotations
 import time
-from typing import List, Optional, Tuple, Callable, Generator
+from typing import Callable, Generator
 from splunk_add_on_ucc_modinput_test.common.splunk_instance import (
     search,
     Configuration,
@@ -43,7 +43,9 @@ class SplunkClientBase:
         return self._splunk_configuration.service
 
     @property
-    def ta_api(self) -> swagger_client.api.default_api.DefaultApi:  # type: ignore
+    def ta_api(
+        self,
+    ) -> swagger_client.api.default_api.DefaultApi:  # type: ignore    # noqa: E501, F821
         assert (
             self.ta_service is not None
         ), "Make sure you have decorated inherited client class \
@@ -93,7 +95,8 @@ class SplunkClientBase:
     @property
     def instance_file_helper(self) -> SplunkInstanceFileHelper:
         assert (
-            hasattr(self.config, "home") and self.config.splunk_home  # type: ignore
+            hasattr(self.config, "home")
+            and self.config.splunk_home  # type: ignore
         ), self._make_conf_error("home")
         connect = dict(
             splunk_url=f"https://{self.config.host}:{self.config.port}",
@@ -126,9 +129,13 @@ class SplunkClientBase:
             index_name,
             self.splunk,
             is_cloud=_is_cloud,
-            acs_stack=self.config.acs_stack if _is_cloud else None,  # type: ignore
+            acs_stack=self.config.acs_stack  # type: ignore
+            if _is_cloud
+            else None,
             acs_server=self.config.acs_server if _is_cloud else None,
-            splunk_token=self.config.splunk_token if _is_cloud else None,  # type: ignore
+            splunk_token=self.config.splunk_token  # type: ignore
+            if _is_cloud
+            else None,
         )
 
     def search_probe(

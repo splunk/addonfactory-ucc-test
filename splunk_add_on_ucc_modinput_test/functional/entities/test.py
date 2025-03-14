@@ -1,5 +1,5 @@
 from copy import deepcopy
-from typing import Any, Callable, Dict, Generator, Optional, Set
+from typing import Any, Dict, Optional, Set
 from splunk_add_on_ucc_modinput_test.functional import logger
 from splunk_add_on_ucc_modinput_test.functional.constants import BuiltInArg
 from splunk_add_on_ucc_modinput_test.functional.entities.executable import (

@@ -303,7 +303,9 @@ class FrmwkParallelExecutor(FrmwkExecutorBase):
         self._manager_thread.join()
         logger.info("Executor has shutdown.")
 
-    def _receive_tasks(self) -> Tuple[bool, Optional[Union[List[TaskSetListType],TaskGroupProcessor.Job]]]:
+    def _receive_tasks(
+        self,
+    ) -> tuple[bool, list[TaskSetListType] | TaskGroupProcessor.Job | None]:
         logger.debug(
             "FrmwkParallelExecutor::_receive_tasks - set waiting for tasks"
         )
