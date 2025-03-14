@@ -8,9 +8,10 @@ from datetime import datetime
 from typing import Optional, Sequence
 from importlib_metadata import version, PackageNotFoundError
 from splunk_add_on_ucc_modinput_test import commands, tools
-from splunk_add_on_ucc_modinput_test.bootstrap.clients import (
-    SplunkClientBootstrup,
-)
+
+# from splunk_add_on_ucc_modinput_test.bootstrap.clients import (
+#     SplunkClientBootstrup,
+# )
 
 
 def get_version() -> str:

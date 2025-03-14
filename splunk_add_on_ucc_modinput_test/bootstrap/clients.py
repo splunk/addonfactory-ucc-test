@@ -30,12 +30,10 @@ class SplunkClientBootstrup:
                 "file": "__init__.py",
                 "template": "unified_tests_init.tmpl",
                 "overwrite": False,
-            }
-            ,
-                       {
+            },
+            {
                 "file": "tests_settings.py",
-                                "template": "tests_settings.tmpl",
-
+                "template": "tests_settings.tmpl",
                 "overwrite": False,
             },
             {
