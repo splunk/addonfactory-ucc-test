@@ -1,34 +1,42 @@
-import json
-import os
-import os.path
-from datetime import datetime
 from pathlib import Path
-from typing import Tuple, List, Optional, Dict
+from typing import Tuple, List, Dict
 from jinja2 import Environment, Template, select_autoescape, FileSystemLoader
 from splunk_add_on_ucc_modinput_test import resources
 from importlib_resources import files
 
-def get_splunk_client_path(ucc_modinput_functional : Path) -> Path:
+
+def get_splunk_client_path(ucc_modinput_functional: Path) -> Path:
     return ucc_modinput_functional / "splunk" / "client" / "client.py"
 
-def load_readme_examples(swagger_client_readme_md : Path) -> List[str]:
+
+def load_readme_examples(swagger_client_readme_md: Path) -> List[str]:
     split_marker = "# create an instance of the API class"
     end_marker = "## Documentation for API Endpoints"
 
-    with open(swagger_client_readme_md,mode="r") as file:
+    with open(swagger_client_readme_md) as file:
         content = file.read()
-    
+
     from_pos = content.find(split_marker)
     to_pos = content.find(end_marker)
-    if from_pos < 0 :
-        raise ValueError(f"Could not find start marker '{split_marker}' in README.md")
+    if from_pos < 0:
+        raise ValueError(
+            f"Could not find start marker '{split_marker}' in README.md"
+        )
     if to_pos < 0:
-        raise ValueError(f"Could not find end marker '{end_marker}' in README.md")
+        raise ValueError(
+            f"Could not find end marker '{end_marker}' in README.md"
+        )
     if to_pos < from_pos:
-        raise ValueError(f"End marker '{end_marker}' is before start marker '{split_marker}' in README.md")
+        raise ValueError(
+            f"End marker '{end_marker}' is before start marker \
+                '{split_marker}' in README.md"
+        )
 
-    splited_content = content[from_pos:to_pos].split(split_marker)[1:]#eliminates everything before the first split_marker
+    splited_content = content[from_pos:to_pos].split(split_marker)[
+        1:
+    ]  # eliminates everything before the first split_marker
     return [x.strip() for x in splited_content]
+
 
 def get_jinja_env() -> Environment:
     templates_search_path = files(resources).joinpath("templates")
@@ -37,18 +45,20 @@ def get_jinja_env() -> Environment:
         autoescape=select_autoescape(),
     )
 
+
 def remove_prefix(*, api_name: str, ta_api_prefix: str) -> str:
     if api_name.lower().startswith(ta_api_prefix.lower()):
         skip = len(ta_api_prefix)
         api_name_no_prefix = api_name[skip:]
-        while (
-            api_name_no_prefix and not api_name_no_prefix[0].isalpha()
-        ):
+        while api_name_no_prefix and not api_name_no_prefix[0].isalpha():
             api_name_no_prefix = api_name_no_prefix[1:]
         return api_name_no_prefix
     return api_name
 
-def make_method_name(*, api_name_no_prefix: str, args_specs: Dict[str, List[str]]) -> Tuple[str, str]:
+
+def make_method_name(
+    *, api_name_no_prefix: str, args_specs: Dict[str, List[str]]
+) -> Tuple[str, str]:
     if api_name_no_prefix.endswith("_name_get"):
         if "name" in args_specs:
             return ("get_" + api_name_no_prefix[:-9], "get")
@@ -84,6 +94,7 @@ def make_method_name(*, api_name_no_prefix: str, args_specs: Dict[str, List[str]
 
     return api_name_no_prefix, "unknown"
 
+
 # def _parse_arg_descriptor(self, arg_name: str, right_part: str) -> None:
 def parse_arg_descriptor(right_part: str) -> List[str]:
     descriptors = right_part.strip().split("#")
@@ -95,7 +106,10 @@ def parse_arg_descriptor(right_part: str) -> List[str]:
     # self.args_specs[arg_name] = spec
     return spec
 
-def parse_args(*, call_args: List[str], args_specs:  Dict[str, List[str]]) -> Tuple[str, str]:
+
+def parse_args(
+    *, call_args: List[str], args_specs: Dict[str, List[str]]
+) -> Tuple[str, str]:
     api_args = []
     method_args = []
     method_kwargs = []
@@ -141,11 +155,15 @@ def parse_args(*, call_args: List[str], args_specs:  Dict[str, List[str]]) -> Tu
     # method_template = get_jinja_env().get_template(
     #     "splunk_client_class_method.tmpl"
     # )
-def extract_methods(*, method_template: Template, samples: List[str], ta_api_prefix: str) ->  List[str]:
+
+
+def extract_methods(
+    *, method_template: Template, samples: List[str], ta_api_prefix: str
+) -> List[str]:
     # method_specs: Dict[str, Dict[str, List[str]]] = {}
     methods: List[str] = []
     for sample in samples:
-        args_specs:  Dict[str, List[str]] = {}
+        args_specs: Dict[str, List[str]] = {}
         for line in sample.splitlines():
             line = line.strip()
             if not line:
@@ -156,24 +174,28 @@ def extract_methods(*, method_template: Template, samples: List[str], ta_api_pre
             arg_name = res[0].strip()
             if arg_name != "api_response":
                 args_specs[arg_name] = parse_arg_descriptor(res[1])
-            else: # if arg_name == "api_response":
+            else:  # if arg_name == "api_response":
                 call = res[1].strip()
                 if call.startswith("api_instance."):
                     call = call[13:].strip()
 
                 api_name = call[: call.find("(")]
 
-                api_name_no_prefix = remove_prefix(api_name=api_name, ta_api_prefix=ta_api_prefix)
+                api_name_no_prefix = remove_prefix(
+                    api_name=api_name, ta_api_prefix=ta_api_prefix
+                )
                 method_name, method_type = make_method_name(
                     # api_name_no_prefix
                     api_name_no_prefix=api_name_no_prefix,
-                    args_specs=args_specs
+                    args_specs=args_specs,
                 )
 
                 fst = call.find("(") + 1
                 lst = call.rfind(")")
                 call_args = call[fst:lst].split(",")
-                api_args_str, method_args_str = parse_args(call_args=call_args, args_specs=args_specs)
+                api_args_str, method_args_str = parse_args(
+                    call_args=call_args, args_specs=args_specs
+                )
 
                 method_str = method_template.render(
                     method_type=method_type,
@@ -184,13 +206,16 @@ def extract_methods(*, method_template: Template, samples: List[str], ta_api_pre
                 )
                 methods.append(method_str)
                 # method_specs[method_str] = args_specs
-                
+
                 # self.args_specs = {}
                 break
     # return method_specs
     return methods
 
-def write_splunk_client(*,splunk_client_py: Path, splunk_client_content: str, methods: List[str]) -> None:
+
+def write_splunk_client(
+    *, splunk_client_py: Path, splunk_client_content: str, methods: List[str]
+) -> None:
     with open(splunk_client_py, "w") as file:
         file.write(splunk_client_content)
         for method in methods:
@@ -198,7 +223,6 @@ def write_splunk_client(*,splunk_client_py: Path, splunk_client_content: str, me
 
 
 def write_other_classes(*, unified_tests_root_dir: Path) -> None:
-
     schema = {
         unified_tests_root_dir.parent: [
             {
@@ -223,7 +247,8 @@ def write_other_classes(*, unified_tests_root_dir: Path) -> None:
                 "overwrite": False,
             },
         ],
-        unified_tests_root_dir / "splunk" : [
+        unified_tests_root_dir
+        / "splunk": [
             {
                 "file": "__init__.py",
                 "overwrite": False,
@@ -239,7 +264,9 @@ def write_other_classes(*, unified_tests_root_dir: Path) -> None:
                 "overwrite": False,
             },
         ],
-        unified_tests_root_dir / "splunk" / "client": [
+        unified_tests_root_dir
+        / "splunk"
+        / "client": [
             {
                 "file": "__init__.py",
                 "template": "splunk_client_init.tmpl",
@@ -251,7 +278,8 @@ def write_other_classes(*, unified_tests_root_dir: Path) -> None:
                 "overwrite": False,
             },
         ],
-        unified_tests_root_dir / "vendor": [
+        unified_tests_root_dir
+        / "vendor": [
             {
                 "file": "__init__.py",
                 "overwrite": False,
@@ -267,7 +295,9 @@ def write_other_classes(*, unified_tests_root_dir: Path) -> None:
                 "overwrite": False,
             },
         ],
-        unified_tests_root_dir / "vendor" / "client": [
+        unified_tests_root_dir
+        / "vendor"
+        / "client": [
             {
                 "file": "__init__.py",
                 "template": "vendor_client_init.tmpl",
@@ -291,7 +321,11 @@ def write_other_classes(*, unified_tests_root_dir: Path) -> None:
         for file_info in folder_files:
             file_name = str(file_info["file"])
             file_path = folder_path / file_name
-            if not file_path.exists() or file_path.exists() and file_info.get("overwrite", False):
+            if (
+                not file_path.exists()
+                or file_path.exists()
+                and file_info.get("overwrite", False)
+            ):
                 template = str(file_info.get("template", ""))
                 if template:
                     template = get_jinja_env().get_template(template).render()

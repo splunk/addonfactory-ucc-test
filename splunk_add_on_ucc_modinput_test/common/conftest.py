@@ -1,7 +1,7 @@
 import os
 from filelock import FileLock
 import json
-import pytest
+import pytest  # noqa F401
 from splunk_add_on_ucc_modinput_test.common import utils
 from splunk_add_on_ucc_modinput_test.common.splunk_instance import (
     Configuration as SplunkConfiguration,
