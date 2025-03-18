@@ -73,7 +73,7 @@ def wait_for_loglevel(
     start = time.time()
     expire = start + PROBE_LOGLEVEL_CHECK_TIMEOUT
     while time.time() < expire:
-        loglevel = splunk_client.get_settings_logging().get("agent")
+        loglevel = splunk_client.get_settings_logging().get("loglevel")
         if loglevel == expected_loglevel:
             logger.debug(
                 f"probe wait_for_loglevel successful after {time.time() - start} seconds"

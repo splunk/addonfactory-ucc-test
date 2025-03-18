@@ -20,6 +20,7 @@ from typing import Optional
 from python_on_whales import docker
 from importlib_resources import files
 from splunk_add_on_ucc_modinput_test import resources
+from splunk_add_on_ucc_modinput_test.common import bootstrap
 
 SWAGGER_CODEGEN_CLI_VERSION = "3.0.46"
 
@@ -42,11 +43,11 @@ def initialize(
     return modinput
 
 
-def generate(
+def generate_swagger_client(
     *,
     openapi: Path,
     tmp: Path,
-    client: Path,
+    swagger_client: Path,
     platform: Optional[str],
 ) -> Path:
     RESTAPI_CLIENT = "restapi_client"
@@ -97,9 +98,42 @@ def generate(
     )
     shutil.copytree(
         str(restapi_client_path / "swagger_client"),
-        str(client / "swagger_client"),
+        str(swagger_client),
     )
-    shutil.copy(
-        str(restapi_client_path / "README.md"), str(client / "swagger_client")
+    shutil.copy(str(restapi_client_path / "README.md"), str(swagger_client))
+
+    return swagger_client
+
+
+def generate_splunk_client(
+    *,
+    swagger_client_readme_md: Path,
+    splunk_client_py: Path,
+    rest_root: str,
+) -> Path:
+    """
+    Generate the Splunk client from the swagger client README.md
+    :param swagger_client_readme_md: Path to the swagger client README.md
+    :param splunk_client_py: Path to client.py
+    :param rest_root: The REST root
+    :return: Path to the generated Splunk client
+    """
+    jinja_env = bootstrap.get_jinja_env()
+    samples = bootstrap.load_readme_examples(
+        swagger_client_readme_md=swagger_client_readme_md
     )
-    return restapi_client_path
+    methods = bootstrap.extract_methods(
+        method_template=jinja_env.get_template(
+            "splunk_client_class_method.tmpl"
+        ),
+        samples=samples,
+        ta_api_prefix=rest_root,
+    )
+    bootstrap.write_splunk_client(
+        splunk_client_py=splunk_client_py,
+        splunk_client_content=jinja_env.get_template(
+            "splunk_client_class_header.tmpl"
+        ).render(),
+        methods=methods,
+    )
+    return splunk_client_py

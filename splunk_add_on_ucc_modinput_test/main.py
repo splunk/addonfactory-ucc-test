@@ -8,6 +8,8 @@ from datetime import datetime
 from typing import Optional, Sequence
 from importlib_metadata import version, PackageNotFoundError
 from splunk_add_on_ucc_modinput_test import commands, tools
+from splunk_add_on_ucc_modinput_test.common import bootstrap, utils
+import shutil
 
 # from splunk_add_on_ucc_modinput_test.bootstrap.clients import (
 #     SplunkClientBootstrup,
@@ -129,14 +131,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     class ModinputPath:
         DEFAULT = "tests/ucc_modinput_functional"
 
-        @staticmethod
-        def validate(value: str) -> Path:
-            directory = Path(value)
-            if directory.exists():
-                raise argparse.ArgumentTypeError(
-                    f"Given directory ({value}) already exist"
-                )
-            return directory
+        # @staticmethod
+        # def validate(value: str) -> Path:
+        #     directory = Path(value)
+        #     if directory.exists():
+        #         raise argparse.ArgumentTypeError(
+        #             f"Given directory ({value}) already exist"
+        #         )
+        #     return directory
 
     class FilePath:
         @staticmethod
@@ -228,12 +230,35 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     gen_parser.add_argument(*_c_args, **_c_kwargs)
     init_parser.add_argument(*_c_args, **_c_kwargs)
 
-    init_parser.add_argument(
+    _m_args = (
         "-m",
         "--modinput",
-        type=ModinputPath.validate,
-        help="Path to modinput_functional. This is target directory.",
-        default=ModinputPath.DEFAULT,
+    )
+    _m_kwargs = {
+        # "type": ModinputPath.validate,
+        "help": "Path to functional tests target directory.",
+        "default": ModinputPath.DEFAULT,
+    }
+    gen_parser.add_argument(*_m_args, **_m_kwargs)
+    init_parser.add_argument(*_m_args, **_m_kwargs)
+
+    # init_parser.add_argument(
+    #     "-m",
+    #     "--modinput",
+    #     type=ModinputPath.validate,
+    #     help="Path to functional tests target directory.",
+    #     default=ModinputPath.DEFAULT,
+    # )
+    feature_group = gen_parser.add_mutually_exclusive_group()
+    feature_group.add_argument(
+        "--skip-splunk-client-check",
+        action="store_true",
+        help="Exisitng splunk client will not be checked aginst consistency with swagger client. WARNING: This may lead to inconsistent state of splunk client.",
+    )
+    feature_group.add_argument(
+        "--force-splunk-client-overwritten",
+        action="store_true",
+        help="Existing splunk client will be overwritten by new one. WARNING: This may lead to loss of existing splunk client.",
     )
 
     # base64encode_parser.add_argument(
@@ -269,22 +294,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     )
 
     args = parser.parse_args(argv)
-    if args.command in ["gen", "init"]:
-        commands.generate(
-            openapi=args.openapi_json,
-            tmp=args.tmp,
-            client=args.client_code,
-            platform=args.platform,
-        )
-    if args.command == "init":
-        commands.initialize(
-            modinput=args.modinput,
-        )
-    # if args.command == "make-splunk-client":
-    #     SplunkClientBootstrup().make_splunk_client()
-
-    # if args.command == "bootstrap-unified-tests":
-    #     SplunkClientBootstrup().init()
 
     if args.command == "base64encode":
         print(
@@ -293,8 +302,76 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 string=args.string,
             )
         )
-    if args.command == "base64decode":
+    elif args.command == "base64decode":
         print(tools.base64decode(base64_string=args.string))
+    elif args.command in ["gen", "init"]:
+        modinput_path = Path(args.modinput)
+        if args.command == "init" and modinput_path.exists():
+            print(
+                f"{modinput_path} already exists. Did you want to run 'gen' command?"
+            )
+            return 1
+        if args.command == "gen" and not modinput_path.exists():
+            print(
+                f"{modinput_path} does not exist. Run 'init' command first or use --modinput/-m with appropriate location."
+            )
+            return 1
+        swagger_client = args.client_code / "swagger_client"
+        if swagger_client.exists():
+            shutil.rmtree(swagger_client)
+        swagger_client = commands.generate_swagger_client(
+            openapi=args.openapi_json,
+            tmp=args.tmp,
+            swagger_client=swagger_client,
+            platform=args.platform,
+        )
+
+        if args.command == "init":
+            bootstrap.write_other_classes(unified_tests_root_dir=modinput_path)
+            splunk_client = commands.generate_splunk_client(
+                swagger_client_readme_md=swagger_client / "README.md",
+                splunk_client_py=bootstrap.get_splunk_client_path(
+                    modinput_path
+                ),
+                rest_root=tools.get_rest_root(openapi=args.openapi_json),
+            )
+        elif args.command == "gen":
+            current_splunk_client = bootstrap.get_splunk_client_path(
+                modinput_path
+            )
+            splunk_client = commands.generate_splunk_client(
+                swagger_client_readme_md=swagger_client / "README.md",
+                splunk_client_py=args.tmp / "client.py",
+                rest_root=tools.get_rest_root(openapi=args.openapi_json),
+            )
+            if args.skip_splunk_client_check:
+                pass
+            elif args.force_splunk_client_overwritten:
+                if current_splunk_client.exists():
+                    backup_path = (
+                        current_splunk_client.parent
+                        / f"{current_splunk_client.name}_{datetime.now().strftime('%Y%m%d%H%M%S')}_backup"
+                    )
+                    shutil.move(current_splunk_client, backup_path)
+                shutil.copy(splunk_client, current_splunk_client)
+            elif not current_splunk_client.exists():
+                print(
+                    f"Current splunk client ({current_splunk_client}) does not exist. Use --force-splunk-client-overwritten to create it."
+                )
+                return 1
+            elif utils.md5(file_path=splunk_client) != utils.md5(
+                file_path=bootstrap.get_splunk_client_path(modinput_path)
+            ):
+                print(
+                    f"Existing splunk client ({current_splunk_client}) is outdated. Use --force-splunk-client-overwritten to overwrite it or --skip-splunk-client-check if you want to post."
+                )
+                return 1
+            else:
+                """
+                Existing splunk client is up to date.
+                """
+                pass
+
     return 0
 
 
