@@ -1,7 +1,94 @@
-from splunk_add_on_ucc_modinput_test.common import utils
+import time
+from typing import Generator, Dict, Optional
+from splunk_add_on_ucc_modinput_test.common.utils import logger
 from tests.ucc_modinput_functional.splunk.client import SplunkClient
-from typing import Generator
+from tests.ucc_modinput_functional.defaults import (
+    PROBE_PROXY_CHECK_INTERVAL,
+    PROBE_PROXY_CHECK_TIMEOUT,
+    PROBE_LOGLEVEL_CHECK_INTERVAL,
+    PROBE_LOGLEVEL_CHECK_TIMEOUT,
+)
+from splunk_add_on_ucc_modinput_test.common import utils
 
+
+def same_proxy_configs(
+    proxy1: Dict[str, object], proxy2: Dict[str, object], ignore_password: bool = True
+) -> bool:
+    # utility method to compare two proxy configurations ignoring None (not configured) properties.
+    # by default it removes from comparison proxy_password as it is returned sanitized by API.
+    # returns value is True if proxy configurations are the same, otherwise returns False.
+
+    proxy1 = {k: v for k, v in proxy1.items() if v is not None}
+    proxy2 = {k: v for k, v in proxy2.items() if v is not None}
+    if ignore_password:
+        proxy1.pop("proxy_password", None)
+        proxy2.pop("proxy_password", None)
+
+    res = proxy1 == proxy2
+    logger.debug(f"same_proxy_configs: {res}\n\tproxy1: {proxy1}\n\tproxy2: {proxy2}")
+
+    return res
+
+
+def wait_for_proxy(
+    splunk_client: SplunkClient,
+    expected_proxy: Dict[str, object],
+    error: Optional[str] = None,
+) -> Generator[int, None, None]:
+    # probe generator method that repeatedly checks TA proxy configuration until it's the same as the value provided in expected_proxy argument or until the time given to probe is expired.
+    # probe does not do any verification if error argument contains any other value than None, which means that API call setting proxy ended up with error (see settings forges).
+    # If vertification was not successfull probe yields value defining interval after which framework should invoke the probe again, otherwize the probe exits
+    # No return value is expected
+
+    if error is not None:
+        return False
+
+    start = time.time()
+    expire = time.time() + PROBE_PROXY_CHECK_TIMEOUT
+    while time.time() < expire:
+        proxy = splunk_client.get_settings_proxy()
+        if same_proxy_configs(expected_proxy, proxy):
+            logger.debug(
+                f"probe wait_for_proxy successful after {time.time() - start} seconds"
+            )
+            return True
+        logger.debug(f"probe wait_for_proxy failed after {time.time() - start} seconds")
+        yield PROBE_PROXY_CHECK_INTERVAL
+
+    logger.debug(
+        f"probe wait_for_proxy expired with failed status after {time.time() - start} seconds"
+    )
+
+    return False
+
+def wait_for_loglevel(
+    splunk_client: SplunkClient, expected_loglevel: str, error=None
+) -> Generator[int, None, None]:
+    # probe generator method that repeatedly checks TA log level configuration until it's the same as the value provided in expected_loglevel argument or until the time given to probe is expired.
+    # probe does not do any verification if error argument contains any other value than None, which means that API call setting log level ended up with error (see settings forges).
+    # If vertification was not successfull probe yields value defining interval after which framework should invoke the probe again, otherwize the probe exits
+    # No return value is expected
+    if error is not None:
+        return False
+
+    start = time.time()
+    expire = start + PROBE_LOGLEVEL_CHECK_TIMEOUT
+    while time.time() < expire:
+        loglevel = splunk_client.get_settings_logging().get("loglevel")
+        if loglevel == expected_loglevel:
+            logger.debug(
+                f"probe wait_for_loglevel successful after {time.time() - start} seconds"
+            )
+            return True
+        logger.debug(
+            f"probe wait_for_loglevel failed after {time.time() - start} seconds"
+        )
+        yield PROBE_LOGLEVEL_CHECK_INTERVAL
+
+    logger.debug(
+        f"probe wait_for_loglevel expired with failed status after {time.time() - start} seconds"
+    )
+    return False
 
 def events_ingested(
     splunk_client: SplunkClient, probe_spl: str, probes_wait_time: int = 10

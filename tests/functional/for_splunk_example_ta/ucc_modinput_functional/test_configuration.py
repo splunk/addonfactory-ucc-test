@@ -1,33 +1,46 @@
 import pytest  # noqa F401
+from typing import Optional, Dict
 from splunk_add_on_ucc_modinput_test.functional.decorators import (
     bootstrap,
+    attach,
     forge,
     forges,
 )
-from splunk_add_on_ucc_modinput_test.resources.ucc_modinput_functional.splunk.client import (  # noqa E501
-    SplunkClient,
-)
-from tests.ucc_modinput_functional import defaults
+from tests.ucc_modinput_functional.splunk.client import SplunkClient
 from tests.ucc_modinput_functional.splunk.forges import (
-    ta_logging,
+    set_loglevel,
     account,
     another_account,
     another_account_index,
 )
-
-
-@bootstrap(
-    forge(ta_logging),  # each forge will be executed just once,
-    # no matter how many times appears in tests
+from tests.ucc_modinput_functional.splunk.probes import (
+    wait_for_proxy,
+    same_proxy_configs,
+    wait_for_loglevel,
 )
-def test_ta_logging(splunk_client: SplunkClient) -> None:
-    assert splunk_client.get_ta_log_level() == defaults.TA_LOG_LEVEL_FOR_TESTS
+from tests.ucc_modinput_functional import defaults
 
 
 @bootstrap(
-    forge(
-        ta_logging
-    ),  # sequence matters - ta_logging will be executed before accounts
+    # each forge will be executed just once,
+    # no matter how many times appears in tests
+    forge(set_loglevel, loglevel=defaults.TA_LOG_LEVEL_FOR_TESTS , probe=wait_for_loglevel)
+    )
+def test_ta_logging(splunk_client: SplunkClient) -> None:
+    assert splunk_client.get_settings_logging()['loglevel'] == defaults.TA_LOG_LEVEL_FOR_TESTS
+
+
+# @bootstrap(
+#     forge(
+#         ta_logging
+#     ),  # sequence matters - ta_logging will be executed before accounts
+#     forges(  # there is parallel execution within forges
+#         forge(account),
+#         forge(another_account),
+#     ),
+# )
+@bootstrap(
+    forge(set_loglevel, loglevel=defaults.TA_LOG_LEVEL_FOR_TESTS , probe=wait_for_loglevel),  # sequence matters - ta_logging will be executed before accounts
     forges(  # there is parallel execution within forges
         forge(account),
         forge(another_account),
@@ -39,21 +52,19 @@ def test_accounts(
     account_config_name: str,
     another_account_config_name: str,
 ) -> None:
-    actual_account = splunk_client.get_account(name=account_config_name)
+    actual_account = splunk_client.get_account(account_config_name)
     assert actual_account is not None
-    assert actual_account.name == account_config_name
-    assert actual_account.content.api_key == defaults.ENCRYPTED_VALUE
+    assert actual_account['api_key'] == defaults.ENCRYPTED_VALUE
 
     actual_another_account = splunk_client.get_account(
-        name=another_account_config_name
+        another_account_config_name
     )
     assert actual_another_account is not None
-    assert actual_another_account.name == another_account_config_name
-    assert actual_another_account.content.api_key == defaults.ENCRYPTED_VALUE
+    assert actual_another_account['api_key'] == defaults.ENCRYPTED_VALUE
 
 
 @bootstrap(
-    forge(ta_logging),
+    forge(set_loglevel, loglevel=defaults.TA_LOG_LEVEL_FOR_TESTS , probe=wait_for_loglevel),  # sequence matters - ta_logging will be executed before accounts
     forges(
         forge(another_account_index),
         # the test framework creates session specific index that can be used

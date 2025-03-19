@@ -6,17 +6,18 @@ from splunk_add_on_ucc_modinput_test.functional.decorators import (
     forges,
 )
 from tests.ucc_modinput_functional.splunk.forges import (
-    ta_logging,
+    set_loglevel,
     account,
     another_account,
     account_input,
 )
-from tests.ucc_modinput_functional.splunk import probes
+from tests.ucc_modinput_functional.splunk.probes import wait_for_loglevel,account_input_events_ingested
 from tests.ucc_modinput_functional.splunk.client import SplunkClient
+from tests.ucc_modinput_functional import defaults
 
 
 @bootstrap(
-    forge(ta_logging),
+    forge(set_loglevel, loglevel=defaults.TA_LOG_LEVEL_FOR_TESTS , probe=wait_for_loglevel),  # sequence matters - ta_logging will be executed before accounts
     forges(
         forge(account),
         forge(another_account),
@@ -24,7 +25,7 @@ from tests.ucc_modinput_functional.splunk.client import SplunkClient
     forges(
         forge(
             account_input,
-            probe=probes.account_input_events_ingested,
+            probe=account_input_events_ingested,
         ),
         # forge(
         #     another_account_base_input,
