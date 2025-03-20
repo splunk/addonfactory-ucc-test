@@ -1,8 +1,7 @@
 import pytest  # noqa F401
-from typing import Optional, Dict
+
 from splunk_add_on_ucc_modinput_test.functional.decorators import (
     bootstrap,
-    attach,
     forge,
     forges,
 )
@@ -14,8 +13,6 @@ from tests.ucc_modinput_functional.splunk.forges import (
     another_account_index,
 )
 from tests.ucc_modinput_functional.splunk.probes import (
-    wait_for_proxy,
-    same_proxy_configs,
     wait_for_loglevel,
 )
 from tests.ucc_modinput_functional import defaults
@@ -37,15 +34,6 @@ def test_ta_logging(splunk_client: SplunkClient) -> None:
     )
 
 
-# @bootstrap(
-#     forge(
-#         ta_logging
-#     ),  # sequence matters - ta_logging will be executed before accounts
-#     forges(  # there is parallel execution within forges
-#         forge(account),
-#         forge(another_account),
-#     ),
-# )
 @bootstrap(
     forge(
         set_loglevel,

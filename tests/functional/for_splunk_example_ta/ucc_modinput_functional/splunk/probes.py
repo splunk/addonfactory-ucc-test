@@ -16,9 +16,22 @@ def same_proxy_configs(
     proxy2: Dict[str, object],
     ignore_password: bool = True,
 ) -> bool:
-    # utility method to compare two proxy configurations ignoring None (not configured) properties.
-    # by default it removes from comparison proxy_password as it is returned sanitized by API.
-    # returns value is True if proxy configurations are the same, otherwise returns False.
+    """
+    Compare two proxy configurations, ignoring properties that are not
+    configured (None).
+
+    By default, the comparison ignores the 'proxy_password' property as it
+    is returned sanitized by the API.
+
+    Args:
+        proxy1 (Dict[str, object]): The first proxy configuration to compare.
+        proxy2 (Dict[str, object]): The second proxy configuration to compare.
+        ignore_password (bool, optional): Whether to ignore 'proxy_password'
+            property in the comparison. Defaults to True.
+
+    Returns:
+        bool: True if the proxy configurations are the same, otherwise False.
+    """
 
     proxy1 = {k: v for k, v in proxy1.items() if v is not None}
     proxy2 = {k: v for k, v in proxy2.items() if v is not None}
@@ -38,11 +51,31 @@ def wait_for_proxy(
     splunk_client: SplunkClient,
     expected_proxy: Dict[str, object],
     error: Optional[str] = None,
-) -> Generator[int, None, None]:
-    # probe generator method that repeatedly checks TA proxy configuration until it's the same as the value provided in expected_proxy argument or until the time given to probe is expired.
-    # probe does not do any verification if error argument contains any other value than None, which means that API call setting proxy ended up with error (see settings forges).
-    # If vertification was not successfull probe yields value defining interval after which framework should invoke the probe again, otherwize the probe exits
-    # No return value is expected
+) -> Generator[int, None, bool]:
+    """
+    Waits for the Splunk proxy configuration to match the expected value.
+
+    This function repeatedly checks the Splunk proxy configuration until it
+    matches the expected value provided in the `expected_proxy` argument or
+    until the timeout expires. If the `error` argument is not None, the
+    function returns immediately with a status of False.
+
+    Args:
+        splunk_client (SplunkClient): The Splunk client to use for checking
+            the proxy settings.
+        expected_proxy (Dict[str, object]): The expected proxy configuration
+            to match against.
+        error (Optional[str]): An error message indicating that the proxy
+            setting API call failed. If not None, the function returns False.
+
+    Yields:
+        int: The interval in seconds after which the probe should be invoked
+            again if the verification was not successful.
+
+    Returns:
+        bool: True if the proxy configuration matches the expected value
+            within the timeout period, False otherwise.
+    """
 
     if error is not None:
         return False
@@ -53,7 +86,8 @@ def wait_for_proxy(
         proxy = splunk_client.get_settings_proxy()
         if same_proxy_configs(expected_proxy, proxy):
             logger.debug(
-                f"probe wait_for_proxy successful after {time.time() - start} seconds"
+                f"probe wait_for_proxy successful after {time.time() - start} "
+                "seconds"
             )
             return True
         logger.debug(
@@ -62,19 +96,35 @@ def wait_for_proxy(
         yield PROBE_PROXY_CHECK_INTERVAL
 
     logger.debug(
-        f"probe wait_for_proxy expired with failed status after {time.time() - start} seconds"
+        "probe wait_for_proxy expired with failed status after "
+        f"{time.time() - start} seconds"
     )
 
     return False
 
 
 def wait_for_loglevel(
-    splunk_client: SplunkClient, expected_loglevel: str, error=None
-) -> Generator[int, None, None]:
-    # probe generator method that repeatedly checks TA log level configuration until it's the same as the value provided in expected_loglevel argument or until the time given to probe is expired.
-    # probe does not do any verification if error argument contains any other value than None, which means that API call setting log level ended up with error (see settings forges).
-    # If vertification was not successfull probe yields value defining interval after which framework should invoke the probe again, otherwize the probe exits
-    # No return value is expected
+    splunk_client: SplunkClient,
+    expected_loglevel: str,
+    error: Optional[str] = None,
+) -> Generator[int, None, bool]:
+    """
+    Probe generator method that repeatedly checks TA log level configuration
+    until it matches the expected_loglevel or the probe time expires.
+
+    Args:
+        splunk_client (SplunkClient): The Splunk client instance.
+        expected_loglevel (str): The expected log level to wait for.
+        error (Optional[str], optional): Error message if the API call setting
+            log level failed. Defaults to None.
+
+    Yields:
+        int: Interval after which the probe should be invoked again if the
+            verification was not successful.
+
+    Returns:
+        bool: True if the log level matches expected value, False otherwise.
+    """
     if error is not None:
         return False
 
@@ -84,16 +134,19 @@ def wait_for_loglevel(
         loglevel = splunk_client.get_settings_logging().get("loglevel")
         if loglevel == expected_loglevel:
             logger.debug(
-                f"probe wait_for_loglevel successful after {time.time() - start} seconds"
+                "probe wait_for_loglevel successful after "
+                f"{time.time() - start} seconds"
             )
             return True
         logger.debug(
-            f"probe wait_for_loglevel failed after {time.time() - start} seconds"
+            f"probe wait_for_loglevel failed after {time.time() - start} "
+            "seconds"
         )
         yield PROBE_LOGLEVEL_CHECK_INTERVAL
 
     logger.debug(
-        f"probe wait_for_loglevel expired with failed status after {time.time() - start} seconds"
+        "probe wait_for_loglevel expired with failed status after "
+        f"{time.time() - start} seconds"
     )
     return False
 

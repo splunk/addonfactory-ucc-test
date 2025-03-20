@@ -1,5 +1,5 @@
 import json
-from typing import Dict, Optional, Tuple
+from typing import Any, Dict, List, Optional
 from splunk_add_on_ucc_modinput_test.common.utils import logger
 from splunk_add_on_ucc_modinput_test.functional.splunk.client import (
     SplunkClientBase,
@@ -31,7 +31,7 @@ class SplunkApiError(Exception):
         return self.api_exception.body
 
     @property
-    def json(self) -> Optional[Dict]:
+    def json(self) -> Optional[Dict[str, Any]]:
         try:
             return json.loads(self.api_exception.body)
         except json.JSONDecodeError:
@@ -49,7 +49,7 @@ class SplunkApiError(Exception):
 class SplunkClient(SplunkClientBase):
     _OUTPUT_MODE = "json"
 
-    def get_account_list(self) -> Dict:
+    def get_account_list(self) -> List[Any]:
         try:
             kwargs = dict(output_mode=self._OUTPUT_MODE)
             kwargs = {k: v for k, v in kwargs.items() if v is not None}
@@ -62,11 +62,12 @@ class SplunkClient(SplunkClientBase):
 
         except ApiException as e:
             logger.error(
-                f"Exception when calling TA API splunk_ta_example_account_get: {e}"
+                "Exception when calling TA API splunk_ta_example_account_get: "
+                f"{e}"
             )
             raise SplunkApiError(e) from e
 
-    def delete_account(self, name: str) -> Dict:
+    def delete_account(self, name: str) -> None:
         try:
             kwargs = dict(name=name, output_mode=self._OUTPUT_MODE)
             kwargs = {k: v for k, v in kwargs.items() if v is not None}
@@ -74,35 +75,41 @@ class SplunkClient(SplunkClientBase):
                 **kwargs
             )
             logger.debug(
-                f"TA API splunk_ta_example_account_name_delete response: {response}"
+                "TA API splunk_ta_example_account_name_delete response: "
+                f"{response}"
             )
 
             return None
 
         except ApiException as e:
             logger.error(
-                f"Exception when calling TA API splunk_ta_example_account_name_delete: {e}"
+                "Exception when calling TA API "
+                f"splunk_ta_example_account_name_delete: {e}"
             )
             raise SplunkApiError(e) from e
 
-    def get_account(self, name: str) -> Dict:
+    def get_account(self, name: str) -> Dict[str, Any]:
         try:
             kwargs = dict(name=name, output_mode=self._OUTPUT_MODE)
             kwargs = {k: v for k, v in kwargs.items() if v is not None}
             response = self.ta_api.splunk_ta_example_account_name_get(**kwargs)
             logger.debug(
-                f"TA API splunk_ta_example_account_name_get response: {response}"
+                "TA API splunk_ta_example_account_name_get response: "
+                f"{response}"
             )
 
             return response.to_dict().get("entry", [{}])[0].get("content")
 
         except ApiException as e:
             logger.error(
-                f"Exception when calling TA API splunk_ta_example_account_name_get: {e}"
+                "Exception when calling TA API "
+                f"splunk_ta_example_account_name_get: {e}"
             )
             raise SplunkApiError(e) from e
 
-    def update_account(self, name: str, api_key: Optional[str] = None) -> Dict:
+    def update_account(
+        self, name: str, api_key: Optional[str] = None
+    ) -> Dict[str, Any]:
         try:
             kwargs = dict(
                 output_mode=self._OUTPUT_MODE, name=name, api_key=api_key
@@ -112,20 +119,22 @@ class SplunkClient(SplunkClientBase):
                 **kwargs
             )
             logger.debug(
-                f"TA API splunk_ta_example_account_name_post response: {response}"
+                "TA API splunk_ta_example_account_name_post response: "
+                f"{response}"
             )
 
             return response.to_dict().get("entry", [{}])[0].get("content")
 
         except ApiException as e:
             logger.error(
-                f"Exception when calling TA API splunk_ta_example_account_name_post: {e}"
+                "Exception when calling TA API "
+                f"splunk_ta_example_account_name_post: {e}"
             )
             raise SplunkApiError(e) from e
 
     def create_account(
         self, name: Optional[str] = None, api_key: Optional[str] = None
-    ) -> Dict:
+    ) -> Dict[str, Any]:
         try:
             kwargs = dict(
                 output_mode=self._OUTPUT_MODE, name=name, api_key=api_key
@@ -140,11 +149,12 @@ class SplunkClient(SplunkClientBase):
 
         except ApiException as e:
             logger.error(
-                f"Exception when calling TA API splunk_ta_example_account_post: {e}"
+                "Exception when calling TA API "
+                f"splunk_ta_example_account_post: {e}"
             )
             raise SplunkApiError(e) from e
 
-    def get_example_list(self) -> Dict:
+    def get_example_list(self) -> Dict[str, Any]:
         try:
             kwargs = dict(output_mode=self._OUTPUT_MODE)
             kwargs = {k: v for k, v in kwargs.items() if v is not None}
@@ -157,11 +167,12 @@ class SplunkClient(SplunkClientBase):
 
         except ApiException as e:
             logger.error(
-                f"Exception when calling TA API splunk_ta_example_example_get: {e}"
+                "Exception when calling TA API splunk_ta_example_example_get: "
+                f"{e}"
             )
             raise SplunkApiError(e) from e
 
-    def delete_example(self, name: str) -> Dict:
+    def delete_example(self, name: str) -> None:
         try:
             kwargs = dict(name=name, output_mode=self._OUTPUT_MODE)
             kwargs = {k: v for k, v in kwargs.items() if v is not None}
@@ -169,31 +180,35 @@ class SplunkClient(SplunkClientBase):
                 **kwargs
             )
             logger.debug(
-                f"TA API splunk_ta_example_example_name_delete response: {response}"
+                "TA API splunk_ta_example_example_name_delete response: "
+                f"{response}"
             )
 
             return None
 
         except ApiException as e:
             logger.error(
-                f"Exception when calling TA API splunk_ta_example_example_name_delete: {e}"
+                "Exception when calling TA API "
+                f"splunk_ta_example_example_name_delete: {e}"
             )
             raise SplunkApiError(e) from e
 
-    def get_example(self, name: str) -> Dict:
+    def get_example(self, name: str) -> Dict[str, Any]:
         try:
             kwargs = dict(name=name, output_mode=self._OUTPUT_MODE)
             kwargs = {k: v for k, v in kwargs.items() if v is not None}
             response = self.ta_api.splunk_ta_example_example_name_get(**kwargs)
             logger.debug(
-                f"TA API splunk_ta_example_example_name_get response: {response}"
+                "TA API splunk_ta_example_example_name_get response: "
+                f"{response}"
             )
 
             return response.to_dict().get("entry", [{}])[0].get("content")
 
         except ApiException as e:
             logger.error(
-                f"Exception when calling TA API splunk_ta_example_example_name_get: {e}"
+                "Exception when calling TA API "
+                f"splunk_ta_example_example_name_get: {e}"
             )
             raise SplunkApiError(e) from e
 
@@ -206,7 +221,7 @@ class SplunkClient(SplunkClientBase):
         fetch_from: Optional[str] = None,
         start_from: Optional[str] = None,
         disabled: Optional[str] = None,
-    ) -> Dict:
+    ) -> Dict[str, Any]:
         try:
             kwargs = dict(
                 output_mode=self._OUTPUT_MODE,
@@ -223,14 +238,16 @@ class SplunkClient(SplunkClientBase):
                 **kwargs
             )
             logger.debug(
-                f"TA API splunk_ta_example_example_name_post response: {response}"
+                "TA API splunk_ta_example_example_name_post response: "
+                f"{response}"
             )
 
             return response.to_dict().get("entry", [{}])[0].get("content")
 
         except ApiException as e:
             logger.error(
-                f"Exception when calling TA API splunk_ta_example_example_name_post: {e}"
+                "Exception when calling TA API "
+                f"splunk_ta_example_example_name_post: {e}"
             )
             raise SplunkApiError(e) from e
 
@@ -242,7 +259,7 @@ class SplunkClient(SplunkClientBase):
         account: Optional[str] = None,
         fetch_from: Optional[str] = None,
         start_from: Optional[str] = None,
-    ) -> Dict:
+    ) -> Dict[str, Any]:
         try:
             kwargs = dict(
                 output_mode=self._OUTPUT_MODE,
@@ -263,11 +280,12 @@ class SplunkClient(SplunkClientBase):
 
         except ApiException as e:
             logger.error(
-                f"Exception when calling TA API splunk_ta_example_example_post: {e}"
+                "Exception when calling TA API splunk_ta_example_example_post:"
+                f" {e}"
             )
             raise SplunkApiError(e) from e
 
-    def get_settings_advanced_inputs(self) -> Dict:
+    def get_settings_advanced_inputs(self) -> Dict[str, Any]:
         try:
             kwargs = dict(output_mode=self._OUTPUT_MODE)
             kwargs = {k: v for k, v in kwargs.items() if v is not None}
@@ -277,18 +295,20 @@ class SplunkClient(SplunkClientBase):
                 )
             )
             logger.debug(
-                f"TA API splunk_ta_example_settings_advanced_inputs_get response: {response}"
+                "TA API splunk_ta_example_settings_advanced_inputs_get "
+                f"response: {response}"
             )
 
             return response.to_dict().get("entry", [{}])[0].get("content")
 
         except ApiException as e:
             logger.error(
-                f"Exception when calling TA API splunk_ta_example_settings_advanced_inputs_get: {e}"
+                "Exception when calling TA API "
+                f"splunk_ta_example_settings_advanced_inputs_get: {e}"
             )
             raise SplunkApiError(e) from e
 
-    def update_settings_advanced_inputs(self) -> Dict:
+    def update_settings_advanced_inputs(self) -> Dict[str, Any]:
         try:
             kwargs = dict(output_mode=self._OUTPUT_MODE)
             kwargs = {k: v for k, v in kwargs.items() if v is not None}
@@ -298,18 +318,20 @@ class SplunkClient(SplunkClientBase):
                 )
             )
             logger.debug(
-                f"TA API splunk_ta_example_settings_advanced_inputs_post response: {response}"
+                "TA API splunk_ta_example_settings_advanced_inputs_post "
+                f"response: {response}"
             )
 
             return response.to_dict().get("entry", [{}])[0].get("content")
 
         except ApiException as e:
             logger.error(
-                f"Exception when calling TA API splunk_ta_example_settings_advanced_inputs_post: {e}"
+                "Exception when calling TA API "
+                f"splunk_ta_example_settings_advanced_inputs_post: {e}"
             )
             raise SplunkApiError(e) from e
 
-    def get_settings_logging(self) -> Dict:
+    def get_settings_logging(self) -> Dict[str, Any]:
         try:
             kwargs = dict(output_mode=self._OUTPUT_MODE)
             kwargs = {k: v for k, v in kwargs.items() if v is not None}
@@ -317,18 +339,22 @@ class SplunkClient(SplunkClientBase):
                 **kwargs
             )
             logger.debug(
-                f"TA API splunk_ta_example_settings_logging_get response: {response}"
+                "TA API splunk_ta_example_settings_logging_get response: "
+                f"{response}"
             )
 
             return response.to_dict().get("entry", [{}])[0].get("content")
 
         except ApiException as e:
             logger.error(
-                f"Exception when calling TA API splunk_ta_example_settings_logging_get: {e}"
+                "Exception when calling TA API "
+                f"splunk_ta_example_settings_logging_get: {e}"
             )
             raise SplunkApiError(e) from e
 
-    def update_settings_logging(self, loglevel: Optional[str] = None) -> Dict:
+    def update_settings_logging(
+        self, loglevel: Optional[str] = None
+    ) -> Dict[str, Any]:
         try:
             kwargs = dict(output_mode=self._OUTPUT_MODE, loglevel=loglevel)
             kwargs = {k: v for k, v in kwargs.items() if v is not None}
@@ -336,18 +362,20 @@ class SplunkClient(SplunkClientBase):
                 **kwargs
             )
             logger.debug(
-                f"TA API splunk_ta_example_settings_logging_post response: {response}"
+                "TA API splunk_ta_example_settings_logging_post response: "
+                f"{response}"
             )
 
             return response.to_dict().get("entry", [{}])[0].get("content")
 
         except ApiException as e:
             logger.error(
-                f"Exception when calling TA API splunk_ta_example_settings_logging_post: {e}"
+                "Exception when calling TA API "
+                f"splunk_ta_example_settings_logging_post: {e}"
             )
             raise SplunkApiError(e) from e
 
-    def get_settings_proxy(self) -> Dict:
+    def get_settings_proxy(self) -> Dict[str, Any]:
         try:
             kwargs = dict(output_mode=self._OUTPUT_MODE)
             kwargs = {k: v for k, v in kwargs.items() if v is not None}
@@ -355,14 +383,16 @@ class SplunkClient(SplunkClientBase):
                 **kwargs
             )
             logger.debug(
-                f"TA API splunk_ta_example_settings_proxy_get response: {response}"
+                "TA API splunk_ta_example_settings_proxy_get response: "
+                f"{response}"
             )
 
             return response.to_dict().get("entry", [{}])[0].get("content")
 
         except ApiException as e:
             logger.error(
-                f"Exception when calling TA API splunk_ta_example_settings_proxy_get: {e}"
+                "Exception when calling TA API "
+                f"splunk_ta_example_settings_proxy_get: {e}"
             )
             raise SplunkApiError(e) from e
 
@@ -375,7 +405,7 @@ class SplunkClient(SplunkClientBase):
         proxy_username: Optional[str] = None,
         proxy_password: Optional[str] = None,
         proxy_rdns: Optional[str] = None,
-    ) -> Dict:
+    ) -> Dict[str, Any]:
         try:
             kwargs = dict(
                 output_mode=self._OUTPUT_MODE,
@@ -392,13 +422,15 @@ class SplunkClient(SplunkClientBase):
                 **kwargs
             )
             logger.debug(
-                f"TA API splunk_ta_example_settings_proxy_post response: {response}"
+                "TA API splunk_ta_example_settings_proxy_post response: "
+                f"{response}"
             )
 
             return response.to_dict().get("entry", [{}])[0].get("content")
 
         except ApiException as e:
             logger.error(
-                f"Exception when calling TA API splunk_ta_example_settings_proxy_post: {e}"
+                "Exception when calling TA API "
+                f"splunk_ta_example_settings_proxy_post: {e}"
             )
             raise SplunkApiError(e) from e

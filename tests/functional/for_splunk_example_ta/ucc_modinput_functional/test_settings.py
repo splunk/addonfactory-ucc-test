@@ -1,27 +1,20 @@
 import pytest
-from typing import Optional, Dict
+from typing import Dict, Tuple
 from splunk_add_on_ucc_modinput_test.functional.decorators import (
-    bootstrap,
     attach,
     forge,
-    forges,
 )
 from tests.ucc_modinput_functional.splunk.client import SplunkClient
 from tests.ucc_modinput_functional.splunk.forges import (
-    try_to_set_loglevel,
     set_loglevel,
     try_to_configure_proxy,
-    configure_http_proxy,
-    configure_socks5_proxy,
 )
 from tests.ucc_modinput_functional.splunk.probes import (
-    wait_for_proxy,
-    same_proxy_configs,
     wait_for_loglevel,
 )
 
 
-@attach(forge(set_loglevel, loglevel="CRITICAL", probe=wait_for_loglevel))
+@attach(forge(set_loglevel, probe=wait_for_loglevel, loglevel="CRITICAL"))
 def test_valid_loglevel(
     splunk_client: SplunkClient, wait_for_loglevel: bool
 ) -> None:
@@ -40,6 +33,8 @@ def test_valid_loglevel(
 )
 @attach(forge(try_to_configure_proxy))
 def test_proxy_validators__invalid_params(
-    error: Optional[str], overwrite, expected_error
+    error: str,
+    overwrite: Tuple[Dict[str, str], str],
+    expected_error: str,
 ) -> None:
     assert expected_error in error

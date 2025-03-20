@@ -1,4 +1,3 @@
-from splunk_add_on_ucc_modinput_test.common.utils import logger
 from splunk_add_on_ucc_modinput_test.functional.decorators import (
     register_vendor_class,
 )

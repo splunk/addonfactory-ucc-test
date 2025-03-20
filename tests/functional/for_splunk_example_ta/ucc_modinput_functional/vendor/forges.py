@@ -1,2 +1,3 @@
-from splunk_add_on_ucc_modinput_test.common.utils import logger
-from tests.ucc_modinput_functional.vendor.client import VendorClient
+from tests.ucc_modinput_functional.vendor.client import (  # noqa F401
+    VendorClient,
+)
