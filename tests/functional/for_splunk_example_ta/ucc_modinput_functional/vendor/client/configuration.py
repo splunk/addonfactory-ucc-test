@@ -2,7 +2,9 @@ import base64
 from typing import Optional
 from splunk_add_on_ucc_modinput_test.common import utils
 from splunk_add_on_ucc_modinput_test.common.utils import logger
-from splunk_add_on_ucc_modinput_test.functional.vendor import VendorConfigurationBase
+from splunk_add_on_ucc_modinput_test.functional.vendor import (
+    VendorConfigurationBase,
+)
 
 
 class Configuration(VendorConfigurationBase):
@@ -15,4 +17,3 @@ class Configuration(VendorConfigurationBase):
     @property
     def api_key(self) -> Optional[str]:
         return self._api_key
-        

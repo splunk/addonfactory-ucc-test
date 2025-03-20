@@ -1,1 +1,1 @@
-from .client import VendorClient # noqa
+from .client import VendorClient  # noqa

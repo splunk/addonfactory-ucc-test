@@ -12,7 +12,9 @@ from splunk_add_on_ucc_modinput_test.common import utils
 
 
 def same_proxy_configs(
-    proxy1: Dict[str, object], proxy2: Dict[str, object], ignore_password: bool = True
+    proxy1: Dict[str, object],
+    proxy2: Dict[str, object],
+    ignore_password: bool = True,
 ) -> bool:
     # utility method to compare two proxy configurations ignoring None (not configured) properties.
     # by default it removes from comparison proxy_password as it is returned sanitized by API.
@@ -25,7 +27,9 @@ def same_proxy_configs(
         proxy2.pop("proxy_password", None)
 
     res = proxy1 == proxy2
-    logger.debug(f"same_proxy_configs: {res}\n\tproxy1: {proxy1}\n\tproxy2: {proxy2}")
+    logger.debug(
+        f"same_proxy_configs: {res}\n\tproxy1: {proxy1}\n\tproxy2: {proxy2}"
+    )
 
     return res
 
@@ -52,7 +56,9 @@ def wait_for_proxy(
                 f"probe wait_for_proxy successful after {time.time() - start} seconds"
             )
             return True
-        logger.debug(f"probe wait_for_proxy failed after {time.time() - start} seconds")
+        logger.debug(
+            f"probe wait_for_proxy failed after {time.time() - start} seconds"
+        )
         yield PROBE_PROXY_CHECK_INTERVAL
 
     logger.debug(
@@ -60,6 +66,7 @@ def wait_for_proxy(
     )
 
     return False
+
 
 def wait_for_loglevel(
     splunk_client: SplunkClient, expected_loglevel: str, error=None
@@ -89,6 +96,7 @@ def wait_for_loglevel(
         f"probe wait_for_loglevel expired with failed status after {time.time() - start} seconds"
     )
     return False
+
 
 def events_ingested(
     splunk_client: SplunkClient, probe_spl: str, probes_wait_time: int = 10

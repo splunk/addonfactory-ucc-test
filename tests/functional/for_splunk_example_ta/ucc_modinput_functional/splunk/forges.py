@@ -1,7 +1,10 @@
 from typing import Dict, Generator, List
 from tests.ucc_modinput_functional import defaults
 from splunk_add_on_ucc_modinput_test.common.utils import logger
-from tests.ucc_modinput_functional.splunk.client import SplunkClient, SplunkApiError
+from tests.ucc_modinput_functional.splunk.client import (
+    SplunkClient,
+    SplunkApiError,
+)
 from tests.ucc_modinput_functional.vendor.client import VendorClient
 from splunk_add_on_ucc_modinput_test.common import utils
 
@@ -117,7 +120,7 @@ def configure_proxy(
 def configure_socks5_proxy(splunk_client, valid=True):
     # Forge method that prepares socks5 proxy configuration while using configure_proxy forge for actual proxy update.
     # Based on test requirements this forge can create proxy with valid and invalid credentials. By default it configures proxy with valid credentials.
-    # Proxy with invalid credentials can be useful for tests checking how TA handles incorrectly configured proxy and what error logs it creates to let users to quickly detect the issue. 
+    # Proxy with invalid credentials can be useful for tests checking how TA handles incorrectly configured proxy and what error logs it creates to let users to quickly detect the issue.
     proxy_configs = {
         "proxy_enabled": "1",
         "proxy_port": "1080",
@@ -147,7 +150,7 @@ def configure_socks5_proxy(splunk_client, valid=True):
 def configure_http_proxy(splunk_client, valid=True):
     # Forge method that prepares socks5 proxy configuration while using configure_proxy forge for actual proxy update.
     # Based on test requirements this forge can create proxy with valid and invalid credentials. By default it configures proxy with valid credentials.
-    # Proxy with invalid credentials can be useful for tests checking how TA handles incorrectly configured proxy and what error logs it creates to let users to quickly detect the issue. 
+    # Proxy with invalid credentials can be useful for tests checking how TA handles incorrectly configured proxy and what error logs it creates to let users to quickly detect the issue.
     proxy_configs = {
         "proxy_enabled": "1",
         "proxy_port": "3128",
@@ -174,7 +177,6 @@ def configure_http_proxy(splunk_client, valid=True):
     yield from configure_proxy(splunk_client, proxy_configs)
 
 
-
 def _account_config(name: str, vendor_client: VendorClient) -> Dict[str, str]:
     return {
         "name": name,
@@ -193,6 +195,7 @@ def account(
     )  # yielded from forges dict key will be available as global variable
     # you can use in your tests to refer to yielded dict value
 
+
 def another_account(
     splunk_client: SplunkClient,
     vendor_client: VendorClient,
@@ -200,6 +203,7 @@ def another_account(
     account_config = _account_config("AnotherExampleAccount", vendor_client)
     splunk_client.create_account(**account_config)
     yield dict(another_account_config_name=account_config["name"])
+
 
 def another_account_index(
     splunk_client: SplunkClient,
@@ -215,7 +219,6 @@ def another_account_index(
         splunk_token=splk_conf.token,
     )
     yield {"another_account_index_name": index_name}
-
 
 
 def _account_input(
@@ -235,9 +238,9 @@ def _account_input(
     #     index=index,
     #     account=account,
     # )
-#def create_example(self, name: Optional[str] = None, interval: Optional[str] = None, index: Optional[str] = None, account: Optional[str] = None, fetch_from: Optional[str] = None, start_from: Optional[str] = None) -> Dict:
-#    splunk_client.create_example(**account_input_config)
-    splunk_client.create_example(name, defaults.INPUT_INTERVAL,index,account)
+    # def create_example(self, name: Optional[str] = None, interval: Optional[str] = None, index: Optional[str] = None, account: Optional[str] = None, fetch_from: Optional[str] = None, start_from: Optional[str] = None) -> Dict:
+    #    splunk_client.create_example(**account_input_config)
+    splunk_client.create_example(name, defaults.INPUT_INTERVAL, index, account)
     input_spl = (
         f'search index={index} source="example://{name}" '
         f"| where _time>{start_time}"
@@ -246,7 +249,7 @@ def _account_input(
     # extractions should be tested with pytest-splunk-addon
     yield {input_spl_name: input_spl}
     # splunk_client.disable_input(name=name)
-    splunk_client.update_example(name,  None,  None,  None,  None,  None, True)
+    splunk_client.update_example(name, None, None, None, None, None, True)
 
 
 def account_input(

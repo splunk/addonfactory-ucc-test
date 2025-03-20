@@ -1,1 +1,1 @@
-from .client import SplunkClient, SplunkApiError # noqa
+from .client import SplunkClient, SplunkApiError  # noqa

@@ -11,4 +11,3 @@ from tests.ucc_modinput_functional.vendor.client.configuration import (
 @register_vendor_class(Configuration)
 class VendorClient(VendorClientBase):
     pass
-    
