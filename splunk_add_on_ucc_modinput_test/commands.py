@@ -136,4 +136,5 @@ def generate_splunk_client(
         ).render(),
         methods=methods,
     )
+
     return splunk_client_py
