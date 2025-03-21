@@ -154,7 +154,7 @@ class SplunkClient(SplunkClientBase):
             )
             raise SplunkApiError(e) from e
 
-    def get_example_list(self) -> Dict[str, Any]:
+    def get_example_list(self) -> List[Any]:
         try:
             kwargs = dict(output_mode=self._OUTPUT_MODE)
             kwargs = {k: v for k, v in kwargs.items() if v is not None}
