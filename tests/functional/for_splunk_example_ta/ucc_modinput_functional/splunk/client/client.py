@@ -62,8 +62,8 @@ class SplunkClient(SplunkClientBase):
 
         except ApiException as e:
             logger.error(
-                "Exception when calling TA API splunk_ta_example_account_get: "
-                f"{e}"
+                "Exception when calling TA API splunk_ta_example_account_get:"
+                f" {e}"
             )
             raise SplunkApiError(e) from e
 
@@ -149,8 +149,8 @@ class SplunkClient(SplunkClientBase):
 
         except ApiException as e:
             logger.error(
-                "Exception when calling TA API "
-                f"splunk_ta_example_account_post: {e}"
+                "Exception when calling TA API splunk_ta_example_account_post:"
+                f" {e}"
             )
             raise SplunkApiError(e) from e
 
@@ -167,8 +167,8 @@ class SplunkClient(SplunkClientBase):
 
         except ApiException as e:
             logger.error(
-                "Exception when calling TA API splunk_ta_example_example_get: "
-                f"{e}"
+                "Exception when calling TA API splunk_ta_example_example_get:"
+                f" {e}"
             )
             raise SplunkApiError(e) from e
 

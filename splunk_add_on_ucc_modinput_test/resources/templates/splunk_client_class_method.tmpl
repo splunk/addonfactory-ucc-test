@@ -1,20 +1,60 @@
 
-{% if method_type == "delete" %}
+{%- if method_type == "delete" %}
     def {{method_name}}(self{{method_args}}) -> None:
-{% elif "list" in method_name %}
+{%- elif "list" in method_name %}
     def {{method_name}}(self{{method_args}}) -> List[Any]:
-{% else %}
-    def {{method_name}}(self{{method_args}}) -> Dict[str, Any]:
-{% endif %}
+{%- else %}
+    {%- if 71 > method_args|length > 30 %}
+    def {{method_name}}(
+        self{{method_args}}
+    ) -> Dict[str, Any]:
+    {%- elif method_args|length > 72 %}
+    def {{method_name}}(
+        self{{method_args|replace(", ",",\n" + " "*8)}},
+    ) -> Dict[str, Any]:
+    {%- else %}
+    def {{method_name}}(self{{method_args}}) -> Dict[str, Any]:{% endif %}{% endif %}
         try:
+        {%- if 64 > api_args|length > 53 %}
+            kwargs = dict(
+                {{api_args}}
+            )
+        {%- elif api_args|length > 64 %}
+            kwargs = dict(
+                {{api_args|replace(", ",",\n" + " " * 16)}},
+            )
+        {%- else %}
             kwargs = dict({{api_args}})
+        {%- endif %}
             kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            {%- if 43 > api_name|length > 34 %}
             response = self.ta_api.{{api_name}}(
                 **kwargs
             )
+            {%- elif api_name|length > 43 %}
+            response = (
+                self.ta_api.{{api_name}}(
+                    **kwargs
+                )
+            )
+            {%- else %}
+            response = self.ta_api.{{api_name}}(**kwargs)
+            {%- endif %}
+            {%- if 43 > api_name|length > 33 %}
+            logger.debug(
+                "TA API {{api_name}} response: "
+                f"{response}"
+            )
+            {%- elif api_name|length > 43 %}
+            logger.debug(
+                "TA API {{api_name}} "
+                f"response: {response}"
+            )
+            {%- else %}
             logger.debug(
                 f"TA API {{api_name}} response: {response}"
             )
+            {%- endif %}
 {% if method_type == "delete" %}
             return None
 {% elif method_type == "get" or method_type == "create" or method_type == "update"%}
@@ -24,7 +64,13 @@
 {% endif %}
         except ApiException as e:
             logger.error(
-                f"Exception when calling TA API {{api_name}}: {e}"
+            {%- if api_name|length < 31 %}
+                "Exception when calling TA API {{api_name}}:"
+                f" {e}"
+            {%- else %}
+                "Exception when calling TA API "
+                f"{{api_name}}: {e}"
+            {%- endif %}
             )
             raise SplunkApiError(e) from e
 
