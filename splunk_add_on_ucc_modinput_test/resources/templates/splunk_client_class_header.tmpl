@@ -1,3 +1,10 @@
+"""
+Note:
+    This file is under the control of the ucc-test-modinput CLI tool and must
+    not be modified manually by developers. If an extension is needed or a
+    method needs to be redefined, it should be done in a separate file.
+"""
+
 import json
 from typing import Any, Dict, List, Optional
 from splunk_add_on_ucc_modinput_test.common.utils import logger
