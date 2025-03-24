@@ -43,7 +43,7 @@ def pytest_addoption(parser: Parser) -> None:
         action="store_true",
         default=False,
         help="Do not fail test if test's teardown fails. By default a test \
-            will fail if any of it's forges teardowns fail, even if the test \
+            will fail if any of its forges teardowns fail, even if the test \
                 itself passed.",
     )
 
