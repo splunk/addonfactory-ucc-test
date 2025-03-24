@@ -323,7 +323,9 @@ class FrameworkTask:
                     msg = f"Test {self.test_key}, forge {self.forge_key}: probe {self._probe_fn} exceeded {self._config.probe_wait_timeout} seconds timeout"
                     raise SplTaFwkWaitForProbeTimeout(msg)
 
-                if interval > ForgeProbe.MAX_INTERVAL.value:
+                if not isinstance(interval, int):
+                    interval = self._config.probe_invoke_interval
+                elif interval > ForgeProbe.MAX_INTERVAL.value:
                     interval = ForgeProbe.MAX_INTERVAL.value
                 elif interval < ForgeProbe.MIN_INTERVAL.value:
                     interval = ForgeProbe.MIN_INTERVAL.value

@@ -6,7 +6,7 @@ Add-on developer experience is the most important for us and we don't want you t
 
 ### Learn from Splunk Add-on for Example
 
-Before you start working on your own tests, check [splunk-example-ta](https://github.com/splunk/splunk-example-ta) to get some idea about the example TA. Think how you would test it.
+Before you start working on your own tests, check [splunk-example-ta](https://github.com/splunk/splunk-example-ta) to get basic understanding of the example TA. Think how you would test it.
 
 Open `tests/ucc_modinput_functional` and go through it in proposed below order to see how it is tested. Are your ideas addressed?
 
@@ -26,9 +26,9 @@ Open `tests/ucc_modinput_functional` and go through it in proposed below order t
 
     1. `client.py` - contains code used to communicate with add-on REST API; relevant code snippets can be found in swagger_client README.md copied from there, pasted to the client file and adopted
 
-    2. `forges.py` - contains forge decorators; `yield` in each forge, separates setup and teardown
+    2. `forges.py` - contains functions responsible for creation and deletion of resources and configurations (forges); `yield` in each forge, separates setup and teardown
 
-    3. `probes.py`
+    3. `probes.py` - contains functions validating specific conditions used to make sure that execution of a specific forge indeed resulted in creation of expected resource.
 
 5. `test_configuration.py` - start simple, eg. from making sure the simplest case like `test_ta_logging` works fine. Keep adding following tests for add-on configuration to make sure you are able to define building blocks that will be used for inputs
 
@@ -62,17 +62,24 @@ There are components you may still want to add to your tests:
 
     4. etc.
 
-4. `test_validators.py` - to test improper values cannot be used when configuring add-on
+4. `test_validators.py` - to test that add-on will not accept improper values for its configuration.
 
 5. etc.
 
 Above is just a proposition that may be relevant for small to medium add-ons.
 
-If you find you add-on more complex, feel free to organise the test structure the way you find the most convinient and efficient.
+If you find your add-on more complex, feel free to organize the test structure the way you find the most convenient and efficient.
 
 ## ucc-test-modinput init
+Init command is created to save some of your efforts by doing boilerplate actions: 
+- generates swagger client supporting modules, 
+- creates unified tests file structure, 
+- bootstraps basic splunk and vendor clients together with configuration classes, 
+- initial tests with forges and probes required for them. 
 
-1. Make sure first:
+This command should be executed once before before any unified tests are created for the project.
+
+1. Before invoking init command, please, make sure:
 
     1. [the prerequsities are met](./index.md#prerequisites)
 
