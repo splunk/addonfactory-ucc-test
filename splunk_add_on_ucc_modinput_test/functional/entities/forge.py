@@ -243,16 +243,7 @@ class FrameworkForge(ExecutableBase):
         self._executions.add(id, teardown, kwargs, result, errors)
 
     def reuse_execution(self, prev_exec_id: str) -> None:
-        # id = (
-        #     prev_exec._id
-        #     if isinstance(prev_exec, ForgeExecData)
-        #     else prev_exec
-        # )
         self._executions.reuse(prev_exec_id)
-
-    # @property
-    # def is_executed(self) -> bool:
-    #     return self._is_executed
 
     def __contains__(self, test_key: ExecutableKeyType) -> bool:
         return test_key in self.tests

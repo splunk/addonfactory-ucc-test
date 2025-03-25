@@ -1,7 +1,3 @@
-# from __future__ import annotations
-# from typing import TYPE_CHECKING
-
-# if TYPE_CHECKING:
 from splunk_add_on_ucc_modinput_test.typing import (
     ArtifactsType,
     ExecutableKeyType,
@@ -70,12 +66,12 @@ class forge:
         *,
         probe: Optional[ProbeFnType] = None,
         scope: Optional[Union[ForgeScope, str]] = None,
-        **kwargs: ArtifactsType,
+        **kwargs: Any,
     ) -> None:
         self.forge_fn = forge_fn
         self.probe = probe
         self.scope = scope.value if isinstance(scope, ForgeScope) else scope
-        self.kwargs = kwargs
+        self.kwargs: ArtifactsType = kwargs
 
 
 class forges:

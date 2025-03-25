@@ -11,7 +11,7 @@ def try_to_set_loglevel(
     # forges pass values to tests, probes and forges by storing key-value pairs in test artifactory that is achived by yielding key-value pairs in a form of dictionary.
     # in addition to error maessage forge yields expected log level value used by a probe to make sure (wait for) the desired loglevel value was indeed applied to TA's configuration.
     error = None
-    old_loglevel = splunk_client.get_settings_logging().get("agent")
+    old_loglevel = splunk_client.get_settings_logging().get("loglevel")
     assert (
         old_loglevel != loglevel
     ), f"Invalid initial conditions: loglevel is already set to {loglevel}"
@@ -33,7 +33,7 @@ def set_loglevel(
 ) -> Generator[Dict[str, object], None, None]:
     # Forge method that configures TA log level and passes it to the artifactory to be used by a probe to make sure (wait for) the desired loglevel value was indeed applied to TA's configuration..
     # It does not catch and pass any error messages, instead API exception causes forge crash handled by framework and turned into corresponding test fast fail.
-    old_loglevel = splunk_client.get_settings_logging().get("agent")
+    old_loglevel = splunk_client.get_settings_logging().get("loglevel")
 
     splunk_client.update_settings_logging(loglevel)
 

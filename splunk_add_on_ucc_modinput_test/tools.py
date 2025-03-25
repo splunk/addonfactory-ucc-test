@@ -16,6 +16,7 @@
 
 from pathlib import Path
 from splunk_add_on_ucc_modinput_test.common import utils
+import json
 
 
 def base64encode(
@@ -29,3 +30,19 @@ def base64encode(
 
 def base64decode(base64_string: str) -> str:
     return utils.Base64.decode(base64_string=base64_string)
+
+
+def get_rest_root(*, openapi: Path) -> str:
+    with openapi.open() as f:
+        data = json.load(f)
+    paths = list(data.get("paths", {}).keys())
+    common_prefix = utils.find_common_prefix(paths)
+    if (
+        common_prefix is None
+        or common_prefix == ""
+        or common_prefix[0] != "/"
+        or common_prefix[-1] != "_"
+    ):
+        raise ValueError("Invalid common prefix")
+        return ""
+    return common_prefix[1:-1]

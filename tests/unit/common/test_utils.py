@@ -1,6 +1,9 @@
+from pathlib import Path
+import shutil
 from typing import Optional
 from splunk_add_on_ucc_modinput_test.common import utils
 import pytest
+import tempfile
 
 
 def test_get_from_environment_variable(monkeypatch) -> None:  # type: ignore
@@ -139,3 +142,56 @@ def test_base64_remove_ending_chars() -> None:
 """
     actual = utils.Base64._remove_ending_chars(string=input)
     assert actual == expected
+
+
+def test_find_common_prefix() -> None:
+    assert (
+        utils.find_common_prefix(
+            [
+                "/Splunk_TA_Example_account",
+                r"/Splunk_TA_Example_account/\{name\}",
+                "/Splunk_TA_Example_settings/proxy",
+                "/Splunk_TA_Example_settings/logging",
+                "/Splunk_TA_Example_settings/advanced_inputs",
+                "/Splunk_TA_Example_example",
+                r"/Splunk_TA_Example_example/\{name\}",
+            ]
+        )
+        == "/Splunk_TA_Example_"
+    )
+
+    assert (
+        utils.find_common_prefix(
+            [
+                "/Splunk_TA_Example_account",
+                r"/Splunk_TA_Example_account/\{name\}",
+                "/Splunk_TA_Example_settings/proxy",
+            ]
+        )
+        == "/Splunk_TA_Example_"
+    )
+
+
+def test_md5():
+    src_file = Path("tests/unit/resources/openapi.json")
+    md5 = utils.md5(file_path=src_file)
+    with tempfile.TemporaryDirectory() as temp_dir:
+        copy_unchanged = Path(temp_dir) / "copy_unchanged.txt"
+        copy_modified = Path(temp_dir) / "copy_modified.txt"
+
+        shutil.copy(src_file, copy_unchanged)
+        shutil.copy(src_file, copy_modified)
+        copy_modified.write_text(copy_modified.read_text() + " modified")
+        md5_unchanged = utils.md5(file_path=copy_unchanged)
+        md5_unchanged_chunk_size_1024 = utils.md5(
+            file_path=copy_unchanged, chunk_size=1024
+        )
+        md5_unchanged_chunk_size_32768 = utils.md5(
+            file_path=copy_unchanged, chunk_size=32768
+        )
+        md5_modified = utils.md5(file_path=copy_modified)
+
+    assert md5 == md5_unchanged
+    assert md5 == md5_unchanged_chunk_size_1024
+    assert md5 == md5_unchanged_chunk_size_32768
+    assert md5 != md5_modified

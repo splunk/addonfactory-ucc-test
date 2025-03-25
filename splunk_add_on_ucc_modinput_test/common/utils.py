@@ -7,9 +7,9 @@ from functools import lru_cache
 import pytz  # type: ignore
 import logging
 import base64
-import re
 from pathlib import Path
-from typing import Callable, Optional
+from typing import Callable, List, Optional
+import hashlib
 
 global logger
 
@@ -146,34 +146,27 @@ class Common:
         # MIT from "MODULARINPUT TEST"
 
 
-def replace_line(
-    *,
-    file: Path,
-    pattern: str,
-    replacement: str,
-) -> None:
-    logger.debug(
-        f"replace_line(file_path:{file},pattern:{pattern},replacement\
-            {replacement})"
-    )
-
-    with file.open() as f:
-        lines = f.readlines()
-
-    found = False
-    modified_lines = []
-    for line in lines:
-        if re.match(pattern, line):
-            logger.debug(f"Found a line ({line}) that will be replaced")
-            found = True
-            line = re.sub(pattern, replacement, line)
-        modified_lines.append(line)
-
-    if found:
-        with open(file, "w") as f:
-            f.writelines(modified_lines)
-        logger.debug(
-            "Pattern found and replaced successfully. Leaving replace_line."
-        )
+def find_common_prefix(strings: List[str]) -> Optional[str]:
+    if strings is None or len(strings) == 0 or len(strings) == 1:
+        return None
+    elif len(strings) == 2:
+        s0len = len(strings[0])
+        s1len = len(strings[1])
+        min_len = s0len if s0len < s1len else s1len
+        for i in range(min_len):
+            if strings[0][i] != strings[1][i]:
+                return strings[0][:i]
+        return strings[0][:min_len]
     else:
-        logger.debug("Pattern not found in the file. Leaving replace_line.")
+        common = find_common_prefix(strings[:2])
+        if common is None or common == "":
+            return common
+        return find_common_prefix([common] + strings[2:])
+
+
+def md5(*, file_path: Path, chunk_size: int = 8192) -> str:
+    hash_md5 = hashlib.md5()
+    with file_path.open("rb") as f:
+        for chunk in iter(lambda: f.read(chunk_size), b""):
+            hash_md5.update(chunk)
+    return hash_md5.hexdigest()

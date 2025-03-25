@@ -1,6 +1,6 @@
 from typing import Optional
 from splunk_add_on_ucc_modinput_test.common import utils
-from splunk_add_on_ucc_modinput_test.functional.vendor.configuration import (
+from splunk_add_on_ucc_modinput_test.functional.vendor import (
     VendorConfigurationBase,
 )
 
