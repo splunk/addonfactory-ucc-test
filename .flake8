@@ -16,3 +16,5 @@ per-file-ignores =
     splunk_add_on_ucc_modinput_test/functional/entities/forge.py: E501,
     ; undefined name 'configuration'
     splunk_add_on_ucc_modinput_test/common/tests.py: F821,
+
+exclude = tests/functional/for_splunk_example_ta/ucc_modinput_functional/splunk/client/client.py
