@@ -321,12 +321,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             if args.skip_splunk_client_check:
                 pass
             elif args.force_splunk_client_overwritten:
-                if current_splunk_client.exists():
+                if current_splunk_client.parent.exists() and current_splunk_client.exists():
                     backup_path = (
                         current_splunk_client.parent
                         / f"{current_splunk_client.name}_{datetime.now().strftime('%Y%m%d%H%M%S')}_backup"
                     )
                     shutil.move(current_splunk_client, backup_path)
+                elif not current_splunk_client.parent.exists():
+                    current_splunk_client.parent.mkdir()
                 shutil.copy(splunk_client, current_splunk_client)
             elif not current_splunk_client.exists():
                 print(
