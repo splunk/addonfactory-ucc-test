@@ -5,8 +5,11 @@ from splunk_add_on_ucc_modinput_test import resources
 from importlib_resources import files
 
 
+CLIENT_FILE_NAME = "_autogen_client.py"
+
+
 def get_splunk_client_path(ucc_modinput_functional: Path) -> Path:
-    return ucc_modinput_functional / "splunk" / "client" / "client.py"
+    return ucc_modinput_functional / "splunk" / "client" / CLIENT_FILE_NAME
 
 
 def load_readme_examples(swagger_client_readme_md: Path) -> List[str]:
@@ -213,13 +216,27 @@ def extract_methods(
     return methods
 
 
+def noqaE501check(block: str) -> List[str]:
+    content: List[str] = []
+    for line in block.split("\n"):
+        if len(line) > 79:
+            line += "  # noqa: E501"
+        content.append(line)
+    return content
+
+
 def write_splunk_client(
     *, splunk_client_py: Path, splunk_client_content: str, methods: List[str]
 ) -> None:
+    content = []
+    content += noqaE501check("# fmt: off\n")
+    content += noqaE501check(splunk_client_content)
+    for method in methods:
+        content += noqaE501check(method)
+    content += noqaE501check("# fmt: on\n")
+
     with open(splunk_client_py, "w") as file:
-        file.write(splunk_client_content)
-        for method in methods:
-            file.write(method)
+        file.write("\n".join(content))
 
 
 def write_other_classes(*, unified_tests_root_dir: Path) -> None:
@@ -275,6 +292,11 @@ def write_other_classes(*, unified_tests_root_dir: Path) -> None:
             {
                 "file": "configuration.py",
                 "template": "splunk_configuration_class.tmpl",
+                "overwrite": False,
+            },
+            {
+                "file": "client.py",
+                "template": "splunk_client_class.tmpl",
                 "overwrite": False,
             },
         ],

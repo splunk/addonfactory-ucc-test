@@ -341,7 +341,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             )
             splunk_client = commands.generate_splunk_client(
                 swagger_client_readme_md=swagger_client / "README.md",
-                splunk_client_py=args.tmp / "client.py",
+                splunk_client_py=args.tmp / bootstrap.CLIENT_FILE_NAME,
                 rest_root=tools.get_rest_root(openapi=args.openapi_json),
             )
             if args.skip_splunk_client_check:
