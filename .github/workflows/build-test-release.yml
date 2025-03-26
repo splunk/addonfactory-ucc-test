@@ -61,6 +61,12 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - uses: pre-commit/action@v3.0.0
 
+
+  semgrep:
+    uses: splunk/sast-scanning/.github/workflows/sast-scan.yml@main
+    secrets:
+      SEMGREP_KEY: ${{ secrets.SEMGREP_PUBLISH_TOKEN }}
+
   build:
     runs-on: ubuntu-22.04
     strategy:
