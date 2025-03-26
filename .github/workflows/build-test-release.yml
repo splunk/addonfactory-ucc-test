@@ -6,16 +6,45 @@ on:
       - "main"
       - "develop"
       - "release/**"
-    tags:
-      - "v[0-9]+.[0-9]+.[0-9]+"
   pull_request:
-    branches: [ main, develop, "release/**" ]
+    branches:
+      - "**"
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: true
 
 jobs:
+
+  fossa-scan:
+    continue-on-error: true
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          curl -H 'Cache-Control: no-cache' https://raw.githubusercontent.com/fossas/fossa-cli/master/install-latest.sh | bash
+          fossa analyze --debug
+          fossa report attribution --format text > /tmp/THIRDPARTY
+        env:
+          FOSSA_API_KEY: ${{ secrets.FOSSA_API_KEY }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: THIRDPARTY
+          path: /tmp/THIRDPARTY
+      - run: |
+          fossa test --debug
+        env:
+          FOSSA_API_KEY: ${{ secrets.FOSSA_API_KEY }}
+      - name: Check for failed steps for jobs with continue-on-error
+        if: ${{ failure() }}
+        run: echo "failed=true" >> $GITHUB_ENV
+
+      - name: Set output if steps failed
+        run: |
+          echo "failed=${{ env.failed }}" >> $GITHUB_ENV
+    outputs:
+      failed: ${{ env.failed }}
 
   pre-commit:
     runs-on: ubuntu-22.04
