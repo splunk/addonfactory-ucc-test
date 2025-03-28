@@ -29,8 +29,6 @@ Information about Splunk has to be given in relevant environment variables:
 
 - ***(optional) MODINPUT_TEST_SPLUNK_DEDICATED_INDEX*** - existing index name that should be used to write test events. If not defined, dedicated index is created for each test run and used for the same purpose.
 
-- *(depreciated) MODINPUT_TEST_SPLUNK_INDEX_LOCK*
-
 - following variables are required only if **Splunk Cloud** is used for tests **and any index needs to be created** for tests:
 
     - **MODINPUT_TEST_SPLUNK_TOKEN_BASE64** - base64 encoded [Splunk Cloud authentication token](https://docs.splunk.com/Documentation/SplunkCloud/latest/Security/CreateAuthTokens)
