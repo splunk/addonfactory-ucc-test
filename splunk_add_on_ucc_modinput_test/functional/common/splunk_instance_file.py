@@ -14,15 +14,14 @@
 # limitations under the License.
 #
 from typing import Any, Dict, Set
-
-# import requests  # type: ignore
 import tempfile
 from splunk_add_on_ucc_modinput_test.functional import logger
-
 from typing import IO
 import json
 from base64 import b64encode
 import ssl
+import urllib.request
+import urllib.parse
 
 
 class SplunkInstanceFileHelper:
@@ -50,8 +49,6 @@ class SplunkInstanceFileHelper:
         self, operation: str, payload: Dict[str, str] = {}
     ) -> Any:  # pylint: disable=dangerous-default-value
         """Performs API operations."""
-        import urllib.request
-        import urllib.parse
 
         endpoint = (
             "/servicesNS/nobody/Splunk_TA_Modinput_Test/"

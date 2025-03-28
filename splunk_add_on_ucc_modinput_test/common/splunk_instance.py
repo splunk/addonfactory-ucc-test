@@ -19,9 +19,6 @@ from __future__ import annotations
 
 import time
 import pytest
-
-# import requests  # type: ignore
-# from requests.adapters import HTTPAdapter, Retry  # type: ignore
 from splunklib.client import Service
 from splunklib.client import Job
 from splunklib.client import Index
