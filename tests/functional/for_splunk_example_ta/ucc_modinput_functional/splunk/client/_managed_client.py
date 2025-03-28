@@ -47,7 +47,7 @@ class SplunkApiError(Exception):
         return None
 
 
-class AutogenSplunkClient(SplunkClientBase):
+class ManagedSplunkClient(SplunkClientBase):
     _OUTPUT_MODE = "json"
 
     def get_account_list(self) -> List[Any]:

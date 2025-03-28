@@ -124,7 +124,7 @@ def generate_splunk_client(
     )
     methods = bootstrap.extract_methods(
         method_template=jinja_env.get_template(
-            "autogen_splunk_client_class_method.tmpl"
+            "managed_splunk_client_class_method.tmpl"
         ),
         samples=samples,
         ta_api_prefix=rest_root,
@@ -132,7 +132,7 @@ def generate_splunk_client(
     bootstrap.write_splunk_client(
         splunk_client_py=splunk_client_py,
         splunk_client_content=jinja_env.get_template(
-            "autogen_splunk_client_class_header.tmpl"
+            "managed_splunk_client_class_header.tmpl"
         ).render(),
         methods=methods,
     )
