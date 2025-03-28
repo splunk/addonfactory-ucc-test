@@ -17,10 +17,10 @@ import os
 from pathlib import Path
 import shutil
 from typing import Optional
-from python_on_whales import docker
 from importlib_resources import files
 from splunk_add_on_ucc_modinput_test import resources
 from splunk_add_on_ucc_modinput_test.common import bootstrap
+import subprocess
 
 SWAGGER_CODEGEN_CLI_VERSION = "3.0.46"
 
@@ -73,11 +73,18 @@ def generate_swagger_client(
         ),
         str(generator_path),
     )
-    docker_run_command = []
+    docker_run_command = [
+        "docker",
+        "run",
+        "--rm",
+        "-v",
+        f"{str(tmp.resolve())}:/local",
+    ]
     if platform:
         docker_run_command.extend(["--platform", platform])
     docker_run_command.extend(
         [
+            f"swaggerapi/swagger-codegen-cli-v3:{SWAGGER_CODEGEN_CLI_VERSION}",
             "generate",
             "-i",
             f"/local/{openapi.name}",
@@ -90,12 +97,8 @@ def generate_swagger_client(
         ]
     )
 
-    docker.run(
-        f"swaggerapi/swagger-codegen-cli-v3:{SWAGGER_CODEGEN_CLI_VERSION}",
-        docker_run_command,
-        volumes=[(str(tmp.resolve()), "/local")],
-        remove=True,
-    )
+    subprocess.run(docker_run_command, check=True)
+
     shutil.copytree(
         str(restapi_client_path / "swagger_client"),
         str(swagger_client),
