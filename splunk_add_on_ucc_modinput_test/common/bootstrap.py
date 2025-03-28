@@ -20,7 +20,7 @@ from splunk_add_on_ucc_modinput_test import resources
 from importlib_resources import files
 
 
-CLIENT_FILE_NAME = "_autogen_client.py"
+CLIENT_FILE_NAME = "_managed_client.py"
 
 
 def get_splunk_client_path(ucc_modinput_functional: Path) -> Path:
