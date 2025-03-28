@@ -28,7 +28,6 @@ import splunklib.results as results
 from splunk_add_on_ucc_modinput_test.common import utils
 from .splunk_service_pool import SplunkServicePool
 
-MODINPUT_TEST_SPLUNK_INDEX_LOCK = "MODINPUT_TEST_SPLUNK_INDEX_LOCK"
 MODINPUT_TEST_SPLUNK_DEDICATED_INDEX = "MODINPUT_TEST_SPLUNK_DEDICATED_INDEX"
 
 
@@ -155,13 +154,6 @@ class Configuration:
         )
 
     @classmethod
-    def collect_splunk_index_lock(cls) -> str | None:
-        return utils.get_from_environment_variable(
-            MODINPUT_TEST_SPLUNK_INDEX_LOCK,
-            is_optional=True,
-        )
-
-    @classmethod
     def collect_splunk_token(cls, is_optional: bool) -> str | None:
         return utils.get_from_environment_variable(
             "MODINPUT_TEST_SPLUNK_TOKEN_BASE64",
@@ -203,14 +195,10 @@ class Configuration:
 
         dedicated_index_name = cls.collect_splunk_dedicated_index()
 
-        index_lock = cls.collect_splunk_index_lock()
-        existing_index = (
-            dedicated_index_name if index_lock is None else index_lock
-        )
         instance._is_cloud = (
             "splunkcloud.com" in instance._host.lower()  # type: ignore
         )
-        create_index_in_cloud = instance._is_cloud and not existing_index
+        create_index_in_cloud = instance._is_cloud and not dedicated_index_name
         instance._token = cls.collect_splunk_token(
             is_optional=not create_index_in_cloud
         )
@@ -227,21 +215,21 @@ class Configuration:
             password=instance._password,
         )
 
-        if existing_index:
+        if dedicated_index_name:
             instance._dedicated_index = cls.get_index(
-                existing_index, instance._service
+                dedicated_index_name, instance._service
             )
             if not instance._dedicated_index:
-                reason = f"Environment variable {MODINPUT_TEST_SPLUNK_INDEX_LOCK} or \
+                reason = f"Environment variable \
                     {MODINPUT_TEST_SPLUNK_DEDICATED_INDEX} set to \
-                        {existing_index}, but Splunk instance \
+                        {dedicated_index_name}, but Splunk instance \
                             {instance._host} does not \
                                 contain such index. Remove the variable \
                                     or create the index."
                 utils.logger.critical(reason)
                 pytest.exit(reason)
             utils.logger.debug(
-                f"Existing index {existing_index} will be used for \
+                f"Existing index {dedicated_index_name} will be used for \
                     test in splunk {instance._host}"
             )
         else:
