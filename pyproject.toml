@@ -33,10 +33,7 @@ python = "^3.7"
 pytest = "^7.4.4"
 importlib-resources = "^5.12.0"
 pytz = "^2023.3"
-six = "1.16.0"
 mypy_extensions = "^1.0.0"
-charset-normalizer = "3.3.2"
-urllib3 = ">=1.21.1,<2" # to stay consistent with PSA
 jinja2 = "^3.1.6"
 importlib-metadata = "^6.7.0"
 
@@ -49,6 +46,8 @@ mkdocs-print-site-plugin = "^2.3.6"
 mkdocstrings = {version=">=0", extras=["python"]}
 splunk-sdk = "2.1.0"
 mypy = "1.4.1"
+six = "1.16.0"
+urllib3 = ">=1.21.1,<2" # to stay consistent with PSA
 
 [tool.poetry.scripts]
 ucc-test-modinput="splunk_add_on_ucc_modinput_test.main:main"
