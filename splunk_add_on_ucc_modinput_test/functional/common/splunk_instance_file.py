@@ -14,11 +14,14 @@
 # limitations under the License.
 #
 from typing import Any, Dict, Set
-import requests  # type: ignore
 import tempfile
 from splunk_add_on_ucc_modinput_test.functional import logger
-
 from typing import IO
+import json
+from base64 import b64encode
+import ssl
+import urllib.request
+import urllib.parse
 
 
 class SplunkInstanceFileHelper:
@@ -46,6 +49,7 @@ class SplunkInstanceFileHelper:
         self, operation: str, payload: Dict[str, str] = {}
     ) -> Any:  # pylint: disable=dangerous-default-value
         """Performs API operations."""
+
         endpoint = (
             "/servicesNS/nobody/Splunk_TA_Modinput_Test/"
             "Splunk_TA_Modinput_Test_perform_crd_operation/<entry>/"
@@ -53,20 +57,34 @@ class SplunkInstanceFileHelper:
         api_url = self.splunk_url + endpoint + operation
 
         payload.update({"output_mode": "json"})
+        data = urllib.parse.urlencode(payload).encode("utf-8")
 
-        response = requests.request(
-            "POST",
-            api_url,
-            auth=(self.username, self.password),
-            data=payload,
-            verify=False,
+        # Create a request object
+        request = urllib.request.Request(api_url, data=data, method="POST")
+
+        # Add basic authentication header
+        credentials = f"{self.username}:{self.password}"
+        encoded_credentials = b64encode(credentials.encode("utf-8")).decode(
+            "utf-8"
         )
-        if response.status_code > 299:
+        request.add_header("Authorization", f"Basic {encoded_credentials}")
+
+        # Disable SSL verification
+        context = ssl._create_unverified_context()
+
+        try:
+            with urllib.request.urlopen(request, context=context) as response:
+                if response.status > 299:
+                    raise SplunkInstanceFileHelper.OperationError(
+                        f"Operation: {operation}, failed. \
+                            Response Code: {response.status}"
+                    )
+                return json.loads(response.read().decode("utf-8"))
+        except urllib.error.HTTPError as e:
             raise SplunkInstanceFileHelper.OperationError(
                 f"Operation: {operation}, failed. \
-                    Response Code:{response.status_code}"
+                    Response Code: {e.code}, Message: {e.reason}"
             )
-        return response.json()
 
     def _make_path(self, filepath: str) -> str:
         """Makes path."""

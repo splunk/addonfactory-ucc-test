@@ -19,14 +19,14 @@ from __future__ import annotations
 
 import time
 import pytest
-import requests  # type: ignore
-from requests.adapters import HTTPAdapter, Retry  # type: ignore
 from splunklib.client import Service
 from splunklib.client import Job
 from splunklib.client import Index
 import splunklib.results as results
 from splunk_add_on_ucc_modinput_test.common import utils
 from .splunk_service_pool import SplunkServicePool
+import json
+from urllib import request, error
 
 MODINPUT_TEST_SPLUNK_DEDICATED_INDEX = "MODINPUT_TEST_SPLUNK_DEDICATED_INDEX"
 
@@ -44,31 +44,50 @@ class Configuration:
         index_name: str, *, acs_stack: str, acs_server: str, splunk_token: str
     ) -> None:
         url = f"{acs_server}/{acs_stack}/adminconfig/v2/indexes"
-        data = {
-            "datatype": "event",
-            "maxDataSizeMB": 0,
-            "name": index_name,
-            "searchableDays": 365,
-            "splunkArchivalRetentionDays": 366,
-            "totalEventCount": "0",
-            "totalRawSizeMB": "0",
-        }
+        data = json.dumps(
+            {
+                "datatype": "event",
+                "maxDataSizeMB": 0,
+                "name": index_name,
+                "searchableDays": 365,
+                "splunkArchivalRetentionDays": 366,
+                "totalEventCount": "0",
+                "totalRawSizeMB": "0",
+            }
+        ).encode("utf-8")
         headers = {
             "Authorization": "Bearer " + splunk_token,
             "Content-Type": "application/json",
         }
         idx_not_created_msg = f"Index {index_name} was not created on stack \
-            {acs_stack} controlleb by {acs_server}"
-        response = requests.post(url, headers=headers, json=data)
-        if response.ok:
-            session = requests.Session()
-            retries = Retry(total=25, backoff_factor=1, status_forcelist=[404])
-            session.mount("https://", HTTPAdapter(max_retries=retries))
-            response = session.get(f"{url}/{index_name}", headers=headers)
-            if response.ok:
-                return
-            else:
-                idx_not_created_msg += " or creation time exceeded timeout"
+            {acs_stack} controlled by {acs_server}"
+
+        req = request.Request(url, data=data, headers=headers, method="POST")
+        try:
+            with request.urlopen(req) as response:
+                if response.status == 200:
+                    # Check if the index was created
+                    retries = 25
+                    backoff_factor = 1
+                    for attempt in range(retries):
+                        try:
+                            get_req = request.Request(
+                                f"{url}/{index_name}",
+                                headers=headers,
+                                method="GET",
+                            )
+                            with request.urlopen(get_req) as get_response:
+                                if get_response.status == 200:
+                                    return
+                        except error.HTTPError as e:
+                            if e.code == 404:
+                                time.sleep(backoff_factor * (2**attempt))
+                            else:
+                                raise
+                    idx_not_created_msg += " or creation time exceeded timeout"
+        except error.URLError as e:
+            idx_not_created_msg += f"\nException raised:\n{e}"
+
         utils.logger.critical(idx_not_created_msg)
         pytest.exit(idx_not_created_msg)
 
