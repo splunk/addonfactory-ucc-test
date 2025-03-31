@@ -200,7 +200,8 @@ jobs:
           mv for_splunk_example_ta/ucc_modinput_functional splunk-example-ta/tests
           cd splunk-example-ta
           ./scripts/run_locally.sh
-          source .venv/bin/activate
+          python -m venv .test
+          source .test/bin/activate
           pip install ../../../dist/*.whl
           export MODINPUT_TEST_SPLUNK_HOST=localhost
           export MODINPUT_TEST_SPLUNK_PORT=8089
