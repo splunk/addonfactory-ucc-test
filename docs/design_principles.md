@@ -12,6 +12,8 @@ The addonfactory-ucc-test framework follows principles in an order based on impo
 
 5. [cross-platform & CI-ready](./design_principles.md#supported-platforms)
 
+6. [framework deepdive](./framework_deepdive.md)
+
 ## Building blocks
 
 The addonfactory-ucc-test framework consists of following building blocks:
