@@ -27,6 +27,8 @@ from splunk_add_on_ucc_modinput_test.common import utils
 from .splunk_service_pool import SplunkServicePool
 import json
 from urllib import request, error
+import ssl
+import certifi
 
 MODINPUT_TEST_SPLUNK_DEDICATED_INDEX = "MODINPUT_TEST_SPLUNK_DEDICATED_INDEX"
 
@@ -63,8 +65,11 @@ class Configuration:
             {acs_stack} controlled by {acs_server}"
 
         req = request.Request(url, data=data, headers=headers, method="POST")
+
+        context = ssl.create_default_context(cafile=certifi.where())
+
         try:
-            with request.urlopen(req) as response:
+            with request.urlopen(req, context=context) as response:
                 if response.status == 200:
                     # Check if the index was created
                     retries = 25
