@@ -147,7 +147,7 @@ class ConfigurationSplunk10(SplunkConfigurationBase):
     def customize_configuration(self) -> None:
         # define configuration to access Splunk v10 instance
 ```
-In the example above ```ConfigurationSplunk9``` is registered without ```splunk_class_argument_name``` value specified, which means that framework will attach it and the client class to default ```splunk_client``` variable. For configuration class ```ConfigurationSplunk10``` ```splunk_class_argument_name``` is defined as *"splunk_client_v10"* which adds to framework new builtin variable *splunk_client_v10* and through it framework will make available a Splunk client class object created using ```ConfigurationSplunk10``` configuration. This way forges, probes and tests will be able to access both builtin variables if needed:
+In the example above ```ConfigurationSplunk9``` is registered without ```splunk_class_argument_name``` value specified, which means that framework will attach it and the client class to default ```splunk_client``` variable. For configuration class ```ConfigurationSplunk10``` ```splunk_class_argument_name``` is defined as *"splunk_client_v10"* which adds to framework new builtin variable *splunk_client_v10* and through it framework will make available a Splunk client class object created using ```ConfigurationSplunk10``` configuration. This way forges, probes and tests will be able to use both builtin variables if needed:
 ```python
 def my_forge1(splunk_client: SplunkClient, splunk_client_v10: SplunkClient):
     splunk_client.some_splunk_client_method() # action at Splunk v9 instance
