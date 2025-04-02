@@ -66,3 +66,4 @@ nav:
   - ucc-test-modinput CLI tool: "ucc-test-modinput_cli_tool.md"
   - addonfactory-ucc-test pytest plugin: "addonfactory-ucc-test_pytest_plugin.md"
   - Contributing: "contributing.md"
+  - Changelog: "CHANGELOG.md"
