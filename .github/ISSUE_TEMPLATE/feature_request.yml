@@ -1,0 +1,22 @@
+---
+name: Feature request
+description: >-
+  Suggest a new idea or improvement for ucc-test-modinput
+title: 'Feature request: '
+labels:
+- enhancement
+- triage
+
+body:
+- type: markdown
+  attributes:
+    value: >
+      Please:
+
+      - [ ] Check for duplicate requests
+- type: textarea
+  attributes:
+    label: Description
+    description: Description of the feature request
+  validations:
+    required: true
