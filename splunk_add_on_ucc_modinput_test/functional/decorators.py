@@ -107,6 +107,7 @@ def register_vendor_class(
 
 
 def define_splunk_client_argument(
+    swagger_client: ModuleType,
     splunk_client_class: Type[SplunkClientBase],
     splunk_class_argument_name: str = BuiltInArg.SPLUNK_CLIENT.value,
 ) -> Callable[..., Any]:
@@ -116,9 +117,16 @@ def define_splunk_client_argument(
         f"splunk_class_argument_name {splunk_class_argument_name}"
     )
 
+    def _bind_swagger_client(self: SplunkClientBase) -> None:
+        self.ta_service = ta_base.ConfigurationBase(
+            swagger_client=swagger_client,
+            splunk_configuration=self._splunk_configuration,
+        )
+
     def register_splunk_class_decorator(
         splunk_configuration_class: Type[SplunkConfigurationBase],
     ) -> Type[SplunkConfigurationBase]:
+        splunk_client_class._bind_swagger_client = _bind_swagger_client
         dependency_manager.set_splunk_client_class(
             splunk_configuration_class,
             splunk_client_class,
