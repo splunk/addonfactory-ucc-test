@@ -1,0 +1,28 @@
+## Default semgrep ignore
+# Ignore git items
+.gitignore
+.git/
+:include .gitignore
+
+# Common large directories
+build/
+dist/
+vendor/
+env/
+.env/
+venv/
+.venv/
+
+# Common test directories
+test/
+tests/
+
+# Semgrep rules folder
+.semgrep
+
+## Additional files to be ignored
+.circleci/
+.github/
+.reuse/
+.vscode/
+.idea/

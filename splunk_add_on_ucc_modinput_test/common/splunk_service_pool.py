@@ -1,10 +1,28 @@
+#
+# Copyright 2025 Splunk Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 from splunklib import client
 from threading import Lock
-from typing import Any, Union
+from typing import Any, Union, List
 from splunk_add_on_ucc_modinput_test.common.utils import logger
 
+
 class SplunkServiceProxy:
-    def __init__(self, host, port, username, password):
+    def __init__(
+        self, host: str, port: Union[int, str], username: str, password: str
+    ) -> None:
         self._lock = Lock()
         self._host = host
         self._port = port
@@ -12,10 +30,10 @@ class SplunkServiceProxy:
         self._password = password
         self.__connect()
 
-    def __getattr__(self, name: str)->Any:
+    def __getattr__(self, name: str) -> Any:
         return getattr(self._service, name)
 
-    def __connect(self):
+    def __connect(self) -> None:
         with self._lock:
             self._service = client.connect(
                 host=self._host,
@@ -28,16 +46,16 @@ class SplunkServiceProxy:
 class SplunkServicePool:
     def __init__(
         self,
-        host:str,
-        port:Union[int,str],
-        username:str,
-        password:str,
+        host: str,
+        port: Union[int, str],
+        username: str,
+        password: str,
         *,
-        pool_initial_size=3,
-        pool_size_inc=2
-    ):
+        pool_initial_size: int = 3,
+        pool_size_inc: int = 2,
+    ) -> None:
         logger.debug(f"SplunkServicePool init {username}@{host}:{port}")
-        
+
         self._lock = Lock()
         self._host = host
         self._port = port
@@ -45,10 +63,10 @@ class SplunkServicePool:
         self._password = password
         self._pool_initial_size = pool_initial_size
         self._pool_size_inc = pool_size_inc
-        self._pool = []
+        self._pool: List[SplunkServiceProxy] = []
         self.__increase_pool(self._pool_initial_size)
 
-    def __increase_pool(self, increment_size:int):
+    def __increase_pool(self, increment_size: int) -> None:
         with self._lock:
             for _ in range(increment_size):
                 self._pool.append(
@@ -58,7 +76,7 @@ class SplunkServicePool:
                 )
         logger.debug(f"SplunkServicePool has been sized to {len(self._pool)}")
 
-    def __getattr__(self, name: str)->Any:
+    def __getattr__(self, name: str) -> Any:
         while True:
             for svc in self._pool:
                 locked = svc._lock.acquire(False)

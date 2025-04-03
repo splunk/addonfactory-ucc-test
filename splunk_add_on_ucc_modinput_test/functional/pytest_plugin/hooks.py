@@ -1,3 +1,19 @@
+#
+# Copyright 2025 Splunk Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+from typing import List
 import pytest
 import traceback
 from splunk_add_on_ucc_modinput_test.functional import logger
@@ -16,26 +32,34 @@ from splunk_add_on_ucc_modinput_test.functional.pytest_plugin.utils import (
     _extract_parametrized_data,
     _map_forged_tests_to_pytest_items,
 )
+from pytest import Session, Config, Item
+from typing import Sequence
+
 
 @pytest.hookimpl
-def pytest_deselected(items):    
+def pytest_deselected(items: Sequence[Item]) -> None:
     logger.debug(f"Processing deselected items: {items}")
     if not items:
         return
-    
+
     for item in items:
-        found_tests_keys = dependency_manager.tests.lookup_by_original_function(item._obj)
+        found_tests_keys = (
+            dependency_manager.tests.lookup_by_original_function(item._obj)
+        )
         for test_key in found_tests_keys:
-            test = dependency_manager.unregister_test(test_key)            
-            msg = f"Test deselection:"
+            test = dependency_manager.unregister_test(test_key)
+            msg = "Test deselection:"
             msg += f'\n\tdeselected: {"Yes" if test else "No"}'
             msg += f"\n\tlookup key: {test_key}"
             msg += f'\n\tpath: {test.full_path if test else "not found"}'
             msg += f'\n\toriginal path: {test.original_full_path if test else "not found"}'
             logger.info(msg)
 
+
 @pytest.hookimpl
-def pytest_collection_modifyitems(session, config, items):
+def pytest_collection_modifyitems(
+    session: Session, config: Config, items: List[Item]
+) -> None:
     logger.debug(f"Lookung for forged tests in: {items}")
     dependency_manager.link_pytest_config(config)
     tests2items = _map_forged_tests_to_pytest_items(items)
@@ -67,12 +91,14 @@ def pytest_collection_modifyitems(session, config, items):
     _debug_log_test_order(items)
     _log_test_order(items)
 
-@pytest.hookimpl
-def pytest_collection_finish(session):
-    dependency_manager.start_bootstrap_execution()
 
 @pytest.hookimpl
-def pytest_runtest_setup(item: pytest.Item) -> None:
+def pytest_collection_finish(session: Session) -> None:
+    dependency_manager.start_bootstrap_execution()
+
+
+@pytest.hookimpl
+def pytest_runtest_setup(item: Item) -> None:
     pytest_funcname, _ = _extract_parametrized_data(item)
     test = dependency_manager.find_test(item._obj, pytest_funcname)
     if not test:
@@ -89,7 +115,7 @@ def pytest_runtest_setup(item: pytest.Item) -> None:
         logger.error(f"Error during test setup: {e}\n{traceback.format_exc()}")
         pytest.fail(str(e))
 
-    global_builtin_args=dependency_manager.get_global_builtin_args(test.key)
+    global_builtin_args = dependency_manager.get_global_builtin_args(test.key)
     custom_args = test.collect_required_kwargs(global_builtin_args)
     item.funcargs.update(custom_args)
     logger.info(
@@ -98,7 +124,7 @@ def pytest_runtest_setup(item: pytest.Item) -> None:
 
 
 @pytest.hookimpl
-def pytest_runtest_call(item: pytest.Item) -> None:
+def pytest_runtest_call(item: Item) -> None:
     pytest_funcname, _ = _extract_parametrized_data(item)
     test = dependency_manager.find_test(item._obj, pytest_funcname)
     if not test:
@@ -108,7 +134,7 @@ def pytest_runtest_call(item: pytest.Item) -> None:
 
 
 @pytest.hookimpl
-def pytest_runtest_teardown(item: pytest.Item) -> None:
+def pytest_runtest_teardown(item: Item) -> None:
     pytest_funcname, _ = _extract_parametrized_data(item)
     test = dependency_manager.find_test(item._obj, pytest_funcname)
     if not test:
@@ -123,7 +149,10 @@ def pytest_runtest_teardown(item: pytest.Item) -> None:
         dependency_manager.shutdown()
 
     for task, error in dependency_manager.test_error_report(test):
-        item.add_report_section("call", "error", error)
+        # OLEG
+        # item.add_report_section("call", "error", error)
+        # splunk_add_on_ucc_modinput_test/functional/pytest_plugin/hooks.py:137: error: Argument 3 to "add_report_section" of "Item" has incompatible type "Exception"; expected "str"  [arg-type]
+        item.add_report_section("call", "error", str(error))
 
     if not dependency_manager.do_not_fail_with_teardown:
         msg = ""

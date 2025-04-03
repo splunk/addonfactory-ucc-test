@@ -137,3 +137,7 @@ swagger_client/
 *.tar.gz
 
 .vscode/
+
+.DS_Store
+
+tests/functional/splunk-example-ta
