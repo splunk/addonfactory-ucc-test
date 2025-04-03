@@ -21,8 +21,16 @@ from importlib_resources import files
 from splunk_add_on_ucc_modinput_test import resources
 from splunk_add_on_ucc_modinput_test.common import bootstrap
 import subprocess
+from importlib_metadata import version, PackageNotFoundError
 
 SWAGGER_CODEGEN_CLI_VERSION = "3.0.46"
+
+
+def get_version() -> str:
+    try:
+        return version("splunk_add_on_ucc_modinput_test")
+    except PackageNotFoundError:
+        return "unknown"
 
 
 def initialize(
@@ -97,7 +105,12 @@ def generate_swagger_client(
         ]
     )
 
-    subprocess.run(docker_run_command, check=True)
+    subprocess.run(
+        docker_run_command,
+        check=True,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
 
     shutil.copytree(
         str(restapi_client_path / "swagger_client"),
