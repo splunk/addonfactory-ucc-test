@@ -211,46 +211,45 @@ jobs:
           ucc-test-modinput gen
           pytest tests/ucc_modinput_functional
 
-  # release:
-  #   needs:
-  #     - build
-  #     - compliance-copyrights
-  #     - fossa-scan
-  #     - test-unit
-  #     - test-smoke
-  #     - test-ui
-  #     - appinspect-for-expected-outputs
-  #     - semgrep
-  #     - pre-commit
-  #     - all-checks
-  #   runs-on: ubuntu-22.04
-  #   if: "! github.event.pull_request.head.repo.fork "
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #       with:
-  #         # Very important: semantic-release won't trigger a tagged
-  #         # build if this is not set false
-  #         persist-credentials: false
-  #     - uses: actions/setup-python@v5
-  #       with:
-  #         python-version: "3.7"
-  #     - run: curl -sSL https://install.python-poetry.org | python3 - --version 1.5.1
-  #     - uses: actions/download-artifact@v4
-  #       with:
-  #         name: THIRDPARTY
-  #     - run: cp -f THIRDPARTY NOTICE
-  #     - run: poetry install
-  #     - id: semantic
-  #       uses: splunk/semantic-release-action@v1.3
-  #       with:
-  #         git_committer_name: ${{ secrets.SA_GH_USER_NAME }}
-  #         git_committer_email: ${{ secrets.SA_GH_USER_EMAIL }}
-  #         gpg_private_key: ${{ secrets.SA_GPG_PRIVATE_KEY }}
-  #         passphrase: ${{ secrets.SA_GPG_PASSPHRASE }}
-  #         extra_plugins: |
-  #           semantic-release-replace-plugin
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.GH_TOKEN_ADMIN }}
+  release:
+    needs:
+      - build
+      - compliance-copyrights
+      - fossa-scan
+      - test-unit
+      - semgrep
+      - pre-commit
+      - test-build
+      - test-cli-init
+      - test-cli-gen
+    runs-on: ubuntu-22.04
+    if: "! github.event.pull_request.head.repo.fork "
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Very important: semantic-release won't trigger a tagged
+          # build if this is not set false
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.7"
+      - run: curl -sSL https://install.python-poetry.org | python3 - --version 1.5.1
+      - uses: actions/download-artifact@v4
+        with:
+          name: THIRDPARTY
+      - run: cp -f THIRDPARTY NOTICE
+      - run: poetry install
+      - id: semantic
+        uses: splunk/semantic-release-action@v1.3
+        with:
+          git_committer_name: ${{ secrets.SA_GH_USER_NAME }}
+          git_committer_email: ${{ secrets.SA_GH_USER_EMAIL }}
+          gpg_private_key: ${{ secrets.SA_GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.SA_GPG_PASSPHRASE }}
+          extra_plugins: |
+            semantic-release-replace-plugin
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN_ADMIN }}
   #     # - if: ${{ steps.semantic.outputs.new_release_published == 'true' }}
   #     #   run: |
   #     #     poetry build
