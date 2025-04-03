@@ -71,7 +71,6 @@ class Configuration:
         try:
             with request.urlopen(req, context=context) as response:
                 if response.status == 202:
-                    # Check if the index was created
                     retries = 25
                     backoff_factor = 1
                     for attempt in range(retries):
