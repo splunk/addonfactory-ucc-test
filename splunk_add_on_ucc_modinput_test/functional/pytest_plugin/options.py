@@ -1,27 +1,47 @@
+#
+# Copyright 2025 Splunk Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 from argparse import ArgumentTypeError
 from splunk_add_on_ucc_modinput_test.functional.constants import (
     ForgeProbe,
     TasksWait,
     Executor,
 )
+from pytest import Parser
+
+from typing import Callable, Union
 
 
-def int_range(min, max):
-    def int_range_validator(value):
+def int_range(min: int, max: int) -> Callable[[Union[int, str]], int]:
+    def int_range_validator(value: Union[int, str]) -> int:
         try:
             value = int(value)
             assert min <= value <= max
         except Exception as e:
-            err = f'Invalid value "{value}". Expected integer value in inclusive range [{min}, {max}]'
+            err = f'Invalid value "{value}". Expected integer value in \
+                inclusive range [{min}, {max}]'
             raise ArgumentTypeError(err) from e
         return value
 
     return int_range_validator
 
 
-def pytest_addoption(parser):
+def pytest_addoption(parser: Parser) -> None:
     splunk_group = parser.getgroup(
-        "addonfactory-ucc-test/functional - Options for unified functional test framework for Splunk technical add-ons"
+        "addonfactory-ucc-test/functional - Options for unified functional \
+            test framework for Splunk technical add-ons"
     )
 
     splunk_group.addoption(
@@ -37,7 +57,9 @@ def pytest_addoption(parser):
         dest="do_not_fail_with_teardown",
         action="store_true",
         default=False,
-        help="Do not fail test if test's teardown fails. By default a test will fail if any of it's forges teardowns fail, even if the test itself passed.",
+        help="Do not fail test if test's teardown fails. By default a test \
+            will fail if any of its forges teardowns fail, even if the test \
+                itself passed.",
     )
 
     splunk_group.addoption(
@@ -45,7 +67,11 @@ def pytest_addoption(parser):
         dest="do_not_delete_at_teardown",
         action="store_true",
         default=False,
-        help="Do not delete created resoueces at teardown. This flag is for debug purposes. Based on this flag developers can add alternative code to forges, that, for example, would disable imputs instead of deletng them in order to study inputs after tests execution.",
+        help="Do not delete created resoueces at teardown. This flag is for \
+            debug purposes. Based on this flag developers can add alternative \
+                code to forges, that, for example, would disable imputs \
+                    instead of deletng them in order to study inputs after \
+                        tests execution.",
     )
 
     allowed_range = [
@@ -58,7 +84,8 @@ def pytest_addoption(parser):
         dest="number_of_threads",
         type=int_range(*allowed_range),
         default=10,
-        help=f"Number of threads to use to execute forges. Allowed range: {allowed_range}. Default value: {default}.",
+        help=f"Number of threads to use to execute forges. Allowed range: \
+            {allowed_range}. Default value: {default}.",
     )
 
     allowed_range = [
@@ -71,7 +98,8 @@ def pytest_addoption(parser):
         dest="probe_invoke_interval",
         type=int_range(*allowed_range),
         default=default,
-        help=f"Interval in seconds used to repeat invocation of yes/no type of probe. Allowed range: {allowed_range}. Default value: {default}.",
+        help=f"Interval in seconds used to repeat invocation of yes/no type of \
+            probe. Allowed range: {allowed_range}. Default value: {default}.",
     )
 
     allowed_range = [
@@ -84,7 +112,8 @@ def pytest_addoption(parser):
         dest="probe_wait_timeout",
         type=int_range(*allowed_range),
         default=default,
-        help=f"Maximum time in seconds given to single probe to turn positive. Allowed range: {allowed_range}. Default value: {default}.",
+        help=f"Maximum time in seconds given to single probe to turn positive. \
+            Allowed range: {allowed_range}. Default value: {default}.",
     )
 
     allowed_range = [
@@ -97,7 +126,8 @@ def pytest_addoption(parser):
         dest="bootstrap_wait_timeout",
         type=int_range(*allowed_range),
         default=default,
-        help=f"Maximum time in seconds given to all bootstrap tasks to finish. Allowed range: {allowed_range}. Default value: {default}.",
+        help=f"Maximum time in seconds given to all bootstrap tasks to finish. \
+            Allowed range: {allowed_range}. Default value: {default}.",
     )
 
     allowed_range = [
@@ -110,7 +140,8 @@ def pytest_addoption(parser):
         dest="attached_tasks_wait_timeout",
         type=int_range(*allowed_range),
         default=default,
-        help=f"Maximum time in seconds given to finish all tasks attached to a test. Allowed range: {allowed_range}. Default value: {default}.",
+        help=f"Maximum time in seconds given to finish all tasks attached to \
+            a test. Allowed range: {allowed_range}. Default value: {default}.",
     )
 
     allowed_range = [
@@ -123,5 +154,7 @@ def pytest_addoption(parser):
         dest="completion_check_frequency",
         type=int_range(*allowed_range),
         default=default,
-        help=f"Frequency to check that bootstrap or attached tasks bundle has finished to execute. Allowed range: {allowed_range}. Default value: {default}.",
+        help=f"Frequency to check that bootstrap or attached tasks bundle has \
+            finished to execute. Allowed range: {allowed_range}. \
+                Default value: {default}.",
     )
