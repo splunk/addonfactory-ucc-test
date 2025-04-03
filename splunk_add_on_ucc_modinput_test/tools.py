@@ -14,6 +14,8 @@
 # limitations under the License.
 #
 from pathlib import Path
+import subprocess
+from typing import Optional
 from splunk_add_on_ucc_modinput_test.common import utils
 import json
 
@@ -45,3 +47,25 @@ def get_rest_root(*, openapi: Path) -> str:
         raise ValueError("Invalid common prefix")
         return ""
     return common_prefix[1:-1]
+
+
+def is_docker_running() -> Optional[str]:
+    """
+    Checks if Docker is running on the system.
+
+    Returns:
+        Optional[str]:
+            - None if Docker is running without issues.
+            - A string describing if Docker is not running or not installed.
+    """
+    try:
+        subprocess.check_output(
+            ["docker", "--version"], stderr=subprocess.STDOUT
+        )
+    except Exception:
+        return "Docker not installed"
+    try:
+        subprocess.check_output(["docker", "info"], stderr=subprocess.STDOUT)
+        return None
+    except Exception:
+        return "Docker seems to be installed but not started"

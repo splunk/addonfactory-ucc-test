@@ -10,12 +10,13 @@ addonfactory-ucc-test (AUT) is an open-source testing framework for functional t
     - Splunk instance with add-on installed
     - The setup is manually tested
 - [openapi.json](https://splunk.github.io/addonfactory-ucc-generator/openapi/#how-to-find-the-document) saved to developer workstation
+- docker installed and started
 
 ## Installation
 
 addonfactory-ucc-test can be installed via pip from PyPI:
 ```console
-pip3 install addonfactory-ucc-test
+pip install addonfactory-ucc-test
 ```
 You can verify installation by checking installed version:
 ```console

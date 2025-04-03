@@ -21,21 +21,9 @@ import tempfile
 from pathlib import Path
 from datetime import datetime
 from typing import Optional, Sequence
-from importlib_metadata import version, PackageNotFoundError
 from splunk_add_on_ucc_modinput_test import commands, tools
 from splunk_add_on_ucc_modinput_test.common import bootstrap, utils
 import shutil
-
-# from splunk_add_on_ucc_modinput_test.bootstrap.clients import (
-#     SplunkClientBootstrup,
-# )
-
-
-def get_version() -> str:
-    try:
-        return version("splunk_add_on_ucc_modinput_test")
-    except PackageNotFoundError:
-        return "unknown"
 
 
 class DefaultSubcommandArgumentParser(argparse.ArgumentParser):
@@ -146,15 +134,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     class ModinputPath:
         DEFAULT = "tests/ucc_modinput_functional"
 
-        # @staticmethod
-        # def validate(value: str) -> Path:
-        #     directory = Path(value)
-        #     if directory.exists():
-        #         raise argparse.ArgumentTypeError(
-        #             f"Given directory ({value}) already exist"
-        #         )
-        #     return directory
-
     class FilePath:
         @staticmethod
         def validate(value: str) -> Path:
@@ -168,7 +147,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     argv = argv if argv is not None else sys.argv[1:]
     parser = DefaultSubcommandArgumentParser()
     parser.add_argument(
-        "--version", action="version", version=f"%(prog)s {get_version()}"
+        "--version",
+        action="version",
+        version=f"%(prog)s {commands.get_version()}",
     )
     subparsers = parser.add_subparsers(dest="command")
     gen_parser = subparsers.add_parser(
@@ -178,14 +159,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "init",
         description="Initialize modinput tests. This is one time action.",
     )
-    # init_parser = subparsers.add_parser(
-    #     "make-splunk-client",
-    #     description="Generates splunk client class based on swagger README.md file",
-    # )
-    # init_parser = subparsers.add_parser(
-    #     "bootstrap-unified-tests",
-    #     description="Bootstraps minimal unified tests including creation of splunk and vendor client classes together with supporting configuration, forges and probes files for each client",
-    # )
     base64encode_parser = subparsers.add_parser(
         "base64encode",
         description="Tool to convert complex string (due to special characters \
@@ -250,20 +223,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "--modinput",
     )
     _m_kwargs = {
-        # "type": ModinputPath.validate,
         "help": "Path to functional tests target directory.",
         "default": ModinputPath.DEFAULT,
     }
     gen_parser.add_argument(*_m_args, **_m_kwargs)
     init_parser.add_argument(*_m_args, **_m_kwargs)
 
-    # init_parser.add_argument(
-    #     "-m",
-    #     "--modinput",
-    #     type=ModinputPath.validate,
-    #     help="Path to functional tests target directory.",
-    #     default=ModinputPath.DEFAULT,
-    # )
     feature_group = gen_parser.add_mutually_exclusive_group()
     feature_group.add_argument(
         "--skip-splunk-client-check",
@@ -275,14 +240,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         action="store_true",
         help="Existing splunk client will be overwritten by new one. WARNING: This may lead to loss of existing splunk client.",
     )
-
-    # base64encode_parser.add_argument(
-    #     "-f",
-    #     "--file",
-    #     type=FilePath.validate,
-    #     help="Path to input text file.",
-    #     required=True
-    # )
 
     base64decode_parser.add_argument(
         "-s",
@@ -298,14 +255,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "--file",
         type=FilePath.validate,
         help="Path to input text file.",
-        # required=True
     )
     group.add_argument(
         "-s",
         "--string",
         type=str,
         help="String to be base64 encoded.",
-        # required=True
     )
 
     args = parser.parse_args(argv)
@@ -320,6 +275,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     elif args.command == "base64decode":
         print(tools.base64decode(base64_string=args.string))
     elif args.command in ["gen", "init"]:
+        docker_err = tools.is_docker_running()
+        if docker_err is not None:
+            print(docker_err)
+            return 1
         modinput_path = Path(args.modinput)
         if args.command == "init" and modinput_path.exists():
             print(
