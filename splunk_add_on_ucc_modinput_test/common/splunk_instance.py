@@ -70,8 +70,7 @@ class Configuration:
 
         try:
             with request.urlopen(req, context=context) as response:
-                if response.status == 200:
-                    # Check if the index was created
+                if response.status == 202:
                     retries = 25
                     backoff_factor = 1
                     for attempt in range(retries):
@@ -81,7 +80,9 @@ class Configuration:
                                 headers=headers,
                                 method="GET",
                             )
-                            with request.urlopen(get_req) as get_response:
+                            with request.urlopen(
+                                get_req, context=context
+                            ) as get_response:
                                 if get_response.status == 200:
                                     return
                         except error.HTTPError as e:
