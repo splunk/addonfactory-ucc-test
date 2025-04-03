@@ -1,3 +1,18 @@
+#
+# Copyright 2025 Splunk Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 # mypy: disable-error-code="attr-defined"
 
 import os
@@ -7,11 +22,12 @@ from functools import lru_cache
 import pytz  # type: ignore
 import logging
 import base64
-import re
 from pathlib import Path
-from typing import Callable, Optional
+from typing import Callable, List, Optional
+import hashlib
 
 global logger
+
 
 class SplunkClientConfigurationException(Exception):
     pass
@@ -48,26 +64,32 @@ def get_from_environment_variable(
     string_function: Optional[Callable[[str], str]] = None,
 ) -> Optional[str]:
     def use_string_function_if_needed(
-        *, variable: str, function: Callable[[str], str]
+        *, variable: str, function: Optional[Callable[[str], str]] = None
     ) -> str:
         return variable if function is None else function(variable)
 
-    if environment_variable not in os.environ and default_value is None and is_optional:
+    if environment_variable in os.environ:
+        return use_string_function_if_needed(
+            variable=os.environ[environment_variable],
+            function=string_function,
+        )
+    elif default_value is not None:
+        return use_string_function_if_needed(
+            variable=default_value,
+            function=string_function,
+        )
+    elif is_optional:
         return None
-    if environment_variable not in os.environ and default_value is None:
+    else:
         logger.critical(40 * "*")
         logger.critical(f"{environment_variable} environment variable not set")
         logger.critical("run below in terminal:")
         logger.critical(f"export {environment_variable}=[your value]")
         logger.critical(40 * "*")
 
-        error = f"Mandatory environment variable {environment_variable} is missing and does not have a default value specified."
+        error = f"Mandatory environment variable {environment_variable} is \
+            missing and does not have a default value specified."
         raise SplunkClientConfigurationException(error)
-    variable = os.environ[environment_variable] if environment_variable in os.environ else default_value
-    return use_string_function_if_needed(
-        variable=variable,
-        function=string_function,  # type: ignore
-    )
 
 
 class Base64:
@@ -139,34 +161,27 @@ class Common:
         # MIT from "MODULARINPUT TEST"
 
 
-def replace_line(
-    *,
-    file: Path,
-    pattern: str,
-    replacement: str,
-) -> None:
-    logger.debug(
-        f"replace_line(file_path:{file},pattern:{pattern},replacement\
-            {replacement})"
-    )
-
-    with file.open() as f:
-        lines = f.readlines()
-
-    found = False
-    modified_lines = []
-    for line in lines:
-        if re.match(pattern, line):
-            logger.debug(f"Found a line ({line}) that will be replaced")
-            found = True
-            line = re.sub(pattern, replacement, line)
-        modified_lines.append(line)
-
-    if found:
-        with open(file, "w") as f:
-            f.writelines(modified_lines)
-        logger.debug(
-            "Pattern found and replaced successfully. Leaving replace_line."
-        )
+def find_common_prefix(strings: List[str]) -> Optional[str]:
+    if strings is None or len(strings) == 0 or len(strings) == 1:
+        return None
+    elif len(strings) == 2:
+        s0len = len(strings[0])
+        s1len = len(strings[1])
+        min_len = s0len if s0len < s1len else s1len
+        for i in range(min_len):
+            if strings[0][i] != strings[1][i]:
+                return strings[0][:i]
+        return strings[0][:min_len]
     else:
-        logger.debug("Pattern not found in the file. Leaving replace_line.")
+        common = find_common_prefix(strings[:2])
+        if common is None or common == "":
+            return common
+        return find_common_prefix([common] + strings[2:])
+
+
+def md5(*, file_path: Path, chunk_size: int = 8192) -> str:
+    hash_md5 = hashlib.md5()
+    with file_path.open("rb") as f:
+        for chunk in iter(lambda: f.read(chunk_size), b""):
+            hash_md5.update(chunk)
+    return hash_md5.hexdigest()

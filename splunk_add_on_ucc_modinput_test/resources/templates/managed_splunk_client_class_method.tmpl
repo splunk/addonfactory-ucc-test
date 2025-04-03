@@ -1,0 +1,41 @@
+{%- if method_type == "delete" %}
+    def {{method_name}}(self{{method_args}}) -> None:
+{%- elif method_type == "list" %}
+    def {{method_name}}(self{{method_args}}) -> List[Any]:
+{%- else %}
+    {%- if method_args|length > 72 %}
+    def {{method_name}}(
+        self{{method_args|replace(", ",",\n" + " "*8)}},
+    ) -> Dict[str, Any]:
+    {%- else %}
+    def {{method_name}}(self{{method_args}}) -> Dict[str, Any]:{% endif %}{% endif %}
+        try:
+        {%- if api_args|length > 64 %}
+            kwargs = dict(
+                {{api_args|replace(", ",",\n" + " " * 16)}},
+            )
+        {%- else %}
+            kwargs = dict({{api_args}})
+        {%- endif %}
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            response = (
+                self.ta_api.{{api_name}}(
+                    **kwargs
+                )
+            )
+            logger.debug(
+                f"TA API {{api_name}} response: {response}"
+            )
+{% if method_type == "delete" %}
+            return None
+{% elif method_type == "get" or method_type == "create" or method_type == "update"%}
+            return response.to_dict().get("entry", [{}])[0].get("content")
+{% else %}
+            return response.to_dict().get("entry", [])
+{% endif %}
+        except ApiException as e:
+            logger.error(
+                "Exception when calling TA API {{api_name}}:"
+                f" {e}"
+            )
+            raise SplunkApiError(e) from e

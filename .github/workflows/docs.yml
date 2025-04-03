@@ -1,0 +1,31 @@
+name: docs
+on:
+  push:
+    branches:
+      - "main"
+      - "develop"
+      - "release/**"
+  pull_request:
+    branches:
+      - "main"
+      - "develop"
+      - "release/**"
+jobs:
+  deploy:
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+      pages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: 3.7
+      - run: |
+          pip install mkdocs mkdocs-material mkdocstrings-python mkdocs-print-site-plugin
+      - name: Deploy to GitHub Pages
+        if: github.ref_name == 'main'
+        run: mkdocs gh-deploy --force
+      - name: Build Docs
+        if: github.ref_name != 'main'
+        run: mkdocs build

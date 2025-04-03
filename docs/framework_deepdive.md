@@ -1,0 +1,237 @@
+# Framework deep dive
+*Not yet finished, writing is still in progress ...*
+
+## Framework philosophy
+This section explains the background why this framework was created, what it tries to solve and what ideas it implements
+
+### Popular add-on test scenarios
+Spunk technical add-on is an application which goal is to interact with vendor customer environment in order to pull required vendor specific data and then send it to Splunk environment to be ingested and saved in desired Splunk indexes. This makes functional testing of add-ons to stick to a couple of common test scenarios:
+1. Test of Add-on configuration validators: 
+- interact with add-on API endpoint trying to configure various add-on supported objects (inputs and supporting configuration files) using incorrect values
+- expecting that corresponding API endpoint rejects these values with expected explanatory error message in response and proper error logged.
+- Delete configuration and objects created for test from Splunk instance
+For example, test can try to configure add-on proxy configuration using unsupported port number and expect that proxy will not be configured and the endpoint responses with an error message clearly pointing to unsupported port number.
+2. Data ingestion validation:
+- interact with customer environment to apply configurations, create objects or reproduce user actions in order to recreate conditions making desired vendor specific data to appear and ready for pulling to Splunk.
+- interact with add-on at Splunk instance to apply configurations and create objects in order engage required add-on modular input to ingest data created for it in customer environment.
+- validate ingestion by interacting with Splunk services to makes sure that expected number of events of expected type have been ingested as well as make sure that add-on modular input did not log any error messages during ingestion process.
+- Delete configuration and objects created for test from customer environment and Splunk instance
+For example, functional test may verify correct ingestion of data from AWS S3 bucket which may require to configure S3 bucket and upload a data file prepared for test, configure corresponding input the way it would point to correct resource at created S3 bucket, let this input to run and ingest expected data, execute Splunk searches to confirm the number and sourcetypes of ingested events are correct, execute Splunk searches to make sure input did not log any error messages during ingestion process.
+### Test requirements
+Based on the test scenarios and examples listed above it is clear that for each add-on functional test before actual verification developer should deal with preparing test requirements, i.e. creation of necessary resources at Splunk or vendor related environment - objects and configurations, possibly uploading some test data. Next step is to retrieve some of test environment state properties and only then do the actual checks by comparing retrieved parameters values with expectations. Another thing to take care is to remove prepared resources after the test completion or at the end of test session. There are even more topics to think about connected with test execution optimization: for example, if several test can safely reuse the same resource it would be better to preserve this resource to let it be reused instead of creating and deleting it several times for each tests; or what if several resources for a tests are independent then it would be faster to create them in parallel. Taking care about such improvements makes tests better but at the same time adds complexity and may make them less clear and straightforward and less maintainable. Unified functional test framework was developed with desire make it take care about all the mentioned improvements while hiding from developers all related complexity and giving clear and straightforward way to create test and describe test requirements. 
+### Framework requirements
+To address the challenges listed above, several core requirements have been developed to be implemented by the framework:
+1. Framework should provide a declaration way of describing test requirements (resources required for tests) outside the test function body.
+2. Test requirements should be provided in same area as the tests function they belong to and give clear understanding what resources are needed, and in what order they should be created. 
+3. Test itself should be as small as possible and only contain as much code as needed for verifications (assert statements) and optionally the code to collect data needed for verifications.
+4. Dependencies between resources should be declared as a flat list in contrast to recursive approach where code creating resource also creates all resources it depends on which increases code complexity and hides dependencies from developer potentially making the code difficult to understand and support.
+5. Developer should be able to specify if some resources can be created in parallel.
+6. Developer should be able to specify what resources can be created in advance and what should be created right before test execution.
+7. Framework should understand lifetime of a resource and execute code removing the resource as soon as all tests using it are executed. Developer should have a way to alter default framework behavior for specific tests.
+8. Developer should be able to specify conditions for certain resources that can be used by framework to confirm that this resource is created or to wait for this resource to be created during required time.
+
+### Framework basic concepts
+To address the above requirements framework introduces a concept of forges - reusable functions responsible for creation and optionally deletion of required resources. They are implemented by developer separately from tests and bound to test functions using 'bootstrap' or 'attach' decorators. The order in which forges are listed within decorators defines the dependencies between forges. In other words, forge declared earlier becomes a prerequisite for a forge declared later. As a result framework will make sure that dependent forge is executed after its dependency. If two or more forges do not depend on each other, they can be declared in the same "line" or block of forges which would tell framework to execute these forges in parallel if possible. 
+
+Forges can accept data via function arguments. The values for those arguments can be defined by a user explicitly or via parametrized arguments when declaring a forge as test requirement. Another way for a forge to receive argument values is to collect them from test artifactory. Artifactory is an internal storage of key-value pairs maintained for each test function separately. The mapping of values from artifactory to forge arguments is done by framework automatically by arguments names. Forges can update artifactory values or create new ones through returned or yielded values. 
+
+When assigned to a test, one of two additional configuration properties that forge can accept is "probe". Probe property allows to attach a probe function that will be used by framework to make sure that action taken by forge indeed has expected result, i.e. a resource has been created or a specific configuration has been applied. Framework will be invoking probe function with certain interval until probe gets successful or time given for probe to success expires. Just like forges probe functions can access test artifactory variables via declared function arguments. Last boolean value returned by a probe will be added by framework to the test artifactory with the name of probe function as the property name so the test function will be able to verify if the probe was successful or exited because of timeout.
+
+Scope is the second of the two arguments that forge can accept when assigned to a tests. Before forge function execution framework pays attention to forge function name, forge function arguments values and forge scope. If there several tests that have the same forge with the same scope assigned to them and those forges have the same call argument values, framework assumes it is the same forge dedicated to create the same resource and executes it only once. By default all forges have "session" scope which means this comparison will take place across all the executed tests.  Changing scope value at forge assignment to tests allows to narrow the scope of tests for which forge execution results may be reused, for example to all tests in the same module or to a single test. Note that as soon as the last test using forge is executed, framework invokes teardown code of the forge if such code was implemented by developer.
+
+It is also important which of the two decorators are used to assign forge to a test. Bootstrap decorator assumes that forge should create resource before executing tests. All forges assigned to different tests taken as independent and executed in parallel - first go all forges at bootstrap list top, then all in the second place and so on. Attach decorator works differently - it invokes forges right before the test execution. Bootstrap is more preferable way to execute forges to achieve better tests execution times, but it requires from developer more efforts to make sure that forges of different tests do not compete for configuring the same resource. There are some cases where it's possible to avoid this competition, for example when dealing with global or single instance resources like testing different proxy configurations. In those cases it's important to apply each specific configuration right before execution of (i.e. specifically for) related test function and 'attach' decorator is the proper way to do this.
+
+It is important to mention that framework also allows tests to receive (or subscribe for) test artifactory properties generated during forge executions just by using their names to test function argument list. This way forges and probes can prepare some useful values in test artifactory and let test to use them for necessary verifications. 
+
+In some sense forges and pytest fixtures have a lot in common, however they are very different in one important way - the way of organizing dependencies between them. To make a fixture A to depend on results of fixture B, fixture B should be declared as argument of fixture A.  Implemented this way, the relationship between fixture A and fixture B are hardcoded and B cannot be replaced with another fixture that would generate expected output using different source data or algorithm. When fixture A is used in tests, its dependencies are hidden from developer, and to understand what fixture A does, developer should study its dependency B as well, and inside be he may discover other dependencies and so on. In big test projects relationship between fixtures can become pretty sophisticated. Forges dependencies, in contrast, are dynamic and rely on artifactory variables provided by dependency forges, that allows to recombine forges according to desired test scenario and taking into account arguments expected by the forge function and generated by it artifacts. When talking about declaring test dependencies, they all (test dependencies together with forges dependencies) are declared in a form of a flat list located right before test function that gives to developer a clear picture about test requirements, i.e. resources to be created for the test execution.
+
+## Framework entities
+
+### Splunk client
+Splunk client is a class created to access Splunk and add-on specific API. This client class is what developer deals with through framework supported function argument ```splunk_client``` when implementing framework entities like forges, probes and tests themselves. Framework creates one instance of this class object per test. Developer can use either default client class available out of the box or extend it with add-on API support as well as with custom methods to add support for Splunk related functionality not supported by the framework. Framework tries to save developers' efforts by automating the creation of splunk client class when developer executes framework ```init``` and ```gen``` commands. These commands use openapi.json file generated by UCC while building TA package to create swagger support classes for add-on API endpoints. Then, based on swagger classes, framework generates a new managed client class inherited from framework base client class. At the same time framework generates one more "developer facing" client class inherited from the managed client class. By doing this framework adds support for add-on API and also prepares area for developers' custom code extensions.
+#### Splunk functionality supported out of the box.
+- *splunk_client.instance_epoch_time()* - returns current time at splunk instance in epoch format
+- *splunk_client.search(query)* - executes SPL search query at Splunk instance and returns result in SearchState class object (*splunk_add_on_ucc_modinput_test.common.splunk_instance.SearchState*)
+- *splunk_client.create_index(name)* - creates Splunk index with a given name and returns *splunklib.Index* object.
+- *splunk_client.default_index()* - returns default Splunk index name if framework configured to create one.
+- *splunk_client.search_probe(probe_spl, verify_fn, timeout, interval, probe_name)* - probe generator function to simplify creation of framework probes based on Splunk searches.
+- *splunk_client.repeat_search_until(spl, condition_fn, timeout, interval)* - methods execution Splunk search continuously in defined intervals until it gets expected result or reaches timeout.
+- *splunk_client.instance_file_helper()* - Factory method for SplunkInstanceFileHelper, allowing to execute some file operations directly on Splunk host. Requires ```Splunk Add-on for Modinput Test``` to be installed on the Splunk host. May be used for creation and verification of file based checkpoints. 
+- *splunk_client.app_file_helper()* - same as instance_file_helper except SplunkInstanceFileHelper (*splunk_add_on_ucc_modinput_test.functional.common.splunk_instance_file*) will treat provided file paths as relative to add-on root folder on Splunk host. Requires ```app_name``` property to be part of ```splunk_client``` configuration class,
+#### Add-on API endpoint support
+#### Client configuration class
+Client configuration class is a separate class dedicated to collect all settings for client class. Framework contains implementation of the base configuration class to collect settings for base client class functionality. Developer has an option to extend by inheriting a new class form base configuration class and add new properties as well as redefine 
+### Vendor client
+#### configuration class
+### Client classes register decorators
+### Forge
+As said earlier, forges are reusable functions responsible for creation and optionally deletion of resources required by tests. Like pytest fixtures forges can receive and return values and can be implemented as a regular function or as a generator function. If implemented as a generator function the first yield will be separating setup and teardown code of the forge. In the following sections these topics explained in more details:
+#### Arguments
+Forge function can receive any number of arguments. Before forge is executed, framework analyses argument names and tries to collect and provide values for forge execution by mapping its function argument names to different internal dictionaries like test artifactory, built in arguments created by framework and arguments explicitly specified by user at forge assignment stage.
+##### builtin arguments (reserved argument names)
+Framework creates the following out of the box objects that can be mapped by name to forges, probes and tests function arguments:
+- **splunk_client** - is an instance of splunk client class created by developer separately and registered in framework using corresponding decorator. Framework creates dedicated Splunk client class instance per test, initializing it using configuration class responsible for collecting necessary setting from different sources like environment variables, hardcoded values. There is a way to tell framework to create additional splunk client instance with different configuration that would be mapped it to desired function argument names, for example splunk_v10_client.  This may be useful when running tests at two or more splunk instances at the same time, for example, for Splunk or add-on upgrade tests. 
+- **vendor_client** - similarly to splunk client class this one is an instance of vendor client class created by developer separately and registered in framework using corresponding decorator. Framework creates dedicated vendor client class instance per test, initializing it using configuration class responsible for collecting necessary setting from different sources like environment variables, hardcoded values. There is a way to tell framework to create additional vendor client instances with different configurations that would be mapped it to a desired function arguments names, for example vendor_client_appliance2.  This may be useful when running tests at two or more vendor instances at the same time, for example, when testing with two different vendor appliances or using instances running different versions of vendor software.
+- **session_id** - is a unique identifier generated by framework for each test execution. It may be helpful to name reused resources to make sure that from test execution to execution those resources have unique names
+- **test_id** - is a unique identifier generated by framework for each test during tests execution. It may be helpful to name resources dedicated to specific tests to avoid conflicts between different tests that other way may by chance get their resources named identically.
+
+#### forges as functions
+Below is example of a forge implemented as a regular function
+```python
+def my_forge(splunk_client: SplunkClient, test_id: str, other_argument: str):
+    input_name = f"my_input_{test_id}"
+    splunk_client.create_some_input(input_name, other_argument) # some splunk client class method to create an input (exact name depends of the add-on)
+    return input_name
+```
+When execution above forge for specific test framework will first collect all necessary forge arguments, i.e. splunk_client and test_id will be taken from builtin arguments, other_argument will be mapped either from test artifactory, explicitly defined arguments or from parametrized arguments. Next framework will execute forge with prepared arguments passing them to forge function as keyword arguments. When forge is executed framework gets its return value. If return value is not None framework will create new new key-value pair (artefact) in test artifacts with the name of forge function as key and returned value as a value. 
+
+There is a way to let forge to control the name of created artifact as well as to tell framework to save several artifacts. For this instead of returning a single value forge can return a dictionary object with desired artifact names mapped to desired returning values. For example
+```python
+def my_forge(splunk_client: SplunkClient, test_id: str, other_argument: str):
+    input_name = f"my_input_{test_id}"
+    successful = splunk_client.create_some_input(input_name, other_argument)  # some splunk client class method to create an input
+    return dict(  # it's recommended to use dict() constructor to makes sure that artifact name used is a valid python variable.
+        input_name = input_name,
+        successful = successful
+    )
+```
+Above forge function returns dictionary telling framework to update artifactory with 'input_name' and 'successful' artifacts with corresponding values. Note, that if artifacts with the same names already exist the will be overwritten.
+#### forges as generators
+Forges as generators are useful when resources created by forge need to be removed and forge should contain teardown code to fullfil deletion. In that case yield statement of generator function splits setup and teardown code like in the following example:
+```python
+def my_forge(splunk_client: SplunkClient, test_id: str, other_argument: str):
+    input_name = f"my_input_{test_id}"
+    successful = splunk_client.create_some_input(input_name, other_argument) # some splunk client class method to create an input
+    yield dict(  # it's recommended to use dict() constructor to makes sure that artifact name used is a valid python variable.
+        input_name = input_name,
+        successful = successful
+    )
+    # teardown code starts here
+    if successful:
+        splunk_client.delete_some_input(input_name)
+```
+As seen from the example, now instead of returning values to be stored in artifactory they should be yielded. It is fine to use yield without any value - this will mean that forge does not intend to update or create any artifacts in test artifactory. Note that as soon as forge invokes yield operator function return value will be ignored ignored. However if forge function has yield statement but does not yield, framework will again rely on returned forge value. This allows framework to support scenarios with conditional teardown. In other words, when forge needs teardown code to be executed it yields, and if teardown is not needed it returns.
+```python
+def my_forge(splunk_client: SplunkClient, test_id: str, does_not_need_teardown: bool = False):
+    input_name = f"my_input_{test_id}"
+    successful = splunk_client.create_some_input(input_name, other_argument) # some splunk client class method to create an input
+    artifacts = dict(  # it's recommended to use dict() constructor to makes sure that artifact name used is a valid python variable.
+        input_name = input_name,
+        successful = successful
+    )
+    if does_not_need_teardown:
+        return artifacts
+    
+    yield artifacts:
+    
+    # teardown code starts here
+    if successful:
+        splunk_client.delete_some_input(input_name)
+```
+In above example forge skips (turns off) teardown block by using ```return``` statement when argument ```does_not_need_teardown``` value is True.
+
+
+### Artifactory
+Artifactory is an internal storage of key-value pairs maintained for each test function separately. It stores variables added by framework based on analysis of values provided by forges and probes. Test artifactories maintained by the framework automatically based on results collected from forges and probes. As well framework handles mapping of artifacts to forge, probe and test function arguments. This means that as soon as a new key value pair is added to test artifactory it can be used by forge, probe and test functions just by declaring function arguments using names of stored artifacts. For example, let's have a forge that creates an S3 bucket at AWS environment and returns ```bucket_name``` artefact
+```python
+def create_s3_bucket(vendor_client: VendorClient, test_id: str, bucket_config: Dict[str, object]):
+    bucket_name = f"my_s3_bucket_{test_id}"
+    vendor_client.create_s3_bucket(bucket_name, bucket_config) # some vendor client class method to create an s3 bucket
+    return dict(bucket_name=bucket_name)
+```
+Now we can create another forge that would upload files with required data samples to created s3 bucket and returns another artifact - ```successfully_uploaded```:
+```python
+def upload_s3_bucket_files(vendor_client: VendorClient, bucket_name: str, data_file_path: str):
+    bucket_name = f"my_s3_bucket_{test_id}"
+    success = vendor_client.upload_file_to_s3_bucket(bucket_name, data_file_path) # some vendor client class method to upload files to s3 bucket
+    return dict(successfully_uploaded=success)
+```
+And finally we implement a test function that depends on the above two forges:
+```python
+@bootstrup(
+    forge(create_s3_bucket, bucket_config={"some": "config"}),
+    forge(upload_s3_bucket_files, data_file_path="some/file/path")
+)
+test_s3_bucket(vendor_client: VendorClient, bucket_name: str, successfully_uploaded: bool):
+    assert list_of_bucket_resources is True
+    list_of_bucket_resources = vendor_client.list_bucket_files(bucket_name)
+    assert expected_resource_name in list_of_bucket_resources
+```
+Above demonstrates how ```bucket_name``` and ```successfully_uploaded``` artifacts returned by forges can be used in arguments of other forges and in test function arguments.
+```bootstrap``` decorator and other control elements required to declare test dependencies are explained in next section. Note where values for other forge arguments are taken from:
+- ```vendor_client``` and ```test_id``` are builtin arguments provided by the framework. 
+- ```bucket_config``` and ```data_file_path``` are defined explicitly by developer at test requirements declaration section.
+
+## Forge assignment
+- 'bootstrap' decorator
+- 'attached' decorator
+- 'forge' and 'forges' helper data collection classes
+- meta arguments
+### Probes
+The single purpose of a probe is to do a check that certain resource is created or required conditions met. Probes are used by the framework together with forges and let it verify that an action taken by a forge achieved the expected result and if not to and wait for expected result if necessary. This means that if for some reason result of the probe is negative, framework will keep calling the probe until it gets successful or the time configured for waiting the expected result expires. Though framework does not jump to the next following forge execution until probe succeeds or expires. Probes can use any parameters saved in test artifactory by declaring them in probe function arguments. There are two ways do implement a probe supported by the unified functional test framework - using function or using function generator. Depending on the approach chosen, developer will have different control on the verification process and requirements to probe return values.
+#### Probe as function
+As follows from the name, this kind of probe is a regular function returning True or False, depending on if it was successful or failed accordingly. So it's pretty simple to implement and developer is required just to create straightforward code checking some desired condition. Framework in its turn is responsible for calling this probe with default frequency until it gets successful or default timeout is reached. The probe call interval and expiration period for all such probes are defined globally and can be controlled vial pytest command prompt arguments ```--probe-invoke-interval=\<value in seconds\>``` and ```--probe-wait-timeout=\<value in seconds\>``` correspondingly. In case of any exception raised inside probe ite will be taken as permanently failed without any following attempts to call it again and the whole corresponding test will be marked as failed as well. The same way probe timeout rises internal framework SplTaFwkWaitForProbeTimeout exception that fails the probe together with corresponding forge and the test.  Note that this kind of probe does not know about how many time it was called, if the current call is the first for the forge or consequent, what is the elapse time of waiting for a check to succeed. 
+
+Here how this type of probe may look:
+```python
+def some_input_is_created(splunk_client: SplunkClient, input_name: str) -> bool:
+    return splunk_client.get_some_input(input_name) is not None
+```
+#### Probe as function generator
+This approach is more complicated and requires developer to create a generator which fulfils required protocol to interact with the framework: 
+- in case of unsuccessful check this generator should yield integer positive value in seconds that framework should use as interval before calling probe once again. Framework verifies yielded interval value and makes sure it's within 1-60. Framework will update interval with minimum or maximum value of the expected range in case yielded interval value is less than the range minimum or bigger than the range maximum correspondingly.
+- if the check was successful, generator should exit optionally returning True. 
+- if probe has internally defined timeout which is less than global probe timeout, the probe can gracefully exit returning False or through an exception.
+- if probe does not have internal timeout or internal timeout is greater then global probe timeout the framework will raise internal probe timeout exception when probing process time exceeded global probe timeout.
+
+Here how this type of probe may look:
+```python
+def some_input_is_created(splunk_client: SplunkClient, input_name: str) -> Generator[int, None, Optional[bool]] :
+    timeout = 60
+    start_time = time()
+    # can have here some preliminary preparations or checks
+    while time() - start_time < timeout:
+        success = splunk_client.get_some_input(input_name) is not None
+        if success:
+            return True
+        yield 10
+    
+    return False # or raise and exception
+```
+As seen from the example this type of probe is aware about probing progress and has more control over it:
+- it defines check interval and can vary it depending on progress conditions
+- it can decide if with probe failing also to fail the test or exit gracefully giving a chance to a test to decide how to treat probe failing
+- it can have some kind of init code for preliminary preparations and checks.
+
+#### Helper search probe as function generator
+To make creation of function generator probes easier framework provides a default probe as a methods of splunk_client built in argument. The probe is based on search operation in Splunk index which is most popular way of probing when it's needed to make sure that expected events have been ingested or logs have been generated by an add-on code. A probe using this helper probe will look like the following:
+```python
+def wait_for_some_input_to_start(
+    splunk_client: SplunkClient
+) -> Generator[int, None, True]:
+    probe_spl = "some SPL looking into Splunk _internal index for a log generated by input process at start"
+    successful = yield from splunk_client.search_probe(
+        probe_spl,      # the SPL to search
+        timeout=30,     # maximum time in seconds given to get successful result. It's an optional argument with default value 300
+        interval=10,    # interval of prove invocation. It's an optional argument with default value 5
+        verify_fn = my_verify_function,  # optional function to search result analysis return ing True/False. 
+                                        # by default the probe is successful search returns at least one record
+        probe_name="wait_for_some_input_to_start" # optional name of your probe used only for test logging
+    )
+    return successful
+```
+As seen from the example comments, only probe_spl argument is mandatory to call this helper probe.
+By defining your own verification function (verify_fn argument) it's possible to alter expected condition for positive result. By default it expects from SPL any non empty result. Custom verify function like below will make it expect some specific number of events , let it be 10:
+```python
+def my_verify_function(state: SearchState) -> bool:
+    return state.result_count == 10
+```
+#### Probe arguments and return value
+To summarize, a probe can rely on any built in framework argument or any artefact (a property stored in test artifactory) just by declaring probe function arguments with the same names as expected artifacts. Probe can return a boolean value. If it does, framework will handle it and add to test artifactory with the name of probe function as the key and the returned boolean value as the value. This artefact can be used by the test and by other probes and forges executed at later processing stages.
+## Tests
+### Test arguments
+### Test execution order
+### Tasks
+Task is not what developer is going to deal with directly. Task is an internal framework entity that is a combination of a forge function with specific argument values and optionally attached probe that should be executed for a specific test.
+## Forge execution and lifetime
+## Best practices

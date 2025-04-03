@@ -1,0 +1,69 @@
+site_name: AUT Framework
+site_author: Splunk
+site_url: "https://splunk.github.io/addonfactory-ucc-test/"
+edit_uri: "tree/main/docs/"
+remote_branch: gh-pages
+
+repo_name: Splunk Add-on AUT Framework
+repo_url: "https://github.com/splunk/addonfactory-ucc-test"
+
+markdown_extensions:
+  - toc:
+      permalink: True
+  - smarty
+  - fenced_code
+  - sane_lists
+  - codehilite
+  - pymdownx.superfences
+  - pymdownx.snippets
+  - admonition
+  - pymdownx.details
+  - footnotes
+
+theme:
+  name: "material"
+  custom_dir: docs/theme_overrides
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: black
+      accent: orange
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: black
+      accent: orange
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - content.code.copy
+    - navigation.indexes
+
+extra_css:
+  - css/extra.css
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            show_if_no_docstring: true
+            filters: ["!^_"]
+            show_source: true
+  - autorefs
+  - print-site  # should be at the end
+
+nav:
+  - About AUT: "index.md"
+  - Design Principles: "design_principles.md"
+  - Test Scenarios: "test_scenarios.md"
+  - Before you write your first line of code: "before_you_write_your_first_line_of_code.md"
+  - When you write your tests: "when_you_write_your_tests.md"
+  - ucc-test-modinput CLI tool: "ucc-test-modinput_cli_tool.md"
+  - addonfactory-ucc-test pytest plugin: "addonfactory-ucc-test_pytest_plugin.md"
+  - Contributing: "contributing.md"
+  - Changelog: "CHANGELOG.md"
