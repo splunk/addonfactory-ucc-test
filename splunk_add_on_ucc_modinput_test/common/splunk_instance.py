@@ -80,7 +80,9 @@ class Configuration:
                                 headers=headers,
                                 method="GET",
                             )
-                            with request.urlopen(get_req) as get_response:
+                            with request.urlopen(
+                                get_req, context=context
+                            ) as get_response:
                                 if get_response.status == 200:
                                     return
                         except error.HTTPError as e:
