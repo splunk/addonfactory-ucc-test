@@ -72,10 +72,11 @@ If you find your add-on more complex, feel free to organize the test structure t
 
 ## ucc-test-modinput init
 Init command is created to save some of your efforts by doing boilerplate actions: 
+
 - generates swagger client supporting modules, 
 - creates unified tests file structure, 
 - bootstraps basic splunk and vendor clients together with configuration classes, 
-- initial tests with forges and probes required for them. 
+- initial tests with forges and probes required for them.
 
 This command should be executed once before before any unified tests are created for the project.
 
@@ -85,12 +86,34 @@ This command should be executed once before before any unified tests are created
 
     2. [addonfactory-ucc-test is installed](index.md#installation)
 
-2. Once you run `ucc-test-modinput init`, `tests/ucc_modinput_functional` directory and relevant files will be generated as well as `swagger_client` directory with supporting modules.
+2. Run `init` to have following directories generated for you:
+```console
+ucc-test-modinput init
+``` 
+
+    1. `swagger_client` directory with supporting modules
+
+    2. `tests/ucc_modinput_functional` directory with relevant files and some UCC related tests.
 
 **Note:** You may want to specify openapi.json file location - eg. if it is in `Downloads`:
 ```console
 ucc-test-modinput init --openapi-json ~/Downloads/openapi.json
 ```
 Visit [`ucc-test-modinput` page](./ucc-test-modinput_cli_tool.md) for more
+
+3. [Set environment variables for your Splunk instance.](./addonfactory-ucc-test_pytest_plugin.md#expected-environment-variables) Eg.:
+```console
+export MODINPUT_TEST_SPLUNK_HOST=localhost
+export MODINPUT_TEST_SPLUNK_PORT=8089
+export MODINPUT_TEST_SPLUNK_USERNAME=admin
+export MODINPUT_TEST_SPLUNK_PASSWORD_BASE64=$(ucc-test-modinput base64encode -s 'Chang3d!')
+```
+
+4. Run the tests
+```console
+pytest tests/ucc_modinput_functional
+```
+
+**Note:** If your add-on code contains customisations for out of the box components (such as logging or proxy), some tests may fail.
 
 ![ucc-test-modinput init](./images/ucc-test-modinput_init.gif)
