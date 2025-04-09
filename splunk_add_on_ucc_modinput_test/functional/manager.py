@@ -389,7 +389,7 @@ class TestDependencyManager(PytestConfigAdapter):
                     for task in test_tasks:
                         matrix += f"\t\tDependency {task.forge_full_path}, scope {task.forge_scope}\n"
                 else:
-                    matrix += "\t\tNo depemdemcies at this step\n"
+                    matrix += "\t\tNo dependencies at this step\n"
         logger.info(matrix)
 
     def remove_skipped_tests(
