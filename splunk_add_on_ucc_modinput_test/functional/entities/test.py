@@ -80,9 +80,6 @@ class FrameworkTest(ExecutableBase):
 
     def update_artifacts(self, artifacts: Dict[str, Any]) -> None:
         assert isinstance(artifacts, dict)
-        # return self._artifacts.update(artifacts)
-        # OLEG
-        # update does not return
         self._artifacts.update(artifacts)
 
     def mark_executed(self) -> None:
@@ -90,7 +87,9 @@ class FrameworkTest(ExecutableBase):
         self._is_executed = True
 
     def link_forge(self, forge_key: ExecutableKeyType) -> None:
-        assert forge_key not in self.forges
+        assert (
+            forge_key not in self.forges
+        ), "Attempt to assign the same forge multiply times or duplicated test name"
         self.forges.add(forge_key)
 
     def __repr__(self) -> str:
