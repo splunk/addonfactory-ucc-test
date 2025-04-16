@@ -158,3 +158,10 @@ def pytest_addoption(parser: Parser) -> None:
             finished to execute. Allowed range: {allowed_range}. \
                 Default value: {default}.",
     )
+
+    splunk_group.addoption(
+        "--ta-version",
+        action="store",
+        default=None,
+        help="TA version to check applicability of tests",
+    )
