@@ -108,6 +108,7 @@ def pytest_collection_modifyitems(
     _debug_log_test_order(items)
     _log_test_order(items)
 
+
 @pytest.hookimpl
 def pytest_collection_finish(session: Session) -> None:
     dependency_manager.start_bootstrap_execution()

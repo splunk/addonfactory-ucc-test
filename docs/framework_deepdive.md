@@ -720,6 +720,30 @@ def test_input_started_successfully(input_type):
 
 ```
 
+#### Support for version-specific test filtering
+The `version_range` decorator allows you to filter tests based on the `--ta-version` pytest argument. This is useful for running tests conditionally depending on the version of the TA being tested.  
+Usage
+The `version_range` decorator accepts two optional arguments: `min_version` and `max_version`. These define the inclusive range of TA versions for which the test should run.  
+* `min_version`: The minimum TA version for which the test is applicable.
+* `max_version`: The maximum TA version for which the test is applicable.
+
+If the `--ta-version` argument is not provided during pytest execution, the decorator will not filter any tests.
+```python
+@pytest.mark.version_range(min_version="1.0.0", max_version="2.0.0")
+def test_feature_x():
+    # Test implementation for versions 1.0.0 to 2.0.0
+    pass
+
+@pytest.mark.version_range(min_version="3.0.0")
+def test_feature_y():
+    # Test implementation for versions 3.0.0 and above
+    pass
+```
+
+To use the version_range decorator, specify the TA version using the `--ta-version` argument when running pytest:
+
+`pytest --ta-version="1.5.0"`
+
 ### Probes
 The single purpose of a probe is to do a check that certain resource is created or required conditions met. Probes are used by the framework together with forges and let it verify that an action taken by a forge achieved the expected result and if it's not to wait for expected result if necessary. This means that if for some reason result of the probe is negative, framework will keep calling the probe in certain intervals until it gets successful or the time configured for waiting the expected result expires. Though framework does not jump to the next following forge execution until probe succeeds or expires. Probes can use any parameters saved in test artifactory by declaring them in probe function arguments. There are two ways do implement a probe supported by the unified functional test framework - using function or using generator function. Depending on the approach chosen, developer will have different control on the verification process and requirements to probe return values.
 #### Probe as function
