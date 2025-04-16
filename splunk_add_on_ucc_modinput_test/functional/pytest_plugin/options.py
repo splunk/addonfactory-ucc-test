@@ -39,13 +39,6 @@ def int_range(min: int, max: int) -> Callable[[Union[int, str]], int]:
     return int_range_validator
 
 
-def pytest_configure(config: Config) -> None:
-    config.addinivalue_line(
-        "markers",
-        "version_range(min=None, max=None): mark test with applicable version range",
-    )
-
-
 def pytest_addoption(parser: Parser) -> None:
     splunk_group = parser.getgroup(
         "addonfactory-ucc-test/functional - Options for unified functional \

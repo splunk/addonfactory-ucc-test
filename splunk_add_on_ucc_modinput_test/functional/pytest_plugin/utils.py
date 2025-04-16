@@ -95,25 +95,27 @@ def _collect_skipped_tests(
     return skip_tests
 
 
-def _collect_out_of_range_version_tests(
+def _collect_out_of_range_tests_by_version(
     items: List[Item], version_str: str
-) -> List[Tuple[FrameworkTest, Mark]]:
+) -> Dict[ExecutableKeyType, Item]:
     current_version = Version(version_str)
-    excluded_tests = []
+    excluded = {}
 
     for item in items:
         marker = item.get_closest_marker("version_range")
-        if marker:
-            min_version = Version(marker.kwargs.get("min", "0.0.0"))
-            max_version = Version(marker.kwargs.get("max", "9999.9999.9999"))
+        if not marker:
+            continue
 
-            if not (min_version <= current_version <= max_version):
-                pytest_funcname, _ = _extract_parametrized_data(item)
-                test = dependency_manager.find_test(item._obj, pytest_funcname)
-                logger.debug(f"_collect_versioned_tests: {item} ==>> {test}")
-                if test:
-                    excluded_tests.append((test, marker))
-    return excluded_tests
+        min_version = Version(marker.kwargs.get("min", "0.0.0"))
+        max_version = Version(marker.kwargs.get("max", "9999.9999.9999"))
+
+        if not (min_version <= current_version <= max_version):
+            pytest_funcname, _ = _extract_parametrized_data(item)
+            test = dependency_manager.find_test(item._obj, pytest_funcname)
+            if test:
+                excluded[test.key] = item
+
+    return excluded
 
 
 def _adjust_test_order(items: List[Item]) -> List[Item]:
