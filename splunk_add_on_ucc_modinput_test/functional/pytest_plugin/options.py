@@ -14,12 +14,13 @@
 # limitations under the License.
 #
 from argparse import ArgumentTypeError
+
 from splunk_add_on_ucc_modinput_test.functional.constants import (
     ForgeProbe,
     TasksWait,
     Executor,
 )
-from pytest import Parser
+from pytest import Parser, Config
 
 from typing import Callable, Union
 
@@ -157,4 +158,11 @@ def pytest_addoption(parser: Parser) -> None:
         help=f"Frequency to check that bootstrap or attached tasks bundle has \
             finished to execute. Allowed range: {allowed_range}. \
                 Default value: {default}.",
+    )
+
+    splunk_group.addoption(
+        "--ta-version",
+        action="store",
+        default=None,
+        help="TA version to check applicability of tests",
     )

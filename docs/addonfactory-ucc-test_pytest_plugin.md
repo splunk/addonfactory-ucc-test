@@ -65,3 +65,5 @@ addonfactory-ucc-test pytest plugin comes with following arguments:
 - `--attached-tasks-wait-timeout=[ATTACHED_TASKS_WAIT_TIMEOUT]` - maximum time in seconds given to finish all tasks attached to a single test. Allowed range: [60, 1200]. Default value: 600.
 
 - `--completion-check-frequency=[COMPLETION_CHECK_FREQUENCY]` - frequency to check that bootstrap or attached tasks bundle has finished to execute. Allowed range: [1, 30]. Default value: 5.
+
+- `--ta-version=[TA_VERSION]` - TA version to adjust or skip tests based on version-specific behavior. Default value: None.

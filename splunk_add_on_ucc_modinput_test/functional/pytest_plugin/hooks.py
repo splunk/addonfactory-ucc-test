@@ -16,6 +16,7 @@
 from typing import List
 import pytest
 import traceback
+
 from splunk_add_on_ucc_modinput_test.functional import logger
 from splunk_add_on_ucc_modinput_test.functional.exceptions import (
     SplTaFwkBaseException,
@@ -31,9 +32,18 @@ from splunk_add_on_ucc_modinput_test.functional.pytest_plugin.utils import (
     _collect_parametrized_tests,
     _extract_parametrized_data,
     _map_forged_tests_to_pytest_items,
+    _collect_out_of_range_tests_by_version,
 )
 from pytest import Session, Config, Item
 from typing import Sequence
+
+
+@pytest.hookimpl
+def pytest_configure(config: Config) -> None:
+    config.addinivalue_line(
+        "markers",
+        "version_range(min=None, max=None): mark test with applicable version range",
+    )
 
 
 @pytest.hookimpl
@@ -60,8 +70,9 @@ def pytest_deselected(items: Sequence[Item]) -> None:
 def pytest_collection_modifyitems(
     session: Session, config: Config, items: List[Item]
 ) -> None:
-    logger.debug(f"Lookung for forged tests in: {items}")
+    logger.debug(f"Looking for forged tests in: {items}")
     dependency_manager.link_pytest_config(config)
+
     tests2items = _map_forged_tests_to_pytest_items(items)
     if not tests2items:
         logger.debug("No forged tests found, exiting")
@@ -81,6 +92,19 @@ def pytest_collection_modifyitems(
             logger.debug(
                 f"\ttest name: {test_name}, test kwargs: {test_kwargs}"
             )
+
+    version_str = config.getoption("--ta-version")
+    if version_str:
+        out_of_range = _collect_out_of_range_tests_by_version(
+            items, version_str
+        )
+        if out_of_range:
+            excluded_items = list(out_of_range.values())
+            logger.info(
+                f"Deselecting tests outside version {version_str}: {[i.name for i in excluded_items]}"
+            )
+            config.hook.pytest_deselected(items=excluded_items)
+            items[:] = [item for item in items if item not in excluded_items]
 
     skipped_tests = _collect_skipped_tests(items)
     skipped_tests_keys = [test.key for test, _ in skipped_tests]

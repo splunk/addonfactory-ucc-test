@@ -15,6 +15,7 @@
 #
 from typing import Any, Dict, List, Tuple
 from splunk_add_on_ucc_modinput_test.functional import logger
+from packaging.version import Version
 from splunk_add_on_ucc_modinput_test.functional.entities.test import (
     FrameworkTest,
 )
@@ -92,6 +93,29 @@ def _collect_skipped_tests(
             if test:
                 skip_tests.append((test, skipped_markers))
     return skip_tests
+
+
+def _collect_out_of_range_tests_by_version(
+    items: List[Item], version_str: str
+) -> Dict[ExecutableKeyType, Item]:
+    current_version = Version(version_str)
+    excluded = {}
+
+    for item in items:
+        marker = item.get_closest_marker("version_range")
+        if not marker:
+            continue
+
+        min_version = Version(marker.kwargs.get("min", "0.0.0"))
+        max_version = Version(marker.kwargs.get("max", "9999.9999.9999"))
+
+        if not (min_version <= current_version <= max_version):
+            pytest_funcname, _ = _extract_parametrized_data(item)
+            test = dependency_manager.find_test(item._obj, pytest_funcname)
+            if test:
+                excluded[test.key] = item
+
+    return excluded
 
 
 def _adjust_test_order(items: List[Item]) -> List[Item]:
