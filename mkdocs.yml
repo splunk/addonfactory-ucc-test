@@ -19,6 +19,7 @@ markdown_extensions:
   - admonition
   - pymdownx.details
   - footnotes
+  - pymdownx.tasklist
 
 theme:
   name: "material"
@@ -59,6 +60,7 @@ plugins:
 
 nav:
   - About AUT: "index.md"
+  - Hello World: "hello_world.md"
   - Design Principles: "design_principles.md"
   - Test Scenarios: "test_scenarios.md"
   - Before you write your first line of code: "before_you_write_your_first_line_of_code.md"
