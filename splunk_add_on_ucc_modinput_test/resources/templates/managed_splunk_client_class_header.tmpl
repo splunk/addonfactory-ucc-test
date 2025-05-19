@@ -15,6 +15,7 @@ import logging
 
 logger = logging.getLogger("ucc-modinput-test")
 
+
 class SplunkApiError(Exception):
     def __init__(self, error: ApiException):
         self.api_exception = error
