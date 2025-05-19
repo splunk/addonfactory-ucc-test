@@ -67,3 +67,4 @@ nav:
   - addonfactory-ucc-test pytest plugin: "addonfactory-ucc-test_pytest_plugin.md"
   - Contributing: "contributing.md"
   - Changelog: "CHANGELOG.md"
+  - Troubleshooting: "troubleshooting.md"
