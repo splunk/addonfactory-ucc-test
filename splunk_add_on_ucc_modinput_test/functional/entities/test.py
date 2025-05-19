@@ -80,9 +80,6 @@ class FrameworkTest(ExecutableBase):
 
     def update_artifacts(self, artifacts: Dict[str, Any]) -> None:
         assert isinstance(artifacts, dict)
-        # return self._artifacts.update(artifacts)
-        # OLEG
-        # update does not return
         self._artifacts.update(artifacts)
 
     def mark_executed(self) -> None:
@@ -90,7 +87,9 @@ class FrameworkTest(ExecutableBase):
         self._is_executed = True
 
     def link_forge(self, forge_key: ExecutableKeyType) -> None:
-        assert forge_key not in self.forges
+        assert (
+            forge_key not in self.forges
+        ), "Attempt to assign the same forge multiply times or duplicated test name"
         self.forges.add(forge_key)
 
     def __repr__(self) -> str:
@@ -102,7 +101,15 @@ class FrameworkTest(ExecutableBase):
 
     @property
     def artifacts_copy(self) -> Dict[str, Any]:
-        return deepcopy(self._artifacts)
+        try:
+            # make a copy of artifacts if possible
+            return deepcopy(self._artifacts)
+        except TypeError:
+            # copy is not possible, get artifacts by reference
+            logger.warning(
+                f"deepcopy of test artifacts is not possible, returning them by reference.\n\test:{self.key}\n\ttest artifacts: {self._artifacts}"
+            )
+            return self._artifacts
 
     def collect_required_kwargs(
         self, global_builtin_args: Dict[str, str]

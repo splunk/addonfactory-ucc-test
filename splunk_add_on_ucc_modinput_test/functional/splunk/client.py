@@ -139,19 +139,28 @@ class SplunkClientBase:
     def search(self, searchquery: str) -> SearchState:
         return search(service=self.splunk, searchquery=searchquery)
 
+    @property
+    def _is_cloud(self) -> bool:
+        return "splunkcloud.com" in self.config.host.lower()
+
     def create_index(self, index_name: str) -> Index:
-        _is_cloud = "splunkcloud.com" in self.config.host.lower()
         return self.config.create_index(
             index_name,
             self.splunk,
-            is_cloud=_is_cloud,
+            is_cloud=self._is_cloud,
             acs_stack=self.config.acs_stack  # type: ignore
-            if _is_cloud
+            if self._is_cloud
             else None,
-            acs_server=self.config.acs_server if _is_cloud else None,
+            acs_server=self.config.acs_server if self._is_cloud else None,
             splunk_token=self.config.splunk_token  # type: ignore
-            if _is_cloud
+            if self._is_cloud
             else None,
+        )
+
+    def get_index(self, index_name: str) -> Index | None:
+        return self.config.get_index(
+            index_name,
+            self.splunk,
         )
 
     def search_probe(

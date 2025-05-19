@@ -35,7 +35,9 @@ MODINPUT_TEST_SPLUNK_DEDICATED_INDEX = "MODINPUT_TEST_SPLUNK_DEDICATED_INDEX"
 
 class Configuration:
     @staticmethod
-    def get_index(index_name: str, client_service: SplunkServicePool) -> Index:
+    def get_index(
+        index_name: str, client_service: SplunkServicePool
+    ) -> Index | None:
         if any(i.name == index_name for i in client_service.indexes):
             return client_service.indexes[index_name]
         else:
@@ -273,11 +275,13 @@ class Configuration:
                     {instance._port}, \
                         {instance._username}"
         )
-        utils.logger.info(
-            f"Splunk - index \
-                {instance._dedicated_index.name} will be \
-                    used for the test run"
-        )
+
+        if instance._dedicated_index is not None:
+            utils.logger.info(
+                f"Splunk - index \
+                    {instance._dedicated_index.name} will be \
+                        used for the test run"
+            )
         cls.__instances[connection_key] = instance
         return instance
 

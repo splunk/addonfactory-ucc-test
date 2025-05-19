@@ -15,16 +15,17 @@
 #
 import logging
 
+UCC_MODINPUT_TEST_LOGGER_NAME = "splunk-add-on-ucc-modinput-test-functional"
+UCC_MODINPUT_TEST_LOG_FILE_NAME = f"{UCC_MODINPUT_TEST_LOGGER_NAME}.log"
+
 logFormatter = logging.Formatter(
-    "%(asctime)s.%(msecs)03d %(levelname)s %(name)s pid=%(process)d tid=%(thread)d file=%(filename)s func=%(funcName)s line=%(lineno)d %(message)s",
+    "%(asctime)s,%(msecs)03d %(levelname)s %(name)s pid=%(process)d tid=%(thread)d file=%(filename)s func=%(funcName)s line=%(lineno)d %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
 )
 
-fileHandler = logging.FileHandler(
-    "splunk-add-on-ucc-modinput-test-functional.log"
-)
+fileHandler = logging.FileHandler(UCC_MODINPUT_TEST_LOG_FILE_NAME)
 fileHandler.setFormatter(logFormatter)
 
-logger = logging.getLogger("splunk-add-on-ucc-modinput-test-functional")
+logger = logging.getLogger(UCC_MODINPUT_TEST_LOGGER_NAME)
 logger.addHandler(fileHandler)
 logger.setLevel(logging.DEBUG)

@@ -59,9 +59,20 @@ class ForgeExecData:
         self.id = id
         self.teardown = teardown
         self.kwargs = kwargs
-        self.result = deepcopy(result)
         self.errors = errors
         self.count = count
+
+        try:
+            # make a copy of forge execution data if possible
+            self.result = deepcopy(result)
+        except TypeError:
+            # copy is not possible, saving forge execution data by reference
+            self.result = result
+
+            summary = self.summary("\t")
+            logger.warning(
+                f"deepcopy of forge execution data is not possible, saving is by reference.{summary}"
+            )
 
     def summary(self, offset: str = "") -> str:
         s = f"\n{offset}Teardown summary:"

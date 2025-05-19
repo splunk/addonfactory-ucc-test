@@ -60,8 +60,11 @@ def pytest_deselected(items: Sequence[Item]) -> None:
 def pytest_collection_modifyitems(
     session: Session, config: Config, items: List[Item]
 ) -> None:
-    logger.debug(f"Lookung for forged tests in: {items}")
     dependency_manager.link_pytest_config(config)
+    if dependency_manager.collectonly:
+        return
+
+    logger.debug(f"Looking for forged tests in: {items}")
     tests2items = _map_forged_tests_to_pytest_items(items)
     if not tests2items:
         logger.debug("No forged tests found, exiting")
@@ -94,6 +97,8 @@ def pytest_collection_modifyitems(
 
 @pytest.hookimpl
 def pytest_collection_finish(session: Session) -> None:
+    if dependency_manager.collectonly:
+        return
     dependency_manager.start_bootstrap_execution()
 
 

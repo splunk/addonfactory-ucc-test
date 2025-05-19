@@ -31,7 +31,7 @@ If you just want to run existing functional tests developed with use of the fram
 
 2. export environment variables that describe your [Splunk instance](./addonfactory-ucc-test_pytest_plugin.md#expected-environment-variables) and the one specific for add-on you want to test (they should be described in `ucc_modinput_functional/README.md`)
 
-3. run [`ucc-test-modinput`](./ucc-test-modinput_cli_tool.md)
+3. run [`ucc-test-modinput gen`](./ucc-test-modinput_cli_tool.md)
 
 4. run [`pytest tests/ucc_modinput_functional/`](./addonfactory-ucc-test_pytest_plugin.md#plugin-arguments)
 
