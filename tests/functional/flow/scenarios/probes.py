@@ -1,11 +1,13 @@
 from typing import Dict
-from splunk_add_on_ucc_modinput_test.common.utils import logger
 from splunk_add_on_ucc_modinput_test.functional.decorators import (
     bootstrap,
     forge,
 )
 from tests.functional.common import VendorClient, SplunkClient
 from splunk_add_on_ucc_modinput_test.typing import ProbeGenType
+import logging
+
+logger = logging.getLogger("ucc-modinput-test")
 
 
 def probe1(test_id: str) -> ProbeGenType:

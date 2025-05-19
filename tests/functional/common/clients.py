@@ -1,7 +1,6 @@
 import time
 import random
 
-from splunk_add_on_ucc_modinput_test.common.utils import logger
 from splunk_add_on_ucc_modinput_test.functional.decorators import (
     register_splunk_class,
     register_vendor_class,
@@ -16,6 +15,9 @@ from splunk_add_on_ucc_modinput_test.functional.vendor import (
     VendorConfigurationBase,
 )
 from tests.functional.common import swagger_client
+import logging
+
+logger = logging.getLogger("ucc-modinput-test")
 
 
 class SplunkConfiguration(SplunkConfigurationBase):
