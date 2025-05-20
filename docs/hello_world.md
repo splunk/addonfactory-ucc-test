@@ -51,11 +51,7 @@ Run following script
 ```
 to get:
 
-- server-example-ta that exposes `events` endpoint on port 5000 with GET and POST methods:
-
-    - GET exposes following events
-
-    - POST allows to send some data that is exposed as event via GET method
+- server-example-ta that exposes `events` endpoint on port 5000
 
 - splunk-example-ta that is Splunk instance exposing standard ports (we'll be interested in 8000 - web and 8089 - management port) with example TA installed.
 ???- note "Click to check where we are with the prerequisites"
@@ -87,17 +83,6 @@ You can verify both scripts results by:
 - checking [configuration](http://localhost:8000/en-GB/app/Splunk_TA_Example/configuration) and [inputs](http://localhost:8000/en-GB/app/Splunk_TA_Example/inputs)
 
 - [searching events](http://localhost:8000/en-GB/app/search/search?q=search%20index%20%3D%20*)
-
-Moreover, we can cause some `Special event` to be exposed by server-example-ta by running:
-
-```console
-curl -X POST http://localhost:5000/events \                  
-     -H "Content-Type: application/json" \
-     -H "API-Key: super-secret-api-token" \
-     -d 'Special Event'
-```
-
-After no more than 20 seconds (minimal interval for the inputs) search query [`index = * "Special Event"`](http://localhost:8000/en-GB/app/search/search?q=search%20index%20%3D%20*%20%22Special%20Event%22) should return event for Special Event.
 
 ???- note "Click to check where we are with the prerequisites"
 
