@@ -9,8 +9,6 @@ If you want to make a lab exercise, clone [the repository](https://github.com/sp
 └── splunk-example-ta-test
 ```
 
-**Note:** Terminal commands appear in the instruction. You may need to adjust them to make them works on your OS and specific workstation configuration. 
-
 ## [Satisfy prerequisites](./index.md#prerequisites)
 
 Open `splunk-example-ta/` in terminal.
