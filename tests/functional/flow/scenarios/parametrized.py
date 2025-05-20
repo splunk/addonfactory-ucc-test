@@ -1,12 +1,12 @@
 import pytest
-from splunk_add_on_ucc_modinput_test.common.utils import logger
-
 from splunk_add_on_ucc_modinput_test.functional.decorators import (
     bootstrap,
     forge,
 )
-
 from typing import Dict
+import logging
+
+logger = logging.getLogger("ucc-modinput-test")
 
 
 def forge1(test_id: str, parametrized_param1: str) -> Dict[str, object]:

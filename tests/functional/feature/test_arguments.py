@@ -1,12 +1,13 @@
 from typing import Dict
-from splunk_add_on_ucc_modinput_test.common.utils import logger
 from splunk_add_on_ucc_modinput_test.functional.decorators import (
     bootstrap,
     forge,
 )
 from splunk_add_on_ucc_modinput_test.typing import ProbeGenType
 from tests.functional.common import SplunkClient, VendorClient
+import logging
 
+logger = logging.getLogger("ucc-modinput-test")
 probe_fn_external_counter = 3
 
 
