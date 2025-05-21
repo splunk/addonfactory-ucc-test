@@ -270,7 +270,7 @@ Account configuration requires server API key. That is configuration relevant to
 
 API key is a credential. We would like to keep it as non-plain text environment variables. We need to document that for whoever will use our test.
 
-Open `splunk-example-ta-test\tests/ucc_modinput_functional/README.md` and add relevant information there.
+Open `splunk-example-ta-test/tests/ucc_modinput_functional/README.md` and add relevant information there.
 ```
 Alongside with environment variables for Splunk, export API key for server-example-ta:
 
