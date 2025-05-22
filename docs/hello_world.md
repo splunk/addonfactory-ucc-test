@@ -146,7 +146,7 @@ ucc-test-modinput --version
 ```console
 ucc-test-modinput init --openapi-json openapi.json
 ```
-Your subdirecotries structure should look like
+Your subdirectories structure should look like
 ```
 .
 ├── swagger_client
