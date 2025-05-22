@@ -302,7 +302,7 @@ def account(
     vendor_client: VendorClient,
 ) -> Generator[Dict[str, str], None, None]:
     account_config = {
-        "name": "ExampleAccount",
+        "name": f"ExampleAccount_{utils.Common().sufix}",
         "api_key": vendor_client.config.api_key,
     }
     splunk_client.create_account(**account_config)
@@ -364,7 +364,7 @@ def example_input(
     *,
     account_config_name: str,   # was defined in account forge
 ) -> Generator[Dict[str, str], None, None]:
-    name = "ExampleInput"
+    name = f"ExampleInput_{utils.Common().sufix}"
     index = splunk_client.splunk_configuration.dedicated_index.name
     start_time = utils.get_epoch_timestamp()
     splunk_client.create_example(name, defaults.INPUT_INTERVAL, index, account_config_name)
@@ -373,7 +373,7 @@ def example_input(
         f"| where _time>{start_time}"
     )
     yield dict(input_spl_name=input_spl)
-    splunk_client.update_example(name)
+    splunk_client.update_example(name, disabled=True)
 ```
 ***Note:*** You need to add two imports:
 ```
