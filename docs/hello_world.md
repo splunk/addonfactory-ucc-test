@@ -266,11 +266,12 @@ tests/ucc_modinput_functional/test_configuration.py::test_ta_logging PASSED [100
 
 We want to make sure account is created in addon configuration.
 
-Account configuration requires server API key. That is configuration relevant to server-example-ta - vendor product.
+Account configuration requires server API key. That is configuration relevant to server-example-ta - vendor product. API key is a credential. We would like to keep it as non-plain text environment variables:
+```console
+export MODINPUT_TEST_EXAMPLE_API_KEY_BASE64=$(ucc-test-modinput base64encode -s 'super-secret-api-token')
+```
 
-API key is a credential. We would like to keep it as non-plain text environment variables. We need to document that for whoever will use our test.
-
-Open `splunk-example-ta-test/tests/ucc_modinput_functional/README.md` and add relevant information there.
+We need to document that for whoever will use our test. Open `splunk-example-ta-test/tests/ucc_modinput_functional/README.md` and add relevant information there.
 ```
 Alongside with environment variables for Splunk, export API key for server-example-ta:
 
