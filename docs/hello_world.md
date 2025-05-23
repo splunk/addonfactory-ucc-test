@@ -293,7 +293,7 @@ class Configuration(VendorConfigurationBase):
 ```
 **Note:** Remember to `from typing import Optional`
 
-Search `splunk-example-ta-test/tests/ucc_modinput_functional/splunk/client/_managed_client.py` for appropriate method for account creation - such as `create_account`.
+We will need to create an account for testing purposes. The framework provides generic methods for this, so  search for `create_account` in `splunk-example-ta-test/tests/ucc_modinput_functional/splunk/client/_managed_client.py`. 
 
 You were already able to see (by `test_ta_logging` example) that test function is decorated with forge functions. Let's create one for the account in `splunk-example-ta-test/tests/ucc_modinput_functional/splunk/forges.py`
 ```
