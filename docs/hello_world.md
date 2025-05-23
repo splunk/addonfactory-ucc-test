@@ -441,3 +441,9 @@ tests/ucc_modinput_functional/test_configuration.py::test_accounts PASSED
 ## ... want to see more examples?
 
 Check [the tests implementation for Example TA](https://github.com/splunk/splunk-example-ta/tests/ucc_modinput_functional).
+
+## troubleshooting
+
+- This tutorial uses [splunk-example-ta](https://github.com/splunk/splunk-example-ta), so consider checking documentation for this project when facing any unexpected error. 
+
+- In case of `npm error code E401 npm error Incorrect or missing password. ...` error, please move your `~/.npmrc` file to `~/.npmrc.backup`: `mv ~/.npmrc ~/.npmrc.backup`
