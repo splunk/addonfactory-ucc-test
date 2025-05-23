@@ -146,7 +146,7 @@ ucc-test-modinput --version
 ```console
 ucc-test-modinput init --openapi-json openapi.json
 ```
-Your subdirecotries structure should look like
+Your subdirectories structure should look like
 ```
 .
 ├── swagger_client
@@ -294,7 +294,7 @@ class Configuration(VendorConfigurationBase):
 ```
 **Note:** Remember to `from typing import Optional`
 
-Search `splunk-example-ta-test/tests/ucc_modinput_functional/splunk/client/_managed_client.py` for appropriate method for account creation - such as `create_account`.
+We will need to create an account for testing purposes. The framework provides generic methods for this, so  search for `create_account` in `splunk-example-ta-test/tests/ucc_modinput_functional/splunk/client/_managed_client.py`. 
 
 You were already able to see (by `test_ta_logging` example) that test function is decorated with forge functions. Let's create one for the account in `splunk-example-ta-test/tests/ucc_modinput_functional/splunk/forges.py`
 ```
@@ -442,3 +442,9 @@ tests/ucc_modinput_functional/test_configuration.py::test_accounts PASSED
 ## ... want to see more examples?
 
 Check [the tests implementation for Example TA](https://github.com/splunk/splunk-example-ta/tests/ucc_modinput_functional).
+
+## troubleshooting
+
+- This tutorial uses [splunk-example-ta](https://github.com/splunk/splunk-example-ta), so consider checking documentation for this project when facing any unexpected error. 
+
+- In case of `npm error code E401 npm error Incorrect or missing password. ...` error, please move your `~/.npmrc` file to `~/.npmrc.backup`: `mv ~/.npmrc ~/.npmrc.backup`
