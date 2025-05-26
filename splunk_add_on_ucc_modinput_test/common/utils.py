@@ -20,40 +20,17 @@ import time
 import datetime
 from functools import lru_cache
 import pytz  # type: ignore
-import logging
 import base64
 from pathlib import Path
 from typing import Callable, List, Optional
 import hashlib
+import logging
 
-global logger
+logger = logging.getLogger("ucc-modinput-test")
 
 
 class SplunkClientConfigurationException(Exception):
     pass
-
-
-def init_logger() -> logging.Logger:
-    """
-    Configure file based logger for the plugin
-    """
-    fh = logging.FileHandler("ucc_modinput_test.log")
-    fh.setLevel(logging.DEBUG)
-    formatter = logging.Formatter(
-        "%(asctime)s - %(levelname)s - %(process)d - %(filename)s - \
-            %(funcName)s - %(message)s"
-    )
-    fh.setFormatter(formatter)
-    logger = logging.getLogger("ucc-modinput-test")
-    logger.addHandler(fh)
-    logging.root.propagate = False
-    logger.setLevel(logging.DEBUG)
-    return logger
-
-
-init_logger()
-logger = logging.getLogger("ucc-modinput-test")
-logger.debug("Logger set")
 
 
 def get_from_environment_variable(

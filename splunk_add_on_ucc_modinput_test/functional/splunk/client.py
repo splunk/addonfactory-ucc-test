@@ -26,11 +26,13 @@ from splunk_add_on_ucc_modinput_test.common.splunk_service_pool import (
     SplunkServicePool,
 )
 from splunk_add_on_ucc_modinput_test.common.ta_base import ConfigurationBase
-from splunk_add_on_ucc_modinput_test.common.utils import logger
 from splunk_add_on_ucc_modinput_test.functional.common.splunk_instance_file import (  # noqa: E501
     SplunkInstanceFileHelper,
 )
 from splunk_add_on_ucc_modinput_test.typing import ProbeGenType
+import logging
+
+logger = logging.getLogger("ucc-modinput-test")
 
 
 class SplunkClientBase:

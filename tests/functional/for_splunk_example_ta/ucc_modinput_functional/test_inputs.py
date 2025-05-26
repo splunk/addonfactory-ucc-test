@@ -17,6 +17,9 @@ from tests.ucc_modinput_functional.splunk.probes import (
 )
 from tests.ucc_modinput_functional.splunk.client import SplunkClient
 from tests.ucc_modinput_functional import defaults
+import logging
+
+logger = logging.getLogger("ucc-modinput-test")
 
 
 @bootstrap(
@@ -46,7 +49,7 @@ def test_inputs(splunk_client: SplunkClient, example_input_spl: str) -> None:
         search_result_details.result_count != 0
     ), f"Following query returned 0 events: {example_input_spl}"
 
-    utils.logger.info(
+    logger.info(
         "test_inputs_loginhistory_clone done at "
         + utils.convert_to_utc(utils.get_epoch_timestamp())
     )

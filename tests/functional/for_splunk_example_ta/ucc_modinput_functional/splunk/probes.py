@@ -1,6 +1,5 @@
 import time
 from typing import Generator, Dict, Optional
-from splunk_add_on_ucc_modinput_test.common.utils import logger
 from tests.ucc_modinput_functional.splunk.client import SplunkClient
 from tests.ucc_modinput_functional.defaults import (
     PROBE_PROXY_CHECK_INTERVAL,
@@ -9,6 +8,9 @@ from tests.ucc_modinput_functional.defaults import (
     PROBE_LOGLEVEL_CHECK_TIMEOUT,
 )
 from splunk_add_on_ucc_modinput_test.common import utils
+import logging
+
+logger = logging.getLogger("ucc-modinput-test")
 
 
 def same_proxy_configs(

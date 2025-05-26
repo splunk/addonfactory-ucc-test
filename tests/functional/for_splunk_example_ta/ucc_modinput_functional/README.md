@@ -30,7 +30,7 @@ ucc-test-modinput --version
 
 5. Run ucc-test-modinput to generate add-on SDK
 ```console
-ucc-test-modinput
+ucc-test-modinput gen
 ```
 
 6. Run tests

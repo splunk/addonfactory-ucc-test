@@ -278,7 +278,15 @@ class FrameworkTask:
         }
 
     def get_forge_kwargs_copy(self) -> dict[str, Any]:
-        return deepcopy(self._forge_initial_kwargs)
+        try:
+            # make a copy of initial arguments if possible
+            return deepcopy(self._forge_initial_kwargs)
+        except TypeError:
+            # copy is not possible, get initial arguments by reference
+            logger.warning(
+                f"deepcopy of forge initial arguments is not possible, returning them by reference.{self.summary}"
+            )
+            return self._forge_initial_kwargs
 
     def get_probe_fn(self) -> ProbeFnType | None:
         return self._probe_fn
@@ -433,7 +441,7 @@ class FrameworkTask:
 
     def execute(self) -> None:
         logger.debug(
-            f"EXECTASK: execute {self} - executions {self._forge.executions}, dep_kwargs: {self._forge_kwargs}"
+            f"EXECTASK: execute {self}:\n\texecutions {self._forge.executions}\n\tdep_kwargs: {self._forge_kwargs}\n\tprobe {self._probe_fn}"
         )
         comp_kwargs = self._get_comparable_args()
         reuse, result = self.use_previous_executions(comp_kwargs)

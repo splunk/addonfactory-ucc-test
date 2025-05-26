@@ -137,7 +137,6 @@ def define_splunk_client_argument(
     return register_splunk_class_decorator
 
 
-# OLEG
 def register_splunk_class(
     swagger_client: ModuleType,
     splunk_configuration_class: Type[
