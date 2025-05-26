@@ -154,9 +154,6 @@ def pytest_runtest_teardown(item: Item) -> None:
         dependency_manager.shutdown()
 
     for task, error in dependency_manager.test_error_report(test):
-        # OLEG
-        # item.add_report_section("call", "error", error)
-        # splunk_add_on_ucc_modinput_test/functional/pytest_plugin/hooks.py:137: error: Argument 3 to "add_report_section" of "Item" has incompatible type "Exception"; expected "str"  [arg-type]
         item.add_report_section("call", "error", str(error))
 
     if not dependency_manager.do_not_fail_with_teardown:
