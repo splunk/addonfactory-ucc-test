@@ -101,15 +101,7 @@ class FrameworkTest(ExecutableBase):
 
     @property
     def artifacts_copy(self) -> Dict[str, Any]:
-        try:
-            # make a copy of artifacts if possible
-            return deepcopy(self._artifacts)
-        except TypeError:
-            # copy is not possible, get artifacts by reference
-            logger.warning(
-                f"deepcopy of test artifacts is not possible, returning them by reference.\n\test:{self.key}\n\ttest artifacts: {self._artifacts}"
-            )
-            return self._artifacts
+        return deepcopy(self._artifacts)
 
     def collect_required_kwargs(
         self, global_builtin_args: Dict[str, str]

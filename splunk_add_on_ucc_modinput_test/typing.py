@@ -15,7 +15,7 @@
 #
 from typing import Any, Callable, Dict, Generator, Tuple, Union, Optional
 
-ProbeGenType = Generator[float, None, Optional[bool]]
+ProbeGenType = Generator[int, None, Optional[bool]]
 ProbeGenFnType = Callable[..., ProbeGenType]
 ProbeRegularFnType = Callable[..., Any]
 ProbeFnType = Union[ProbeGenFnType, ProbeRegularFnType]

@@ -13,19 +13,3 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
-import logging
-
-fh = logging.FileHandler("ucc_modinput_test.log")
-fh.setLevel(logging.DEBUG)
-formatter = logging.Formatter(
-    "%(asctime)s - %(levelname)s - %(process)d - %(filename)s - \
-        %(funcName)s - %(message)s"
-)
-fh.setFormatter(formatter)
-logger = logging.getLogger("ucc-modinput-test")
-logger.addHandler(fh)
-logging.root.propagate = False
-logger.setLevel(logging.DEBUG)
-
-logger.debug("Logger set")

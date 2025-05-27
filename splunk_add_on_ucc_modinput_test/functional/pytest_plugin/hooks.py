@@ -60,11 +60,8 @@ def pytest_deselected(items: Sequence[Item]) -> None:
 def pytest_collection_modifyitems(
     session: Session, config: Config, items: List[Item]
 ) -> None:
+    logger.debug(f"Lookung for forged tests in: {items}")
     dependency_manager.link_pytest_config(config)
-    if dependency_manager.collectonly:
-        return
-
-    logger.debug(f"Looking for forged tests in: {items}")
     tests2items = _map_forged_tests_to_pytest_items(items)
     if not tests2items:
         logger.debug("No forged tests found, exiting")
@@ -97,8 +94,6 @@ def pytest_collection_modifyitems(
 
 @pytest.hookimpl
 def pytest_collection_finish(session: Session) -> None:
-    if dependency_manager.collectonly:
-        return
     dependency_manager.start_bootstrap_execution()
 
 
@@ -154,6 +149,9 @@ def pytest_runtest_teardown(item: Item) -> None:
         dependency_manager.shutdown()
 
     for task, error in dependency_manager.test_error_report(test):
+        # OLEG
+        # item.add_report_section("call", "error", error)
+        # splunk_add_on_ucc_modinput_test/functional/pytest_plugin/hooks.py:137: error: Argument 3 to "add_report_section" of "Item" has incompatible type "Exception"; expected "str"  [arg-type]
         item.add_report_section("call", "error", str(error))
 
     if not dependency_manager.do_not_fail_with_teardown:

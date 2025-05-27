@@ -1072,7 +1072,7 @@ When looking in the logs for an issue it's recommendes first to searching for ``
     ```
 
 #### Log file ucc_modinput_test.log
-This is high level log that comes from the logger provided by framework in ```splunk_add_on_ucc_modinput_test/__init__.py```. It's recommended to use this logger when log information from test, probes, forges and other code related to unified functional test implementation.
+This is high level log that comes from the logger provided by framework in ```splunk_add_on_ucc_modinput_test.common.utils```. It's recommended to use this logger when log information from test, probes, forges and other code related to unified functional test implementation.
 
 #### Framework sequential execution mode
 By default to execute forges and probes framework uses multithreading. This allows to speed up overall test execution but makes it more difficult to debug in case a forge or a probe have bugs. Sequential execution mode allows to start tests without using multithreading. All forges and probes executed sequentially which is much more easier for debugging. Sequential mode can be turned on by using ```--sequential-execution``` pytest custom command argument flag. When this flag is used framework ignores value of ```--number-of-threads``` and does not creates any threads.

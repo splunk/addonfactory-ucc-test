@@ -26,6 +26,29 @@ from splunk_add_on_ucc_modinput_test.common import bootstrap, utils
 import shutil
 
 
+class DefaultSubcommandArgumentParser(argparse.ArgumentParser):
+    __default_subparser = None
+
+    def set_default_subparser(self, name: str) -> None:
+        self.__default_subparser = name
+
+    def _parse_known_args(self, arg_strings, *args, **kwargs):  # type: ignore
+        in_args = set(arg_strings)
+        d_sp = self.__default_subparser
+        if d_sp is not None and not {"-h", "--help", "--version"}.intersection(
+            in_args
+        ):
+            for x in self._subparsers._actions:  # type: ignore
+                subparser_found = isinstance(
+                    x, argparse._SubParsersAction
+                ) and in_args.intersection(x._name_parser_map.keys())
+                if subparser_found:
+                    break
+            else:
+                arg_strings = [d_sp] + arg_strings
+        return super()._parse_known_args(arg_strings, *args, **kwargs)
+
+
 def main(argv: Optional[Sequence[str]] = None) -> int:
     class Platform:
         #   https://docs.docker.com/build/building/multi-platform/
@@ -122,7 +145,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             return f
 
     argv = argv if argv is not None else sys.argv[1:]
-    parser = argparse.ArgumentParser()
+    parser = DefaultSubcommandArgumentParser()
     parser.add_argument(
         "--version",
         action="version",
@@ -144,6 +167,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     base64decode_parser = subparsers.add_parser(
         "base64decode", description="Tool to decode base64 string"
     )
+    parser.set_default_subparser("gen")
 
     _p_args = (
         "-p",
@@ -326,8 +350,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 Existing splunk client is up to date.
                 """
                 pass
-    else:
-        parser.print_help()
+
     return 0
 
 

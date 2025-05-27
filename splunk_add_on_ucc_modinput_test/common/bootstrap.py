@@ -278,11 +278,6 @@ def write_other_classes(*, unified_tests_root_dir: Path) -> None:
                 "template": "defaults.tmpl",
                 "overwrite": False,
             },
-            {
-                "file": "README.md",
-                "template": "README.tmpl",
-                "overwrite": False,
-            },
         ],
         unified_tests_root_dir
         / "splunk": [

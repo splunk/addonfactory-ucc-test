@@ -29,9 +29,6 @@ import json
 from urllib import request, error
 import ssl
 import certifi
-import logging
-
-logger = logging.getLogger("ucc-modinput-test")
 
 MODINPUT_TEST_SPLUNK_DEDICATED_INDEX = "MODINPUT_TEST_SPLUNK_DEDICATED_INDEX"
 
@@ -99,7 +96,7 @@ class Configuration:
         except error.URLError as e:
             idx_not_created_msg += f"\nException raised:\n{e}"
 
-        logger.critical(idx_not_created_msg)
+        utils.logger.critical(idx_not_created_msg)
         pytest.exit(idx_not_created_msg)
 
     @staticmethod
@@ -112,12 +109,12 @@ class Configuration:
             new_index = client_service.indexes.create(index_name)
         except Exception as e:
             reason = f"{idx_not_created_msg}\nException raised:\n{e}"
-            logger.critical(reason)
+            utils.logger.critical(reason)
             pytest.exit(reason)
         if new_index:
             return new_index
         else:
-            logger.critical(idx_not_created_msg)
+            utils.logger.critical(idx_not_created_msg)
             pytest.exit(idx_not_created_msg)
 
     @staticmethod
@@ -132,7 +129,7 @@ class Configuration:
     ) -> Index:
         if Configuration.get_index(index_name, client_service):
             reason = f"Index {index_name} already exists"
-            logger.critical(reason)
+            utils.logger.critical(reason)
             pytest.exit(reason)
         if is_cloud:
             Configuration._victoria_create_index(
@@ -150,7 +147,7 @@ class Configuration:
                 index_name,
                 client_service,
             )
-        logger.debug(f"Index {index_name} has just been created")
+        utils.logger.debug(f"Index {index_name} has just been created")
         return created_index
 
     __instances: dict[tuple[str, str, str], Configuration] = {}
@@ -256,9 +253,9 @@ class Configuration:
                             {instance._host} does not \
                                 contain such index. Remove the variable \
                                     or create the index."
-                logger.critical(reason)
+                utils.logger.critical(reason)
                 pytest.exit(reason)
-            logger.debug(
+            utils.logger.debug(
                 f"Existing index {dedicated_index_name} will be used for \
                     test in splunk {instance._host}"
             )
@@ -272,7 +269,7 @@ class Configuration:
                 splunk_token=instance._token,
             )
 
-        logger.info(
+        utils.logger.info(
             f"Splunk - host:port and user set to \
                 {instance._host}:\
                     {instance._port}, \
@@ -280,7 +277,7 @@ class Configuration:
         )
 
         if instance._dedicated_index is not None:
-            logger.info(
+            utils.logger.info(
                 f"Splunk - index \
                     {instance._dedicated_index.name} will be \
                         used for the test run"

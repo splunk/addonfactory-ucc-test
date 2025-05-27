@@ -23,7 +23,7 @@ from splunk_add_on_ucc_modinput_test.common import bootstrap
 import subprocess
 from importlib_metadata import version, PackageNotFoundError
 
-SWAGGER_CODEGEN_CLI_VERSION = "3.0.68"
+SWAGGER_CODEGEN_CLI_VERSION = "3.0.46"
 
 
 def get_version() -> str:
