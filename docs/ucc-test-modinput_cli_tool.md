@@ -16,7 +16,7 @@ It comes with following arguments:
 
 - `base64decode -s [string you want to decode]` - eg. `ucc-test-modinput base64decode -s VGghczEkTXlQQHNzdzByZA==`
 
-- `gen` - does two things: 1. creates add-on SDK from given openapi.json, 2. creates splunk client module and checks if existing (`ucc_modinput_functional/splunk/client/client.py`) is the same
+- `gen` - does two things: 1. creates add-on SDK from given openapi.json, 2. creates splunk client module and checks if existing (`ucc_modinput_functional/splunk/client/client.py`) is the same; it is default command so `ucc-test-modinput` gives the same result as `ucc-test-modinput gen`
 
     - `--openapi-json` or `-o` ; `-o [path to openapi.json / source file ]` - default value is `output/*/appserver/static/openapi.json` ; refer to [UCC documentation](https://splunk.github.io/addonfactory-ucc-generator/openapi/#how-to-find-the-document) to learn more where you can find this document
 

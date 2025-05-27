@@ -44,13 +44,11 @@ if TYPE_CHECKING:
 def log_exceptions_traceback(fn: Callable[..., Any]) -> Callable[..., Any]:
     def wrapper(*args: Any, **kwargs: Any) -> Any | None:
         try:
-            logger.debug(f"{fn.__name__} executor is about to start")
             return fn(*args, **kwargs)
         except Exception as e:
-            logger.error(f"{fn.__name__} executor has failed with error: {e}")
+            logger.error(f"Error executing {fn.__name__}: {e}")
             logger.debug(traceback.format_exc())
-        finally:
-            logger.debug(f"{fn.__name__} executor has stopped")
+
         return None
 
     return wrapper

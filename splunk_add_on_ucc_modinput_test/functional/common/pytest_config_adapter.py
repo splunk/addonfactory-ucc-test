@@ -88,9 +88,3 @@ class PytestConfigAdapter:
         if self._pytest_config is not None:
             return self._pytest_config.getvalue("do_not_delete_at_teardown")
         return False
-
-    @property
-    def collectonly(self) -> bool:
-        if self._pytest_config is not None:
-            return self._pytest_config.getvalue("collectonly")
-        return False

@@ -66,6 +66,8 @@ class ConfigurationBase:
         )
         self._inputs: Dict[str, InputConfigurationBase] = {}
 
+        # OLEG
+
         def api_instance(self) -> swagger_client.api.default_api.DefaultApi:  # type: ignore # noqa: E501
             return self._api_instance
 

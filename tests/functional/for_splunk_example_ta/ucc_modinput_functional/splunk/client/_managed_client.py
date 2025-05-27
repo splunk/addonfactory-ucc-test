@@ -9,13 +9,11 @@ Note:
 
 import json
 from typing import Any, Dict, List, Optional
+from splunk_add_on_ucc_modinput_test.common.utils import logger
 from splunk_add_on_ucc_modinput_test.functional.splunk.client import (
     SplunkClientBase,
 )
 from swagger_client.rest import ApiException
-import logging
-
-logger = logging.getLogger("ucc-modinput-test")
 
 
 class SplunkApiError(Exception):

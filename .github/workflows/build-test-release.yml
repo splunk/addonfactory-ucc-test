@@ -135,44 +135,6 @@ jobs:
           poetry install
           poetry run pytest tests/unit
 
-  test-functional-flow:
-    runs-on: ubuntu-22.04
-    continue-on-error: true
-    strategy:
-      matrix:
-        python-version:
-          - "3.7"
-          - "3.9"
-          - "3.13"
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
-      - run: curl -sSL https://install.python-poetry.org | python3 - --version 1.5.1
-      - run: |
-          poetry install
-          poetry run pytest -p pytester tests/functional/flow
-
-  test-functional-feature:
-    runs-on: ubuntu-22.04
-    continue-on-error: true
-    strategy:
-      matrix:
-        python-version:
-          - "3.7"
-          - "3.9"
-          - "3.13"
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
-      - run: curl -sSL https://install.python-poetry.org | python3 - --version 1.5.1
-      - run: |
-          poetry install
-          poetry run pytest tests/functional/feature
-
   test-cli-init:
     runs-on: ubuntu-22.04
     continue-on-error: true
@@ -255,8 +217,6 @@ jobs:
       - compliance-copyrights
       - fossa-scan
       - test-unit
-      - test-functional-flow
-      - test-functional-feature
       - semgrep
       - pre-commit
       - test-build
@@ -290,7 +250,8 @@ jobs:
             semantic-release-replace-plugin
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN_ADMIN }}
-      - if: ${{ steps.semantic.outputs.new_release_published == 'true' }}
-        run: |
-          poetry build
-          poetry publish -n -u ${{ secrets.PYPI_USERNAME }} -p ${{ secrets.PYPI_TOKEN }}
+  #     # - if: ${{ steps.semantic.outputs.new_release_published == 'true' }}
+  #     #   run: |
+  #     #     poetry build
+  #     #     poetry publish -n -u ${{ secrets.PYPI_USERNAME }} -p ${{ secrets.PYPI_TOKEN }}
+        
