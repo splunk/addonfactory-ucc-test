@@ -16,7 +16,9 @@
 from splunklib import client
 from threading import Lock
 from typing import Any, Union, List
-from splunk_add_on_ucc_modinput_test.common.utils import logger
+import logging
+
+logger = logging.getLogger("ucc-modinput-test")
 
 
 class SplunkServiceProxy:

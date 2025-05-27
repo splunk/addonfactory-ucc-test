@@ -1,5 +1,4 @@
 from splunk_add_on_ucc_modinput_test.common import utils  # noqa
-from splunk_add_on_ucc_modinput_test.common.utils import logger  # noqa
 from splunk_add_on_ucc_modinput_test.functional.splunk import (
     SplunkConfigurationBase,
 )

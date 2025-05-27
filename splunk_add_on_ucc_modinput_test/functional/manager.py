@@ -134,13 +134,18 @@ class TestDependencyManager(PytestConfigAdapter):
 
     def set_vendor_client_class(
         self,
-        vendor_configuration_class: Type[VendorConfigurationBase],
-        vendor_client_class: Type[VendorClientBase],
-        vendor_class_argument_name: str,
+        vendor_configuration_class: Type[
+            VendorConfigurationBase
+        ] = VendorConfigurationBase,
+        vendor_client_class: Type[VendorClientBase] = VendorClientBase,
+        vendor_class_argument_name: str = BuiltInArg.VENDOR_CLIENT.value,
     ) -> None:
         logger.debug(
             f"set_vendor_client_class: {vendor_client_class}, {vendor_configuration_class}, {vendor_class_argument_name}"
         )
+        assert (
+            vendor_class_argument_name.isidentifier()
+        ), "Custom Splunk client argument name must comply with Python variable name requirements"
         assert issubclass(vendor_client_class, VendorClientBase)
         assert issubclass(vendor_configuration_class, VendorConfigurationBase)
         self._vendor_clients[vendor_class_argument_name] = (
@@ -150,13 +155,18 @@ class TestDependencyManager(PytestConfigAdapter):
 
     def set_splunk_client_class(
         self,
-        splunk_configuration_class: Type[SplunkConfigurationBase],
-        splunk_client_class: Type[SplunkClientBase],
-        splunk_class_argument_name: str,
+        splunk_configuration_class: Type[
+            SplunkConfigurationBase
+        ] = SplunkConfigurationBase,
+        splunk_client_class: Type[SplunkClientBase] = SplunkClientBase,
+        splunk_class_argument_name: str = BuiltInArg.SPLUNK_CLIENT.value,
     ) -> None:
         logger.debug(
             f"set_splunk_client_class: {splunk_configuration_class}, {splunk_client_class}, {splunk_class_argument_name}"
         )
+        assert (
+            splunk_class_argument_name.isidentifier()
+        ), "Custom Splunk client argument name must comply with Python variable name requirements"
         assert issubclass(splunk_client_class, SplunkClientBase)
         assert issubclass(splunk_configuration_class, SplunkConfigurationBase)
         self._splunk_clients[splunk_class_argument_name] = (
@@ -466,6 +476,7 @@ class TestDependencyManager(PytestConfigAdapter):
 
         if self.executor is not None:
             self.executor.shutdown()
+            self.executor = None
 
     def check_all_tests_executed(self) -> bool:
         executed = [test.is_executed for test in self.tests.values()]
