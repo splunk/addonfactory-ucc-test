@@ -7,9 +7,9 @@
 
 The following 3rd-party software packages may be used by or distributed with addonfactory-ucc-test. Any information relevant to third-party vendors listed below are collected using common, reasonable means.
 
-Date generated: 2025-4-3
+Date generated: 2025-5-27
 
-Revision ID: 749a65f2c2232566ce4118619021cd27a4949233
+Revision ID: 9f4c7f498a85fe50c9d72face865e6c4eec2750c
 
 ================================================================================
 ================================================================================
@@ -46,6 +46,25 @@ No licenses found
 
 ================================================================================
 
+- certifi (2025.1.31) [MPL-2.0]
+- colorama (0.4.6) [BSD-3-Clause]
+- deprecation (2.1.0) [Apache-2.0]
+- exceptiongroup (1.2.2) [Python-2.0, MIT]
+- importlib-metadata (6.7.0) [Apache-2.0]
+- importlib-resources (5.12.0) [Apache-2.0]
+- iniconfig (2.0.0) [MIT]
+- Jinja2 (3.1.6) [BSD-3-Clause]
+- markupsafe (2.1.5) [BSD-3-Clause]
+- packaging (24.0) [Apache-2.0]
+- pluggy (1.2.0) [MIT]
+- pytest (7.4.4) [MIT]
+- pytz (2023.4) [MIT, public-domain]
+- six (1.16.0) [MIT]
+- splunk-sdk (2.1.0) [Apache-2.0]
+- tomli (2.0.1) [MIT]
+- typing-extensions (4.7.1) [Python-2.0]
+- urllib3 (1.26.20) [MIT]
+- zipp (3.15.0) [MIT]
 
 
 --------------------------------------------------------------------------------
@@ -59,6 +78,11 @@ Package Depth: Direct
 * Declared Licenses *
 MPL-2.0
 
+--------------------------------------------------------------------------------
+File matches:
+LICENSE
+setup.py
+--------------------------------------------------------------------------------
 
 This package contains a modified version of ca-bundle.crt:
 
@@ -94,6 +118,10 @@ Package Depth: Transitive
 * Declared Licenses *
 BSD-3-Clause
 
+--------------------------------------------------------------------------------
+File matches:
+LICENSE.txt
+--------------------------------------------------------------------------------
 
 Copyright (c) 2010 Jonathan Hartley
 All rights reserved.
@@ -136,6 +164,13 @@ Package Depth: Transitive
 * Declared Licenses *
 Apache-2.0
 
+--------------------------------------------------------------------------------
+File matches:
+deprecation.py
+LICENSE
+setup.py
+tests/test_deprecation.py
+--------------------------------------------------------------------------------
 
                                  Apache License
                            Version 2.0, January 2004
@@ -353,6 +388,10 @@ Package Depth: Transitive
 Python-2.0, MIT
 
 * Python-2.0 *
+--------------------------------------------------------------------------------
+File matches:
+LICENSE
+--------------------------------------------------------------------------------
 
 1. This LICENSE AGREEMENT is between the Python Software Foundation ("PSF"), and the Individual or Organization ("Licensee") accessing and otherwise using this software ("Python") in source or binary form and its associated documentation.
    2. Subject to the terms and conditions of this License Agreement, PSF hereby grants Licensee a nonexclusive, royalty-free, world-wide license to reproduce, analyze, test, perform and/or display publicly, prepare derivative works, distribute, and otherwise use Python alone or in any derivative version, provided, however, that PSF's License Agreement and PSF's notice of copyright, i.e., "Copyright (c) 2001, 2002, 2003, 2004, 2005, 2006 Python Software Foundation; All Rights Reserved" are retained in Python alone or in any derivative version prepared by Licensee.
@@ -383,6 +422,10 @@ Permission to use, copy, modify, and distribute this software and its documentat
 STICHTING MATHEMATISCH CENTRUM DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL STICHTING MATHEMATISCH CENTRUM BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 * MIT *
+--------------------------------------------------------------------------------
+File matches:
+LICENSE
+--------------------------------------------------------------------------------
 
 The MIT License (MIT)
 
@@ -471,6 +514,10 @@ Package Depth: Direct
 * Declared Licenses *
 Apache-2.0
 
+--------------------------------------------------------------------------------
+File matches:
+LICENSE
+--------------------------------------------------------------------------------
 
 
                                  Apache License
@@ -688,6 +735,10 @@ Package Depth: Direct
 * Declared Licenses *
 Apache-2.0
 
+--------------------------------------------------------------------------------
+File matches:
+LICENSE
+--------------------------------------------------------------------------------
 
 
                                  Apache License
@@ -905,6 +956,10 @@ Package Depth: Transitive
 * Declared Licenses *
 MIT
 
+--------------------------------------------------------------------------------
+File matches:
+LICENSE
+--------------------------------------------------------------------------------
 
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -931,7 +986,7 @@ MIT
 --------------------------------------------------------------------------------
 Package Title: Jinja2 (3.1.6)
 
-Package Locator: pip+Jinja2$3.1.6
+Package Locator: pip+jinja2$3.1.6
 
 Package Depth: Direct
 --------------------------------------------------------------------------------
@@ -939,6 +994,10 @@ Package Depth: Direct
 * Declared Licenses *
 BSD-3-Clause
 
+--------------------------------------------------------------------------------
+File matches:
+LICENSE.txt
+--------------------------------------------------------------------------------
 
 Copyright 2007 Pallets
 
@@ -982,6 +1041,10 @@ Package Depth: Transitive
 * Declared Licenses *
 BSD-3-Clause
 
+--------------------------------------------------------------------------------
+File matches:
+LICENSE.rst
+--------------------------------------------------------------------------------
 
 Copyright 2010 Pallets
 
@@ -1015,48 +1078,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 --------------------------------------------------------------------------------
-Package Title: mypy-extensions (1.0.0)
-
-Package Locator: pip+mypy-extensions$1.0.0
-
-Package Depth: Direct
---------------------------------------------------------------------------------
-
-* Declared Licenses *
-MIT
-
-
-Mypy extensions are licensed under the terms of the MIT license, reproduced below.
-
-= = = = =
-
-The MIT License
-
-Copyright (c) 2016-2017 Jukka Lehtosalo and contributors
-
-Permission is hereby granted, free of charge, to any person obtaining a
-copy of this software and associated documentation files (the "Software"),
-to deal in the Software without restriction, including without limitation
-the rights to use, copy, modify, merge, publish, distribute, sublicense,
-and/or sell copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-DEALINGS IN THE SOFTWARE.
-
-= = = = =
-
-
-
---------------------------------------------------------------------------------
 Package Title: packaging (24.0)
 
 Package Locator: pip+packaging$24.0
@@ -1067,6 +1088,29 @@ Package Depth: Transitive
 * Declared Licenses *
 Apache-2.0
 
+--------------------------------------------------------------------------------
+File matches:
+docs/conf.py
+docs/development/submitting-patches.rst
+LICENSE
+LICENSE.APACHE
+src/packaging/__init__.py
+src/packaging/_structures.py
+src/packaging/markers.py
+src/packaging/requirements.py
+src/packaging/specifiers.py
+src/packaging/tags.py
+src/packaging/utils.py
+src/packaging/version.py
+tests/__init__.py
+tests/test_markers.py
+tests/test_requirements.py
+tests/test_specifiers.py
+tests/test_structures.py
+tests/test_tags.py
+tests/test_utils.py
+tests/test_version.py
+--------------------------------------------------------------------------------
 
 This software is made available under the terms of *either* of the licenses
 found in LICENSE.APACHE or LICENSE.BSD. Contributions to this software is made
@@ -1085,6 +1129,10 @@ Package Depth: Transitive
 * Declared Licenses *
 MIT
 
+--------------------------------------------------------------------------------
+File matches:
+LICENSE
+--------------------------------------------------------------------------------
 
 The MIT License (MIT)
 
@@ -1121,6 +1169,12 @@ Package Depth: Direct
 * Declared Licenses *
 MIT
 
+--------------------------------------------------------------------------------
+File matches:
+doc/en/license.rst
+LICENSE
+testing/example_scripts/junit-10.xsd
+--------------------------------------------------------------------------------
 
 The MIT License (MIT)
 
@@ -1157,6 +1211,11 @@ Package Depth: Direct
 * Declared Licenses *
 MIT
 
+--------------------------------------------------------------------------------
+File matches:
+LICENSE.txt
+setup.py
+--------------------------------------------------------------------------------
 
 Copyright (c) 2003-2019 Stuart Bishop <stuart@stuartbishop.net>
 
@@ -1183,6 +1242,11 @@ DEALINGS IN THE SOFTWARE.
 * Other Licenses *
 public-domain
 
+--------------------------------------------------------------------------------
+File matches:
+pytz/zoneinfo/leapseconds
+--------------------------------------------------------------------------------
+
 
 --------------------------------------------------------------------------------
 Package Title: six (1.16.0)
@@ -1195,6 +1259,13 @@ Package Depth: Direct
 * Declared Licenses *
 MIT
 
+--------------------------------------------------------------------------------
+File matches:
+LICENSE
+setup.py
+six.py
+test_six.py
+--------------------------------------------------------------------------------
 
 Copyright (c) 2010-2020 Benjamin Peterson
 
@@ -1228,6 +1299,37 @@ Package Depth: Direct
 * Declared Licenses *
 Apache-2.0
 
+--------------------------------------------------------------------------------
+File matches:
+PKG-INFO
+setup.py
+splunk_sdk.egg-info/PKG-INFO
+splunklib/__init__.py
+splunklib/binding.py
+splunklib/client.py
+splunklib/data.py
+splunklib/modularinput/argument.py
+splunklib/modularinput/event_writer.py
+splunklib/modularinput/event.py
+splunklib/modularinput/input_definition.py
+splunklib/modularinput/scheme.py
+splunklib/modularinput/script.py
+splunklib/modularinput/utils.py
+splunklib/modularinput/validation_definition.py
+splunklib/results.py
+splunklib/searchcommands/__init__.py
+splunklib/searchcommands/decorators.py
+splunklib/searchcommands/environment.py
+splunklib/searchcommands/eventing_command.py
+splunklib/searchcommands/external_search_command.py
+splunklib/searchcommands/generating_command.py
+splunklib/searchcommands/internals.py
+splunklib/searchcommands/reporting_command.py
+splunklib/searchcommands/search_command.py
+splunklib/searchcommands/streaming_command.py
+splunklib/searchcommands/validators.py
+splunklib/utils.py
+--------------------------------------------------------------------------------
 
 Copyright 2011-2015 Splunk, Inc.
 
@@ -1255,6 +1357,14 @@ Package Depth: Transitive
 * Declared Licenses *
 MIT
 
+--------------------------------------------------------------------------------
+File matches:
+LICENSE
+src/tomli/__init__.py
+src/tomli/_parser.py
+src/tomli/_re.py
+src/tomli/_types.py
+--------------------------------------------------------------------------------
 
 MIT License
 
@@ -1291,6 +1401,10 @@ Package Depth: Transitive
 * Declared Licenses *
 Python-2.0
 
+--------------------------------------------------------------------------------
+File matches:
+LICENSE
+--------------------------------------------------------------------------------
 
 1. This LICENSE AGREEMENT is between the Python Software Foundation ("PSF"), and the Individual or Organization ("Licensee") accessing and otherwise using this software ("Python") in source or binary form and its associated documentation.
    2. Subject to the terms and conditions of this License Agreement, PSF hereby grants Licensee a nonexclusive, royalty-free, world-wide license to reproduce, analyze, test, perform and/or display publicly, prepare derivative works, distribute, and otherwise use Python alone or in any derivative version, provided, however, that PSF's License Agreement and PSF's notice of copyright, i.e., "Copyright (c) 2001, 2002, 2003, 2004, 2005, 2006 Python Software Foundation; All Rights Reserved" are retained in Python alone or in any derivative version prepared by Licensee.
@@ -1332,6 +1446,15 @@ Package Depth: Direct
 * Declared Licenses *
 MIT
 
+--------------------------------------------------------------------------------
+File matches:
+dummyserver/proxy.py
+LICENSE.txt
+setup.py
+src/urllib3/contrib/_securetransport/bindings.py
+src/urllib3/contrib/securetransport.py
+src/urllib3/packages/six.py
+--------------------------------------------------------------------------------
 
 MIT License
 
@@ -1368,6 +1491,10 @@ Package Depth: Transitive
 * Declared Licenses *
 MIT
 
+--------------------------------------------------------------------------------
+File matches:
+LICENSE
+--------------------------------------------------------------------------------
 
 Copyright Jason R. Coombs
 
@@ -2096,37 +2223,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 
-* MIT *
-
-Mypy extensions are licensed under the terms of the MIT license, reproduced below.
-
-= = = = =
-
-The MIT License
-
-Copyright (c) 2016-2017 Jukka Lehtosalo and contributors
-
-Permission is hereby granted, free of charge, to any person obtaining a
-copy of this software and associated documentation files (the "Software"),
-to deal in the Software without restriction, including without limitation
-the rights to use, copy, modify, merge, publish, distribute, sublicense,
-and/or sell copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-DEALINGS IN THE SOFTWARE.
-
-= = = = =
-
-
 * Python-2.0 *
 
 PYTHON SOFTWARE FOUNDATION LICENSE VERSION 2
@@ -2441,8 +2537,6 @@ Copyright (c) 2012 Senko Rasic <senko.rasic@dobarkod.hr>
 
 Copyright (c) 2021 Taneli Hukkinen
 
-Copyright (c) 2016-2017 Jukka Lehtosalo and contributors
-
 Copyright (c) 2004 Holger Krekel and others
 
 Copyright (c) 2014 Gregory Boissinot
@@ -2559,11 +2653,40 @@ Exhibit B - "Incompatible With Secondary Licenses" Notice
 This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
 
 --------------------------------------------------------------------------------
+No Associated License
+
+Copyright (c)  licensing info to every file, as requested by a large
+
+Copyright (c)  Jonathan Hartley 2013. BSD 3-Clause license, see LICENSE file.
+
+Copyright (c)  Jonathan Hartley & Arnon Yaari, 2013-2020. BSD 3-Clause license; see
+
+Copyright (c)  Copyright 2007-2019 by the Sphinx team, see AUTHORS.
+
+Copyright (c) 2007-2019 by the Sphinx team, see AUTHORS.
+
+Copyright (c)  JS Foundation and other contributors
+
+Copyright (c) 2008 by <a href="http://domain.invalid/">you</a>.
+
+Copyright (c)  dates in LICENSE, README.rst and in the documentation.
+
+Copyright (c)  is shown in the HTML footer. Default is True.
+
+Copyright (c)  True
+
+Copyright (c) 2013 holger krekel et alii"
+
+Copyright (c)  Holger Krekel and others, 2004.
+
+--------------------------------------------------------------------------------
 Python License 2.0
 
 Copyright (c) 2022 Alex Grönholm
 
 Copyright (c) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010
+
+Copyright (c) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 
 PYTHON SOFTWARE FOUNDATION LICENSE VERSION 2
    1. This LICENSE AGREEMENT is between the Python Software Foundation ("PSF"), and the Individual or Organization ("Licensee") accessing and otherwise using this software ("Python") in source or binary form and its associated documentation.
    2. Subject to the terms and conditions of this License Agreement, PSF hereby grants Licensee a nonexclusive, royalty-free, world-wide license to reproduce, analyze, test, perform and/or display publicly, prepare derivative works, distribute, and otherwise use Python alone or in any derivative version, provided, however, that PSF's License Agreement and PSF's notice of copyright, i.e., "Copyright (c) 2001, 2002, 2003, 2004, 2005, 2006 Python Software Foundation; All Rights Reserved" are retained in Python alone or in any derivative version prepared by Licensee.
@@ -2603,4 +2726,4 @@ Public Domain
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
 
-Report Generated by FOSSA on 2025-4-3
+Report Generated by FOSSA on 2025-5-27
