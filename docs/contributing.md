@@ -134,8 +134,6 @@ gh pr merge main --auto --merge
     + Merge the PR using the merge commit option on GitHub.
     + Backport the bug fix PR to the develop branch.
 
-<!--
 - After release is done, announce it to community on slack channels:
-    + [Internal UCC channel](https://splunk.enterprise.slack.com/archives/C03T8QCHBTJ)
+    + [Internal UCC test channel](https://splunk.enterprise.slack.com/archives/C081JT7R69Z)
     + [Splunk Usergroup UCC channel](https://splunk-usergroups.slack.com/archives/C03SG3ZL4S1)
--->
