@@ -138,7 +138,7 @@ Open `splunk-example-ta-test/` directory in terminal. There should be openapi.js
 
 [Install `addonfactory-ucc-test` and make sure it is installed](./index.md#installation)
 ```console
-pip install addonfactory-ucc-test
+pip install splunk-add-on-ucc-modinput-test
 ucc-test-modinput --version
 ```
 
@@ -441,7 +441,7 @@ tests/ucc_modinput_functional/test_configuration.py::test_accounts PASSED
 
 ## ... want to see more examples?
 
-Check [the tests implementation for Example TA](https://github.com/splunk/splunk-example-ta/tests/ucc_modinput_functional).
+Check [the tests implementation for Example TA](https://github.com/splunk/splunk-example-ta/tree/main/tests/ucc_modinput_functional).
 
 ## troubleshooting
 
