@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-exclude: (^tests/testdata/expected_addons|^tests/testdata/test_addons|^example)
+
 repos:
 -   repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
@@ -26,11 +26,6 @@ repos:
     -   id: pyupgrade
         args:
         - --py37-plus
--   repo: https://github.com/psf/black
-    rev: 23.3.0
-    hooks:
-    -   id: black
-        exclude: ^tests/functional/for_splunk_example_ta/ucc_modinput_functional/splunk/client/client.py
 -   repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.2.0
     hooks:

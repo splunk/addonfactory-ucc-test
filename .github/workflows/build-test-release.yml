@@ -199,6 +199,9 @@ jobs:
           git clone https://github.com/splunk/splunk-example-ta.git
           cd splunk-example-ta
           ./scripts/run_locally.sh
+          cd ..
+          mkdir splunk-example-ta-test
+          cd splunk-example-ta-test
           python -m venv .test
           source .test/bin/activate
           pip install ../../../dist/*.whl
@@ -207,7 +210,7 @@ jobs:
           export MODINPUT_TEST_SPLUNK_USERNAME=admin
           export MODINPUT_TEST_SPLUNK_PASSWORD_BASE64=$(ucc-test-modinput base64encode -s 'Chang3d!')
           export MODINPUT_TEST_EXAMPLE_API_KEY_BASE64=$(ucc-test-modinput base64encode -s 'super-secret-api-token')
-          ucc-test-modinput init
+          ucc-test-modinput init -o ../splunk-example-ta/output/Splunk_TA_Example/appserver/static/openapi.json
           pytest tests/ucc_modinput_functional
 
   test-cli-gen:
@@ -234,13 +237,11 @@ jobs:
         run: |
           cd tests/functional/
           git clone https://github.com/splunk/splunk-example-ta.git
-          mv for_splunk_example_ta/__init__.py splunk-example-ta/tests
-          mv for_splunk_example_ta/ucc_modinput_functional splunk-example-ta/tests
           cd splunk-example-ta
           ./scripts/run_locally.sh
           python -m venv .test
           source .test/bin/activate
-          pip install ../../../dist/*.whl
+          pip install --force-reinstall ../../../dist/*.whl
           export MODINPUT_TEST_SPLUNK_HOST=localhost
           export MODINPUT_TEST_SPLUNK_PORT=8089
           export MODINPUT_TEST_SPLUNK_USERNAME=admin
