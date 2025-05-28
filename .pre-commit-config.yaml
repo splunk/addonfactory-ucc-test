@@ -13,9 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-default_language_version:
-  python: python3.9
-exclude: (^tests/testdata/expected_addons|^tests/testdata/test_addons|^example)
+
 repos:
 -   repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
