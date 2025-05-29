@@ -31,6 +31,7 @@ from splunk_add_on_ucc_modinput_test.functional.pytest_plugin.utils import (
     _collect_parametrized_tests,
     _extract_parametrized_data,
     _map_forged_tests_to_pytest_items,
+    _check_session_terminal_output,
 )
 from pytest import Session, Config, Item
 from typing import Sequence
@@ -99,20 +100,7 @@ def pytest_collection_modifyitems(
 def pytest_collection_finish(session: Session) -> None:
     if dependency_manager.collectonly:
         return
-    # Access the terminal reporter to check for collection errors
-    terminal_reporter = session.config.pluginmanager.get_plugin(
-        "terminalreporter"
-    )
-    if terminal_reporter and "error" in terminal_reporter.stats:
-        errors = terminal_reporter.stats["error"]
-        if errors:
-            logger.error("Errors occurred during test collection:")
-            for error in errors:
-                logger.error(error.longrepr)
-            pytest.exit(
-                "Errors occurred during test collection. Exiting pytest.",
-                returncode=1,
-            )
+    _check_session_terminal_output(session)
 
     dependency_manager.start_bootstrap_execution()
 
