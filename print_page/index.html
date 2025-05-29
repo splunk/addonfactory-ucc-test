@@ -1,0 +1,2003 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+        <meta name="author" content="Splunk">
+      
+      
+        <link rel="canonical" href="https://splunk.github.io/addonfactory-ucc-test/print_page/">
+      
+      
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.2.7">
+    
+    
+      
+        <title>Print Site - AUT Framework</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.046329b4.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.85d0ee34.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../css/print-site-enum-headings1.css">
+    
+      <link rel="stylesheet" href="../css/print-site-enum-headings2.css">
+    
+      <link rel="stylesheet" href="../css/print-site-enum-headings3.css">
+    
+      <link rel="stylesheet" href="../css/print-site-enum-headings4.css">
+    
+      <link rel="stylesheet" href="../css/print-site-enum-headings5.css">
+    
+      <link rel="stylesheet" href="../css/print-site-enum-headings6.css">
+    
+      <link rel="stylesheet" href="../css/print-site.css">
+    
+      <link rel="stylesheet" href="../css/print-site-material.css">
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../css/extra.css">
+    
+    <script>__md_scope=new URL("/addonfactory-ucc-test/",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  
+        <script type="text/javascript">
+        document.addEventListener('DOMContentLoaded', function () {
+            remove_material_navigation();remove_mkdocs_theme_navigation();generate_toc();
+        })
+        </script>
+        </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="black" data-md-color-accent="orange">
+  
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      <!-- Source:
+https://github.com/squidfunk/mkdocs-material/blob/master/src/templates/partials/header.html
+-->
+
+
+
+  
+
+
+<!-- Header -->
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav
+    class="md-header__inner md-grid"
+    aria-label="Header"
+  >
+
+    <!-- Link to home -->
+    <a
+      href=".."
+      title="AUT Framework"
+      class="md-header__button md-logo"
+      aria-label="AUT Framework"
+      data-md-component="logo"
+    >
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+
+    <!-- Button to open drawer -->
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+
+    <!-- Header title -->
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            AUT Framework
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Print Site
+            
+          </span>
+        </div>
+      </div>
+    </div>
+
+    
+
+    <!-- Color palette toggle -->
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="black" data-md-color-accent="orange"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="orange"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12c0-2.42-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+
+    <!-- User preference: color palette -->
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+
+    <!-- Site language selector -->
+    
+
+    <!-- Button to open search modal -->
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+
+      <!-- Search interface -->
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+
+    <!-- Repository information -->
+    
+      <div class="md-header__source">
+        <a href="https://github.com/splunk/addonfactory-ucc-test" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Splunk Add-on AUT Framework
+  </div>
+</a>
+      </div>
+    
+  </nav>
+
+  <!-- Navigation tabs (sticky) -->
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="AUT Framework" class="md-nav__button md-logo" aria-label="AUT Framework" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    AUT Framework
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/splunk/addonfactory-ucc-test" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Splunk Add-on AUT Framework
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    About AUT
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../hello_world/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Hello World
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../design_principles/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Design Principles
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../test_scenarios/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Test Scenarios
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../before_you_write_your_first_line_of_code/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Before you write your first line of code
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../when_you_write_your_tests/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    When you write your tests
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ucc-test-modinput_cli_tool/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ucc-test-modinput CLI tool
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../addonfactory-ucc-test_pytest_plugin/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    addonfactory-ucc-test pytest plugin
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Contributing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CHANGELOG/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Changelog
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Troubleshooting
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#" class="md-nav__link">
+    1. About AUT
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hello_world" class="md-nav__link">
+    2. Hello World
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#design_principles" class="md-nav__link">
+    3. Design Principles
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#test_scenarios" class="md-nav__link">
+    4. Test Scenarios
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#before_you_write_your_first_line_of_code" class="md-nav__link">
+    5. Before you write your first line of code
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#when_you_write_your_tests" class="md-nav__link">
+    6. When you write your tests
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ucc-test-modinput_cli_tool" class="md-nav__link">
+    7. ucc-test-modinput CLI tool
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#addonfactory-ucc-test_pytest_plugin" class="md-nav__link">
+    8. addonfactory-ucc-test pytest plugin
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#contributing" class="md-nav__link">
+    9. Contributing
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#changelog" class="md-nav__link">
+    10. Changelog
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    11. Troubleshooting
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+<div id="print-site-page" class="print-site-enumerate-headings print-site-enumerate-figures">
+        <section class="print-page">
+            <div id="print-page-toc" data-toc-depth="3">
+                <nav role='navigation' class='print-page-toc-nav'>
+                <h1 class='print-page-toc-title'>Table of Contents</h1>
+                </nav>
+            </div>
+        </section>
+        <section class="print-page" id="index"><h1 id="index-overview">Overview<a class="headerlink" href="#index-overview" title="Permanent link">&para;</a></h1>
+<p>addonfactory-ucc-test (AUT) is an open-source testing framework for functional tests for <a href="https://splunk.github.io/addonfactory-ucc-generator/">UCC-based Splunk Add-ons</a> which allows to test add-ons functonality for data ingestion. It automates add-ons configuration, events generation by vendor product side and assessment of ingested events providing platform for end to end tests.</p>
+<h2 id="index-prerequisites">Prerequisites<a class="headerlink" href="#index-prerequisites" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Prepared basic setup for the add-on<ul>
+<li>Vendor product configured for the add-on</li>
+<li>Splunk instance with add-on installed</li>
+<li>The setup is manually tested</li>
+</ul>
+</li>
+<li><a href="https://splunk.github.io/addonfactory-ucc-generator/openapi/#how-to-find-the-document">openapi.json</a> saved to developer workstation</li>
+<li>docker installed and started</li>
+</ul>
+<h2 id="index-installation">Installation<a class="headerlink" href="#index-installation" title="Permanent link">&para;</a></h2>
+<p>addonfactory-ucc-test can be installed via pip from <a href="https://pypi.org/project/splunk-add-on-ucc-modinput-test/">PyPI</a>:
+<div class="highlight"><pre><span></span><code><span class="go">pip install splunk-add-on-ucc-modinput-test</span>
+</code></pre></div>
+You can verify installation by checking installed version:
+<div class="highlight"><pre><span></span><code><span class="go">ucc-test-modinput --version</span>
+</code></pre></div></p>
+<h2 id="index-how-can-i-run-existing-tests">How can I run existing tests?<a class="headerlink" href="#index-how-can-i-run-existing-tests" title="Permanent link">&para;</a></h2>
+<p>If you just want to run existing functional tests developed with use of the framework:</p>
+<ol>
+<li>
+<p>make sure <a href="#index-prerequisites">the prerequisites</a> are met and <a href="#index-installation">addonfactory-ucc-test is installed</a></p>
+</li>
+<li>
+<p>export environment variables that describe your <a href="#addonfactory-ucc-test_pytest_plugin-expected-environment-variables">Splunk instance</a> and the one specific for add-on you want to test (they should be described in <code>ucc_modinput_functional/README.md</code>)</p>
+</li>
+<li>
+<p>run <a href="#ucc-test-modinput_cli_tool"><code>ucc-test-modinput gen</code></a></p>
+</li>
+<li>
+<p>run <a href="#addonfactory-ucc-test_pytest_plugin-plugin-arguments"><code>pytest tests/ucc_modinput_functional/</code></a></p>
+</li>
+</ol>
+<p><img alt="Run existing tests" src="../images/ucc-test-modinput_gen.gif" /></p>
+<h2 id="index-writing-all-tests-from-scratch">Writing all tests from scratch<a class="headerlink" href="#index-writing-all-tests-from-scratch" title="Permanent link">&para;</a></h2>
+<p>Building a comprehensive test suite requires careful planning and adherence to best practices. Following paragraphs outlines the key aspects of starting from scratch, including the <a href="#design_principles">Design Principles</a> that guide test architecture, the <a href="#test_scenarios">Test Scenarios</a> that ensure coverage, important considerations <a href="#before_you_write_your_first_line_of_code">Before You Write Your First Line of Code</a>, and best practices <a href="#when_you_write_your_tests">When You Write Your Tests</a>.</p>
+<p>That is a lot to read.</p>
+<p>You want to start small and simple?</p>
+<p>Check our <a href="#hello_world">Hello World</a> example first.</p></section><section class="print-page" id="hello_world"><h1 id="hello_world-hello-world-example">Hello World example<a class="headerlink" href="#hello_world-hello-world-example" title="Permanent link">&para;</a></h1>
+<p>This, step by step, instruction uses Splunk_TA_Example to show how you can create end to end, functional, modinput tests for your add-on.</p>
+<p>If you want to make a lab exercise, clone <a href="https://github.com/splunk/splunk-example-ta">the repository</a> to your workstation and create dedicated directory for the tests (eg. splunk-example-ta-test), so it can look like:
+<div class="highlight"><pre><span></span><code>.
+├── splunk-example-ta
+└── splunk-example-ta-test
+</code></pre></div></p>
+<h2 id="hello_world-satisfy-prerequisites"><a href="#index-prerequisites">Satisfy prerequisites</a><a class="headerlink" href="#hello_world-satisfy-prerequisites" title="Permanent link">&para;</a></h2>
+<p>Open <code>splunk-example-ta/</code> in terminal.</p>
+<details class="- note">
+<summary>Click to check where we are with the prerequisites</summary>
+<ul class="task-list">
+<li class="task-list-item">
+<p><input type="checkbox" disabled/> Prepared basic setup for the add-on</p>
+<ul class="task-list">
+<li class="task-list-item">
+<p><input type="checkbox" disabled/> Vendor product configured for the add-on</p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled/> Splunk instance with add-on installed</p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled/> The setup is manually tested</p>
+</li>
+</ul>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled/> <a href="https://splunk.github.io/addonfactory-ucc-generator/openapi/#how-to-find-the-document">openapi.json</a> saved to developer workstation</p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled/> docker installed and started</p>
+</li>
+</ul>
+</details>
+<p>Example TA for Splunk comes with script that automates environment setup.</p>
+<p>The script requires docker, so <strong>make sure that docker installed and started</strong>.</p>
+<details class="- note">
+<summary>Click to check where we are with the prerequisites</summary>
+<ul class="task-list">
+<li class="task-list-item">
+<p><input type="checkbox" disabled/> Prepared basic setup for the add-on</p>
+<ul class="task-list">
+<li class="task-list-item">
+<p><input type="checkbox" disabled/> Vendor product configured for the add-on</p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled/> Splunk instance with add-on installed</p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled/> The setup is manually tested</p>
+</li>
+</ul>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled/> <a href="https://splunk.github.io/addonfactory-ucc-generator/openapi/#how-to-find-the-document">openapi.json</a> saved to developer workstation</p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled checked/> <strong>docker installed and started</strong></p>
+</li>
+</ul>
+</details>
+<p>Run following script 
+<div class="highlight"><pre><span></span><code><span class="go">./scripts/run_locally.sh</span>
+</code></pre></div>
+to get:</p>
+<ul>
+<li>
+<p>server-example-ta that exposes <code>events</code> endpoint on port 5000</p>
+</li>
+<li>
+<p>splunk-example-ta that is Splunk instance exposing standard ports (we&rsquo;ll be interested in 8000 - web and 8089 - management port) with example TA installed.</p>
+</li>
+</ul>
+<details class="- note">
+<summary>Click to check where we are with the prerequisites</summary>
+<ul class="task-list">
+<li class="task-list-item">
+<p><input type="checkbox" disabled/> Prepared basic setup for the add-on</p>
+<ul class="task-list">
+<li class="task-list-item">
+<p><input type="checkbox" disabled checked/> <strong>Vendor product configured for the add-on</strong></p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled checked/> <strong>Splunk instance with add-on installed</strong></p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled/> The setup is manually tested</p>
+</li>
+</ul>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled/> <a href="https://splunk.github.io/addonfactory-ucc-generator/openapi/#how-to-find-the-document">openapi.json</a> saved to developer workstation</p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled checked/> docker installed and started</p>
+</li>
+</ul>
+</details>
+<p>There is another script that creates Example TA configuration and inputs:</p>
+<div class="highlight"><pre><span></span><code><span class="go">./scripts/local_testing_setup.sh</span>
+</code></pre></div>
+<p>You can verify both scripts results by:</p>
+<ul>
+<li>
+<p>opening the splunk instance: http://localhost:8000</p>
+</li>
+<li>
+<p>signing in (admin / <a href="https://github.com/splunk/splunk-example-ta/blob/26225f0c1ca6aeb3897696918898d0980eac82e9/docker-compose.yml#L16">Chang3d!</a>)</p>
+</li>
+<li>
+<p>checking <a href="http://localhost:8000/en-GB/app/Splunk_TA_Example/configuration">configuration</a> and <a href="http://localhost:8000/en-GB/app/Splunk_TA_Example/inputs">inputs</a></p>
+</li>
+<li>
+<p><a href="http://localhost:8000/en-GB/app/search/search?q=search%20index%20%3D%20*">searching events</a></p>
+</li>
+</ul>
+<details class="- note">
+<summary>Click to check where we are with the prerequisites</summary>
+<ul class="task-list">
+<li class="task-list-item">
+<p><input type="checkbox" disabled checked/> <strong>Prepared basic setup for the add-on</strong></p>
+<ul class="task-list">
+<li class="task-list-item">
+<p><input type="checkbox" disabled checked/> Vendor product configured for the add-on</p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled checked/> Splunk instance with add-on installed</p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled checked/> <strong>The setup is manually tested</strong></p>
+</li>
+</ul>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled/> <a href="https://splunk.github.io/addonfactory-ucc-generator/openapi/#how-to-find-the-document">openapi.json</a> saved to developer workstation</p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled checked/> docker installed and started</p>
+</li>
+</ul>
+</details>
+<p>Open <a href="http://localhost:8000/en-GB/app/Splunk_TA_Example/configuration">configuration</a> and download it to <code>splunk-example-ta-test/</code> directory using <a href="https://splunk.github.io/addonfactory-ucc-generator/openapi/#how-to-find-the-document">OpenAPI.json button</a>.</p>
+<details class="- note">
+<summary>Click to check where we are with the prerequisites</summary>
+<ul class="task-list">
+<li class="task-list-item">
+<p><input type="checkbox" disabled checked/> Prepared basic setup for the add-on</p>
+<ul class="task-list">
+<li class="task-list-item">
+<p><input type="checkbox" disabled checked/> Vendor product configured for the add-on</p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled checked/> Splunk instance with add-on installed</p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled checked/> The setup is manually tested</p>
+</li>
+</ul>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled checked/> <strong><a href="https://splunk.github.io/addonfactory-ucc-generator/openapi/#how-to-find-the-document">openapi.json</a> saved to developer workstation</strong></p>
+</li>
+<li class="task-list-item">
+<p><input type="checkbox" disabled checked/> docker installed and started</p>
+</li>
+</ul>
+</details>
+<p>You&rsquo;ve got openapi.json that will be used in following steps. Moreover, you confirmed that you&rsquo;ve got all you need to create necessary environment for development. You can delete docker containers
+<div class="highlight"><pre><span></span><code><span class="go">docker rm -f server-example-ta splunk-example-ta</span>
+</code></pre></div>
+and recreate the environment
+<div class="highlight"><pre><span></span><code><span class="go">./scripts/run_locally.sh</span>
+</code></pre></div></p>
+<p><strong>Note:</strong> The containers recreation is just one of a few options to prepare the environment for development. If you are not interested in having clean instance, you may consider:</p>
+<ul>
+<li>
+<p>inputs deactivation only</p>
+</li>
+<li>
+<p>inputs and configuration deletion</p>
+</li>
+<li>
+<p>etc.</p>
+</li>
+</ul>
+<h2 id="hello_world-init">init<a class="headerlink" href="#hello_world-init" title="Permanent link">&para;</a></h2>
+<p>Open <code>splunk-example-ta-test/</code> directory in terminal. There should be openapi.json file downloaded as a part of <a href="#hello_world-satisfy-prerequisites">satisfying prerequisities</a>.</p>
+<p><a href="#index-installation">Install <code>addonfactory-ucc-test</code> and make sure it is installed</a>
+<div class="highlight"><pre><span></span><code><span class="go">pip install splunk-add-on-ucc-modinput-test</span>
+<span class="go">ucc-test-modinput --version</span>
+</code></pre></div></p>
+<p><a href="#before_you_write_your_first_line_of_code-ucc-test-modinput-init">Initialize modinput tests</a>
+<div class="highlight"><pre><span></span><code><span class="go">ucc-test-modinput init --openapi-json openapi.json</span>
+</code></pre></div>
+Your subdirectories structure should look like
+<div class="highlight"><pre><span></span><code>.
+├── swagger_client
+│   ├── api
+│   └── models
+└── tests
+    └── ucc_modinput_functional
+        ├── splunk
+        │   └── client
+        └── vendor
+            └── client
+</code></pre></div></p>
+<p><strong>Hint:</strong> If you use version control system such as git, you don&rsquo;t want to keep there <code>swagger_client/</code> that will be generated for you from <code>openapi.json</code> by <code>ucc-test-modinput</code>.</p>
+<p><a href="#addonfactory-ucc-test_pytest_plugin-expected-environment-variables">Set environment variables for your Splunk instance.</a>
+<div class="highlight"><pre><span></span><code><span class="go">export MODINPUT_TEST_SPLUNK_HOST=localhost</span>
+<span class="go">export MODINPUT_TEST_SPLUNK_PORT=8089</span>
+<span class="go">export MODINPUT_TEST_SPLUNK_USERNAME=admin</span>
+<span class="go">export MODINPUT_TEST_SPLUNK_PASSWORD_BASE64=$(ucc-test-modinput base64encode -s &#39;Chang3d!&#39;)</span>
+</code></pre></div></p>
+<p>Run few auto-generated tests 
+<div class="highlight"><pre><span></span><code><span class="go">pytest tests/ucc_modinput_functional</span>
+</code></pre></div>
+You should be informed about 3 passed tests.</p>
+<p>We will be interested in <code>splunk-example-ta-test/tests/ucc_modinput_functional/</code> when working on following points of the instruction
+<div class="highlight"><pre><span></span><code>.
+├── README.md
+├── __init__.py
+├── defaults.py
+├── splunk
+│   ├── __init__.py
+│   ├── client
+│   │   ├── __init__.py
+│   │   ├── _managed_client.py
+│   │   ├── client.py
+│   │   └── configuration.py
+│   ├── forges.py
+│   └── probes.py
+├── test_settings.py
+└── vendor
+    ├── __init__.py
+    ├── client
+    │   ├── __init__.py
+    │   ├── client.py
+    │   └── configuration.py
+    ├── forges.py
+    └── probes.py
+</code></pre></div></p>
+<h2 id="hello_world-test_ta_logging-your-first-test">test_ta_logging - your first test<a class="headerlink" href="#hello_world-test_ta_logging-your-first-test" title="Permanent link">&para;</a></h2>
+<p>We want to have log level set to DEBUG for all of the tests we will write.</p>
+<p>As the log level will be so common, we can add it to <code>defaults.py</code>
+<div class="highlight"><pre><span></span><code>TA_LOG_LEVEL_FOR_TESTS = &quot;DEBUG&quot;
+</code></pre></div></p>
+<p>We will create appropriate test, to make sure log level is changed to DEBUG.</p>
+<p>Let&rsquo;s have dedicated file to test modifications in addon configuration - <code>test_configuration.py</code>. Move piece of code for log level from <code>test_settings.py</code> to <code>test_configuration.py</code> and adopt.</p>
+<p>The code we are to use from <code>test_settings.py</code>
+<div class="highlight"><pre><span></span><code>@attach(forge(set_loglevel, loglevel=&quot;CRITICAL&quot;, probe=wait_for_loglevel))
+def test_valid_loglevel(splunk_client: SplunkClient, wait_for_loglevel: bool) -&gt; None:
+    assert wait_for_loglevel is True
+</code></pre></div></p>
+<p>The code how it should look like in <code>test_configuration.py</code>
+<div class="highlight"><pre><span></span><code>@bootstrap(
+    forge(
+        set_loglevel,
+        loglevel=defaults.TA_LOG_LEVEL_FOR_TESTS,
+        probe=wait_for_loglevel,
+    )
+)
+def test_ta_logging(splunk_client: SplunkClient) -&gt; None:
+    assert (
+        splunk_client.get_settings_logging()[&quot;loglevel&quot;]
+        == defaults.TA_LOG_LEVEL_FOR_TESTS
+    )
+</code></pre></div>
+You need add few imports to make it works
+<div class="highlight"><pre><span></span><code>from splunk_add_on_ucc_modinput_test.functional.decorators import (
+    bootstrap,
+    forge,
+)
+from tests.ucc_modinput_functional.splunk.forges import (
+    set_loglevel,
+)
+from tests.ucc_modinput_functional.splunk.probes import (
+    wait_for_loglevel,
+)
+from tests.ucc_modinput_functional.splunk.client import SplunkClient
+from tests.ucc_modinput_functional import defaults
+</code></pre></div>
+We are ready to run our first test. Remember to do it from <code>splunk-example-ta-test/</code>
+<div class="highlight"><pre><span></span><code>pytest -v tests/ucc_modinput_functional/test_configuration.py
+</code></pre></div>
+You should see
+<div class="highlight"><pre><span></span><code>tests/ucc_modinput_functional/test_configuration.py::test_ta_logging PASSED [100%]
+</code></pre></div>
+<strong>Hint:</strong> Save modifications to your version control system</p>
+<h2 id="hello_world-test_accounts-first-this-addon-specific-test">test_accounts - first, this addon-specific, test<a class="headerlink" href="#hello_world-test_accounts-first-this-addon-specific-test" title="Permanent link">&para;</a></h2>
+<p>We want to make sure account is created in addon configuration.</p>
+<p>Account configuration requires server API key. That is configuration relevant to server-example-ta - vendor product. API key is a credential. We would like to keep it as non-plain text environment variables:
+<div class="highlight"><pre><span></span><code><span class="go">export MODINPUT_TEST_EXAMPLE_API_KEY_BASE64=$(ucc-test-modinput base64encode -s &#39;super-secret-api-token&#39;)</span>
+</code></pre></div></p>
+<p>We need to document that for whoever will use our test. Open <code>splunk-example-ta-test/tests/ucc_modinput_functional/README.md</code> and add relevant information there.
+<div class="highlight"><pre><span></span><code>Alongside with environment variables for Splunk, export API key for server-example-ta:
+
+    ```console
+    export MODINPUT_TEST_EXAMPLE_API_KEY_BASE64=$(ucc-test-modinput base64encode -s &#39;super-secret-api-token&#39;)
+    ```
+</code></pre></div>
+Once we can be sure the variable is defined, we want to read it. Open <code>splunk-example-ta-test/tests/ucc_modinput_functional/vendor/client/configuration.py</code>, make sure the key is read from the variable and expose for use:
+<div class="highlight"><pre><span></span><code>class Configuration(VendorConfigurationBase):
+    def customize_configuration(self) -&gt; None:
+        self._api_key = utils.get_from_environment_variable(
+            &quot;MODINPUT_TEST_EXAMPLE_API_KEY_BASE64&quot;,
+            string_function=utils.Base64.decode,
+        )
+
+    @property
+    def api_key(self) -&gt; Optional[str]:
+        return self._api_key
+</code></pre></div>
+<strong>Note:</strong> Remember to <code>from typing import Optional</code></p>
+<p>We will need to create an account for testing purposes. The framework provides generic methods for this, so  search for <code>create_account</code> in <code>splunk-example-ta-test/tests/ucc_modinput_functional/splunk/client/_managed_client.py</code>. </p>
+<p>You were already able to see (by <code>test_ta_logging</code> example) that test function is decorated with forge functions. Let&rsquo;s create one for the account in <code>splunk-example-ta-test/tests/ucc_modinput_functional/splunk/forges.py</code>
+<div class="highlight"><pre><span></span><code>def account(
+    splunk_client: SplunkClient,
+    vendor_client: VendorClient,
+) -&gt; Generator[Dict[str, str], None, None]:
+    account_config = {
+        &quot;name&quot;: f&quot;ExampleAccount_{utils.Common().sufix}&quot;,
+        &quot;api_key&quot;: vendor_client.config.api_key,
+    }
+    splunk_client.create_account(**account_config)
+    yield dict(
+        account_config_name=account_config[&quot;name&quot;]
+    )
+</code></pre></div>
+<strong>Note:</strong> Remember to <code>from tests.ucc_modinput_functional.vendor.client import VendorClient</code></p>
+<p>We&rsquo;ve got all of the blocks ready now to build our test function. Open <code>splunk-example-ta-test/tests/ucc_modinput_functional/test_configuration.py</code>
+<div class="highlight"><pre><span></span><code>@bootstrap(
+    forge(
+        set_loglevel,
+        loglevel=defaults.TA_LOG_LEVEL_FOR_TESTS,
+        probe=wait_for_loglevel,
+    ),
+    forge(account),
+)
+def test_accounts(
+    splunk_client: SplunkClient,
+    account_config_name: str,
+) -&gt; None:
+    actual_account = splunk_client.get_account(account_config_name)
+    assert actual_account is not None
+</code></pre></div>
+<strong>Note:</strong> Remember to <code>from tests.ucc_modinput_functional.splunk.forges import account</code></p>
+<p>We are ready to run test_accounts:
+<div class="highlight"><pre><span></span><code>pytest -v tests/ucc_modinput_functional/test_configuration.py::test_accounts
+</code></pre></div>
+You should get
+<div class="highlight"><pre><span></span><code>tests/ucc_modinput_functional/test_configuration.py::test_accounts PASSED
+</code></pre></div>
+<strong>Hint:</strong> Save modifications to your version control system</p>
+<h2 id="hello_world-test_inputs-to-make-sure-data-is-comming">test_inputs to make sure data is comming<a class="headerlink" href="#hello_world-test_inputs-to-make-sure-data-is-comming" title="Permanent link">&para;</a></h2>
+<p>We want to make sure input is created, data is ingested and input is deactivated. Goal is to have it available for troubleshooting if needed but we don&rsquo;t want to keep the Splunk instance too busy with inputs active once events necessary for tests were already ingested.</p>
+<p>Let&rsquo;s find relevant methods to create and deactivate inputs in <code>splunk-example-ta-test/tests/ucc_modinput_functional/splunk/client/_managed_client.py</code> &ndash; <code>create_example</code> and <code>update_example</code>.</p>
+<p>When creating input, we&rsquo;ll use some default value for interval. Add following to <code>defaults.py</code>:
+<div class="highlight"><pre><span></span><code>INPUT_INTERVAL = 60
+</code></pre></div></p>
+<p>In case of inputs, we want to be sure data is coming to specific index, source related to just created input and after the input gets created.</p>
+<p>Whatever needs to happen before test execution, needs to be added before <code>yield</code> (test setup). <code>yield</code>ed are values used for tests, other forges, probes, etc. What happens after, needs to be added after <code>yield</code> (teardown).</p>
+<p>Let&rsquo;s add <code>example_input</code> forge containing all the knowledge documented above to <code>tests/ucc_modinput_functional/splunk/forges.py</code>:
+<div class="highlight"><pre><span></span><code>def example_input(
+    splunk_client: SplunkClient,
+    *,
+    account_config_name: str,   # was defined in account forge
+) -&gt; Generator[Dict[str, str], None, None]:
+    name = f&quot;ExampleInput_{utils.Common().sufix}&quot;
+    index = splunk_client.splunk_configuration.dedicated_index.name
+    start_time = utils.get_epoch_timestamp()
+    splunk_client.create_example(name, defaults.INPUT_INTERVAL, index, account_config_name)
+    input_spl = (
+        f&#39;search index={index} source=&quot;example://{name}&quot; &#39;
+        f&quot;| where _time&gt;{start_time}&quot;
+    )
+    yield dict(input_spl_name=input_spl)
+    splunk_client.update_example(name, disabled=True)
+</code></pre></div>
+<strong><em>Note:</em></strong> You need to add two imports:
+<div class="highlight"><pre><span></span><code>from splunk_add_on_ucc_modinput_test.common import utils
+from tests.ucc_modinput_functional import defaults
+</code></pre></div></p>
+<p>Once some configuration is added, modified or deleted and effect is not immediate, we use probes to wait with further steps until effects occur. Open <code>tests/ucc_modinput_functional/splunk/probes.py</code> and add <code>events_ingested</code>:
+<div class="highlight"><pre><span></span><code>def events_ingested(
+    splunk_client: SplunkClient, input_spl_name: str, probes_wait_time: int = 10
+) -&gt; Generator[int, None, None]:
+    while True:
+        search = splunk_client.search(searchquery=input_spl_name)
+        if search.result_count != 0:
+            break
+        yield probes_wait_time
+</code></pre></div></p>
+<p>Input configuration requires account configuration that was tested in <a href="#hello_world-test_accounts-first-this-addon-specific-test">previous section</a>. Moreover, just like for all the other tests, we want to make sure log level is set to default.</p>
+<p>Let&rsquo;s have dedicated test file for inputs - <code>test_inputs.py</code> in <code>tests/ucc_modinput_functional/</code> with <code>test_input</code>:
+<div class="highlight"><pre><span></span><code>@bootstrap(
+    forge(
+        set_loglevel,
+        loglevel=defaults.TA_LOG_LEVEL_FOR_TESTS,
+        probe=wait_for_loglevel,
+    ),
+    forge(account),
+    forge(
+        example_input,
+        probe=events_ingested,
+    )
+)
+def test_inputs(splunk_client: SplunkClient, input_spl_name: str) -&gt; None:
+    search_result_details = splunk_client.search(searchquery=input_spl_name)
+    assert (
+        search_result_details.result_count != 0
+    ), f&quot;Following query returned 0 events: {input_spl_name}&quot;
+
+    utils.logger.info(
+        &quot;test_inputs_loginhistory_clone done at &quot;
+        + utils.convert_to_utc(utils.get_epoch_timestamp())
+    )
+</code></pre></div>
+<strong><em>Note:</em></strong> You need to have imports you have in <code>test_configuration.py</code> and few new:</p>
+<ul>
+<li>
+<p><code>from splunk_add_on_ucc_modinput_test.common import utils</code></p>
+</li>
+<li>
+<p><code>example_input</code> add to imports from <code>tests.ucc_modinput_functional.splunk.forges</code></p>
+</li>
+<li>
+<p><code>events_ingested</code> from <code>tests.ucc_modinput_functional.splunk.probes</code></p>
+</li>
+</ul>
+<p>Run test_inputs:
+<div class="highlight"><pre><span></span><code>pytest -v tests/ucc_modinput_functional/test_inputs.py::test_inputs
+</code></pre></div>
+You should get
+<div class="highlight"><pre><span></span><code>tests/ucc_modinput_functional/test_configuration.py::test_accounts PASSED
+</code></pre></div>
+<strong><em>Hint:</em></strong> Remember about saving to version control system</p>
+<h2 id="hello_world-want-to-see-more-examples">&hellip; want to see more examples?<a class="headerlink" href="#hello_world-want-to-see-more-examples" title="Permanent link">&para;</a></h2>
+<p>Check <a href="https://github.com/splunk/splunk-example-ta/tree/main/tests/ucc_modinput_functional">the tests implementation for Example TA</a>.</p>
+<h2 id="hello_world-troubleshooting">troubleshooting<a class="headerlink" href="#hello_world-troubleshooting" title="Permanent link">&para;</a></h2>
+<ul>
+<li>
+<p>This tutorial uses <a href="https://github.com/splunk/splunk-example-ta">splunk-example-ta</a>, so consider checking documentation for this project when facing any unexpected error. </p>
+</li>
+<li>
+<p>In case of <code>npm error code E401 npm error Incorrect or missing password. ...</code> error, please move your <code>~/.npmrc</code> file to <code>~/.npmrc.backup</code>: <code>mv ~/.npmrc ~/.npmrc.backup</code></p>
+</li>
+</ul></section><section class="print-page" id="design_principles"><h1 id="design_principles-design-principles">Design principles<a class="headerlink" href="#design_principles-design-principles" title="Permanent link">&para;</a></h1>
+<p>The addonfactory-ucc-test framework follows principles in an order based on importance:</p>
+<ol>
+<li>
+<p><a href="#before_you_write_your_first_line_of_code">add-on developer experience</a></p>
+</li>
+<li>
+<p><a href="#design_principles-performance">execution time</a></p>
+</li>
+<li>
+<p><a href="#design_principles-complexity">test scenarios complexity</a></p>
+</li>
+<li>
+<p><a href="#design_principles-data-isolation">data isolation</a></p>
+</li>
+<li>
+<p><a href="#design_principles-supported-platforms">cross-platform &amp; CI-ready</a></p>
+</li>
+<li>
+<p><a href="#framework_deepdive">framework deepdive</a></p>
+</li>
+</ol>
+<h2 id="design_principles-building-blocks">Building blocks<a class="headerlink" href="#design_principles-building-blocks" title="Permanent link">&para;</a></h2>
+<p>The addonfactory-ucc-test framework consists of following building blocks:</p>
+<ul>
+<li>
+<p>addonfactory-ucc-test that contains:</p>
+<ul>
+<li>
+<p><a href="#ucc-test-modinput_cli_tool"><code>ucc-test-modinput</code> CLI tool</a> used to initialise the tests (creates relevant directories, files and initial test; one time action), generate add-on SDK and other supporting actions (text encryption and decryption) </p>
+</li>
+<li>
+<p><a href="#addonfactory-ucc-test_pytest_plugin"><code>addonfactory-ucc-test/functional</code> pytest plugin</a> used to extend pytest functionality to support end-to-end functional tests </p>
+</li>
+</ul>
+</li>
+<li>
+<p>supporting artifacts:</p>
+<ul>
+<li>
+<p><code>ucc_modinput_functional</code> tests in <a href="https://github.com/splunk/splunk-example-ta"><code>Splunk Add-on for Example</code> </a></p>
+</li>
+<li>
+<p>this documentation</p>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="design_principles-concepts-to-use-and-rules-to-follow">Concepts to use and rules to follow<a class="headerlink" href="#design_principles-concepts-to-use-and-rules-to-follow" title="Permanent link">&para;</a></h2>
+<p>Framework comes with libraries used to deal with Splunk (Enterprise as well as Cloud), UCC-related functionalities and common actions.</p>
+<p>There are following concepts used in the framework as well as rules add-on developer should follow:</p>
+<ol>
+<li>
+<p><strong>Vendor product-related and add-on specific functionalities</strong> are left to the <strong>developer to deal with</strong></p>
+</li>
+<li>
+<p><strong>test function</strong>s should be used just <strong>to assert</strong> actual vs expected values</p>
+</li>
+<li>
+<p>test functions are wrapped by <strong>forge decorators</strong> that <strong>define setup and teardown tasks</strong></p>
+</li>
+<li>
+<p>forge can yield <code>Dict[str,Any]</code>. Key becomes globally available variable that refers to relevant value</p>
+</li>
+<li>
+<p><strong>probe function</strong> can be defined for forge <strong>to optimise setup time</strong></p>
+</li>
+<li>
+<p><strong>forge functions</strong> are <strong>executed in a sequence as they appear</strong>  - that means setup tasks are executed in a sequence of appearance while tear down tasks are executed in reversed order</p>
+</li>
+<li>
+<p><strong>forges decorator</strong> allows to <strong>group forge</strong> tasks that can be <strong>executed parallely</strong></p>
+</li>
+<li>
+<p><strong>bootstrap</strong> decorators group forge tasks that are <strong>common for many tests</strong></p>
+</li>
+<li>
+<p><strong>attach</strong> decorators group forge tasks that are <strong>specific for certain test</strong></p>
+</li>
+</ol>
+<p><em>Note: <a href="#index-principles">Order of importance is discussed separately.</a></em></p>
+<h2 id="design_principles-performance">Performance<a class="headerlink" href="#design_principles-performance" title="Permanent link">&para;</a></h2>
+<ul>
+<li>
+<p><strong>bootstrap</strong> makes sure setup and teardown tasks are executed just once, no matter for how many tests they are required.</p>
+</li>
+<li>
+<p><strong>probes</strong> when applied for setup tasks, makes setup task is finished as soon as expected state is achieved.</p>
+</li>
+<li>
+<p><strong>forges</strong> allows to parallelise independent tasks.</p>
+</li>
+</ul>
+<h2 id="design_principles-complexity">Complexity<a class="headerlink" href="#design_principles-complexity" title="Permanent link">&para;</a></h2>
+<p>The framework is thought the way, to be able to address even the most complicated Splunk add-ons. To achieve this goal, <strong>each forge should cover just one functionality</strong>. This way it becomes atomic. Atomic components can be connected, related or group flexible.</p>
+<h2 id="design_principles-data-isolation">Data isolation<a class="headerlink" href="#design_principles-data-isolation" title="Permanent link">&para;</a></h2>
+<p>There are certain ways data can be isolated:</p>
+<ul>
+<li>
+<p><strong>dedicated index</strong> is created for each test run by default and it is highly recommended to use the index. Moreover, AUT provides a functionality that allows to create custom indexes if needed</p>
+</li>
+<li>
+<p><strong>attach decorator</strong> allows to isolate specific tests so time range can be defined for splunk events</p>
+</li>
+<li>
+<p>source of the event allows to identify input</p>
+</li>
+<li>
+<p>unique <strong>test id</strong> can be used to distinguish between specific tests and test runs</p>
+</li>
+</ul>
+<h2 id="design_principles-supported-platforms">Supported platforms<a class="headerlink" href="#design_principles-supported-platforms" title="Permanent link">&para;</a></h2>
+<p>This framework is supported on the most popular workstations (MacOS, Linux, Windows) as well as CIs (GitHub, GitLab).</p></section><section class="print-page" id="test_scenarios"><h1 id="test_scenarios-test-scenarios">Test scenarios<a class="headerlink" href="#test_scenarios-test-scenarios" title="Permanent link">&para;</a></h1>
+<p>General test cases are described. There are scenarios for each and relevant <a href="#design_principles-design-principles">concepts</a> that should be used.</p>
+<p><em><strong>Note:</strong> all <code>forge</code> tasks should be treated as <code>bootstrap</code> unless explicitly defined as <code>attach</code></em></p>
+<p><em><strong>Note:</strong> if <code>forge</code> term is used, that generally refers to setup step unless explicitly defined as teardown</em></p>
+<h2 id="test_scenarios-basic-scenario">Basic scenario<a class="headerlink" href="#test_scenarios-basic-scenario" title="Permanent link">&para;</a></h2>
+<p>We want to ingest some general events for few inputs and vendor product is <em>talkative</em> enough to expose the event within seconds or few minutes.</p>
+<ol>
+<li>
+<p>Increase log level to DEBUG (forge)</p>
+</li>
+<li>
+<p>Create configuration (forge; yield configuration name - will be used for input)</p>
+</li>
+<li>
+<p>Create inputs that depend on just created configuration (forge with probe - will be used to wait; yield SPL query that should contain at least index, source and start time information)</p>
+</li>
+<li>
+<p>Wait till events are indexed (probe; use SPL query)</p>
+</li>
+<li>
+<p>Test - assert event/actual values are as expected (use SPL query; assert returned values against expected values)</p>
+</li>
+<li>
+<p>Disable inputs (forge teardown)</p>
+</li>
+<li>
+<p>Decrease log level to initial value (forge teardown)</p>
+</li>
+</ol>
+<h2 id="test_scenarios-isolate-data-in-indexes">Isolate data in indexes<a class="headerlink" href="#test_scenarios-isolate-data-in-indexes" title="Permanent link">&para;</a></h2>
+<p><em><strong>Note:</strong> this case is just an extension of <a href="#test_scenarios-basic">basic</a> and as such, just concepts that touches the differences will be described</em></p>
+<p>Specifics of an add-on considered in this scenario does not allow to distinguish which input was used to ingest specific event.</p>
+<p><em><strong>Hint:</strong> When constructing tests for this kind of add-on, you want to have <a href="#design_principles-data-isolation">dedicated index for each input</a></em></p>
+<ol>
+<li>
+<p>Increase log level to DEBUG</p>
+</li>
+<li>
+<p>Create (<code>forges</code> as following can be done independently)</p>
+<ol>
+<li>
+<p>configuration</p>
+</li>
+<li>
+<p>indexes (forge per index; yield index name - will be used for input)</p>
+</li>
+</ol>
+</li>
+<li>
+<p>Create inputs with reference to just created configuration and indexes</p>
+</li>
+<li>
+<p>Wait</p>
+</li>
+<li>
+<p>Test</p>
+</li>
+<li>
+<p>Disable inputs</p>
+</li>
+<li>
+<p>Decrease log level</p>
+</li>
+</ol>
+<h2 id="test_scenarios-test-proxies">Test proxies<a class="headerlink" href="#test_scenarios-test-proxies" title="Permanent link">&para;</a></h2>
+<p><em><strong>Note:</strong> this case is just an extension of <a href="#test_scenarios-basic">basic</a> and as such, just concepts that touches the differences will be described</em></p>
+<p>We want to be sure the add-on can be configured to use proxy if needed.</p>
+<p><em><strong>Hint:</strong> Proxy configuration is general for specific add-on, so if defined it will be used for all configuration entries as well as inputs.
+When constructing this kind of tests you want to isolate them that can be achieved by using <code>attach</code> decorator that would group following tasks</em></p>
+<ol>
+<li>
+<p>Increase log level to DEBUG </p>
+</li>
+<li>
+<p>Configure proxy or disabled if we want to test without proxy configured (<code>attache</code> to be sure all following forge tasks are in the context of this configuration)</p>
+<ol>
+<li>
+<p>Create configuration - we want to be sure proxy configuration is applied to it, especially if connection to vendor product is established to validate configuration corectness</p>
+</li>
+<li>
+<p>Create inputs</p>
+</li>
+<li>
+<p>Wait</p>
+</li>
+<li>
+<p>Test</p>
+</li>
+<li>
+<p>Disable inputs</p>
+</li>
+</ol>
+</li>
+<li>
+<p>Decrease log level</p>
+</li>
+</ol>
+<h2 id="test_scenarios-trigger-events-generation">Trigger events generation<a class="headerlink" href="#test_scenarios-trigger-events-generation" title="Permanent link">&para;</a></h2>
+<p>We want to ingest some general events for an input and vendor product needs to be triggered to generate the events first.</p>
+<ol>
+<li>
+<p>Increase log level to DEBUG (forge)</p>
+</li>
+<li>
+<p>Following steps can be executed independently, before relevant input is created (forges)</p>
+<ol>
+<li>
+<p>Create configuration (forge; yield configuration name - will be used for input)</p>
+</li>
+<li>
+<p>Trigger vendor product to generate event (forge; yield timestamp)</p>
+</li>
+</ol>
+</li>
+<li>
+<p>Create input that depend on just created configuration and timestamp (forge with probe - will be used to wait; yield SPL query that should contain at least index, source and start time information)</p>
+</li>
+<li>
+<p>Wait till events are indexed (probe; use SPL query)</p>
+</li>
+<li>
+<p>Test - assert event/actual values are as expected (use SPL query; assert returned values against expected values)</p>
+</li>
+<li>
+<p>Disable input (forge teardown)</p>
+</li>
+<li>
+<p>Decrease log level to initial value (forge teardown)</p>
+</li>
+</ol>
+<h2 id="test_scenarios-configure-vendor-product">Configure vendor product<a class="headerlink" href="#test_scenarios-configure-vendor-product" title="Permanent link">&para;</a></h2>
+<p><em><strong>Note:</strong> this case is just an extension of <a href="#test_scenarios-trigger-events-generation">triggering events generation</a> and as such, just concepts that touches the differences will be described</em></p>
+<p>Vendor product needs to be configured before it can be triggered to generate the events. The vendor product configuration has to be roll back then.</p>
+<ol>
+<li>
+<p>Increase log level to DEBUG</p>
+</li>
+<li>
+<p>Configure vendor product (forge; yield configuration name - it can be used later for configuration or input and the configuration teardown)</p>
+</li>
+<li>
+<p>Before input is created</p>
+<ol>
+<li>
+<p>Create configuration</p>
+</li>
+<li>
+<p>Trigger vendor product to generate event</p>
+</li>
+</ol>
+</li>
+<li>
+<p>Create input</p>
+</li>
+<li>
+<p>Wait</p>
+</li>
+<li>
+<p>Test</p>
+</li>
+<li>
+<p>Disable input</p>
+</li>
+<li>
+<p>Delete vendor product configuration (forge teardown)</p>
+</li>
+<li>
+<p>Decrease log level</p>
+</li>
+</ol>
+<h2 id="test_scenarios-eliminate-dangling-resources">Eliminate dangling resources<a class="headerlink" href="#test_scenarios-eliminate-dangling-resources" title="Permanent link">&para;</a></h2>
+<p><em><strong>Note:</strong> this case is just an extension of <a href="#test_scenarios-configure-vendor-product">configuring vendor product</a> and as such concepts that touches the differences will be described</em></p>
+<p>It happens that teardown is not reached in the tests. There can be number of reasons - eg. developer interupts tests execution before teardown is reached.</p>
+<p>We have to maintain hygiene in vendor product configuration to eliminate dangling resources.</p>
+<p><em><strong>Hint:</strong> We want to be able to distinguish configuration created for our tests from: 1. configuration used for other purposes, 2. configuration created for our tests but other time, 3. configuration created for our tests but by other test run - that may be a case in CI</em></p>
+<p>All the steps are the same as for <a href="#test_scenarios-configure-vendor-product">configuring vendor product</a>, beside implementation of:</p>
+<ol start="2">
+<li>
+<p>Configure vendor product:</p>
+<ol>
+<li>
+<p>Check list of configuration items and filter by names. Process only if name: 1. matches predefined pattern for the tests, 2. timestamp shows the configuration is older than predefined threshold. Delete the resources.</p>
+</li>
+<li>
+<p>When creating the configuration, make sure its name 1. matches predefined pattern, 2. contains timestamp and 3. contains <a href="#design_principles-data-isolation">test id</a>.</p>
+</li>
+</ol>
+</li>
+</ol></section><section class="print-page" id="before_you_write_your_first_line_of_code"><h1 id="before_you_write_your_first_line_of_code-before-you-write-your-first-line-of-code">Before you write your first line of code<a class="headerlink" href="#before_you_write_your_first_line_of_code-before-you-write-your-first-line-of-code" title="Permanent link">&para;</a></h1>
+<p>AUT is a powerful toolset.</p>
+<p>Add-on developer experience is the most important for us and we don&rsquo;t want you to get lost in what is available for you.</p>
+<h3 id="before_you_write_your_first_line_of_code-learn-from-splunk-add-on-for-example">Learn from Splunk Add-on for Example<a class="headerlink" href="#before_you_write_your_first_line_of_code-learn-from-splunk-add-on-for-example" title="Permanent link">&para;</a></h3>
+<p>Before you start working on your own tests, check <a href="https://github.com/splunk/splunk-example-ta">splunk-example-ta</a> to get basic understanding of the example TA. Think how you would test it.</p>
+<p>Open <code>tests/ucc_modinput_functional</code> and go through it in proposed below order to see how it is tested. Are your ideas addressed?</p>
+<h4 id="before_you_write_your_first_line_of_code-testsucc_modinput_functional">tests/ucc_modinput_functional<a class="headerlink" href="#before_you_write_your_first_line_of_code-testsucc_modinput_functional" title="Permanent link">&para;</a></h4>
+<ol>
+<li>
+<p><code>README.md</code> - contains add-on specific information related to the functional tests</p>
+</li>
+<li>
+<p><code>defaults.py</code> - contains predefined, the tests-specific, constant values</p>
+</li>
+<li>
+<p><code>vendor/</code> - contains vendor product-specific code</p>
+<ol>
+<li>
+<p><code>configuration.py</code> - to read configuration from environment variables; it can be used later for vendor product-specific means (eg. triggering action that would generate event available for add-on to collect), add-on configuration or within test functions</p>
+</li>
+<li>
+<p><code>client.py</code> - contains code used to communicate with vendor product</p>
+</li>
+</ol>
+</li>
+<li>
+<p><code>splunk/</code> - contains add-on specific code</p>
+<ol>
+<li>
+<p><code>client.py</code> - contains code used to communicate with add-on REST API; relevant code snippets can be found in swagger_client README.md copied from there, pasted to the client file and adopted</p>
+</li>
+<li>
+<p><code>forges.py</code> - contains functions responsible for creation and deletion of resources and configurations (forges); <code>yield</code> in each forge, separates setup and teardown</p>
+</li>
+<li>
+<p><code>probes.py</code> - contains functions validating specific conditions used to make sure that execution of a specific forge indeed resulted in creation of expected resource.</p>
+</li>
+</ol>
+</li>
+<li>
+<p><code>test_configuration.py</code> - start simple, eg. from making sure the simplest case like <code>test_ta_logging</code> works fine. Keep adding following tests for add-on configuration to make sure you are able to define building blocks that will be used for inputs</p>
+</li>
+<li>
+<p><code>test_inputs.py</code> - you have proper configuration. There are still two things you need to confirm:</p>
+<ol>
+<li>
+<p>Make sure vendor product is talkative enough to have always events available for your tests or you need to trigger events generation</p>
+</li>
+<li>
+<p>Input forge should return spl query you will use in input probe as well as in test to get raw events for assertion</p>
+</li>
+</ol>
+</li>
+</ol>
+<h3 id="before_you_write_your_first_line_of_code-also-worth-considering">&hellip; also worth considering<a class="headerlink" href="#before_you_write_your_first_line_of_code-also-worth-considering" title="Permanent link">&para;</a></h3>
+<p>There are components you may still want to add to your tests:</p>
+<ol>
+<li>
+<p><code>vendor/</code> </p>
+<ol>
+<li>
+<p><code>forges.py</code> - use if you want to setup and teardown resources in vendor product</p>
+</li>
+<li>
+<p><code>probes.py</code></p>
+</li>
+</ol>
+</li>
+<li>
+<p><code>splunk/</code></p>
+<ol>
+<li><code>configuration.py</code> - this file is to cover values not related to vendor product, such as proxy accounts</li>
+</ol>
+</li>
+<li>
+<p><code>test_proxies.py</code> - to test proxies. Proxy configuration is general for specific add-on, so if defined it will be used for all configuration entries as well as inputs. When constructing this kind of tests you want to isolate them that can be achieved by using <code>attach</code> decorator that would group following tasks:</p>
+<ol>
+<li>
+<p>making sure proxy is defined as required (or disabled if we want to test without proxy configured)</p>
+</li>
+<li>
+<p>relevant configuration creation - especially if validation is used that requires relevant connection to vendor product</p>
+</li>
+<li>
+<p>input creation</p>
+</li>
+<li>
+<p>etc.</p>
+</li>
+</ol>
+</li>
+<li>
+<p><code>test_validators.py</code> - to test that add-on will not accept improper values for its configuration.</p>
+</li>
+<li>
+<p>etc.</p>
+</li>
+</ol>
+<p>Above is just a proposition that may be relevant for small to medium add-ons.</p>
+<p>If you find your add-on more complex, feel free to organize the test structure the way you find the most convenient and efficient.</p>
+<h2 id="before_you_write_your_first_line_of_code-ucc-test-modinput-init">ucc-test-modinput init<a class="headerlink" href="#before_you_write_your_first_line_of_code-ucc-test-modinput-init" title="Permanent link">&para;</a></h2>
+<p>Init command is created to save some of your efforts by doing boilerplate actions: </p>
+<ul>
+<li>generates swagger client supporting modules, </li>
+<li>creates unified tests file structure, </li>
+<li>bootstraps basic splunk and vendor clients together with configuration classes, </li>
+<li>initial tests with forges and probes required for them.</li>
+</ul>
+<p>This command should be executed once before before any unified tests are created for the project.</p>
+<ol>
+<li>
+<p>Before invoking init command, please, make sure:</p>
+<ol>
+<li>
+<p><a href="#index-prerequisites">the prerequsities are met</a></p>
+</li>
+<li>
+<p><a href="#index-installation">addonfactory-ucc-test is installed</a></p>
+</li>
+</ol>
+</li>
+<li>
+<p>Run <code>init</code> to have following directories generated for you:
+<div class="highlight"><pre><span></span><code><span class="go">ucc-test-modinput init</span>
+</code></pre></div></p>
+<ol>
+<li>
+<p><code>swagger_client</code> directory with supporting modules</p>
+</li>
+<li>
+<p><code>tests/ucc_modinput_functional</code> directory with relevant files and some UCC related tests.</p>
+</li>
+</ol>
+</li>
+</ol>
+<p><strong>Note:</strong> You may want to specify openapi.json file location - eg. if it is in <code>Downloads</code>:
+<div class="highlight"><pre><span></span><code><span class="go">ucc-test-modinput init --openapi-json ~/Downloads/openapi.json</span>
+</code></pre></div>
+Visit <a href="#ucc-test-modinput_cli_tool"><code>ucc-test-modinput</code> page</a> for more</p>
+<ol start="3">
+<li>
+<p><a href="#addonfactory-ucc-test_pytest_plugin-expected-environment-variables">Set environment variables for your Splunk instance.</a> Eg.:
+<div class="highlight"><pre><span></span><code><span class="go">export MODINPUT_TEST_SPLUNK_HOST=localhost</span>
+<span class="go">export MODINPUT_TEST_SPLUNK_PORT=8089</span>
+<span class="go">export MODINPUT_TEST_SPLUNK_USERNAME=admin</span>
+<span class="go">export MODINPUT_TEST_SPLUNK_PASSWORD_BASE64=$(ucc-test-modinput base64encode -s &#39;Chang3d!&#39;)</span>
+</code></pre></div></p>
+</li>
+<li>
+<p>Run the tests
+<div class="highlight"><pre><span></span><code><span class="go">pytest tests/ucc_modinput_functional</span>
+</code></pre></div></p>
+</li>
+</ol>
+<p><strong>Note:</strong> If your add-on code contains customisations for out of the box components (such as logging or proxy), some tests may fail.</p>
+<p><img alt="ucc-test-modinput init" src="../images/ucc-test-modinput_init.gif" /></p></section><section class="print-page" id="when_you_write_your_tests"><h1 id="when_you_write_your_tests-when-you-write-your-tests">When you write your tests<a class="headerlink" href="#when_you_write_your_tests-when-you-write-your-tests" title="Permanent link">&para;</a></h1>
+<p>Running <a href="#before_you_write_your_first_line_of_code-ucc-test-modinput-init"><code>ucc-test-modinput init</code></a> provides a starting point for further development.</p>
+<p>Start with the <a href="#test_scenarios-basic-scenario">basic case</a> even if you need to cover more complex test cases. This will allow you to ensure there is access from the development environment to the vendor product.</p>
+<p>This paragraph contains hints that should be useful for your test development.</p>
+<p>Keep checking <a href="#before_you_write_your_first_line_of_code-learn-from-splunk-add-on-for-example">the example</a> for implementation details.</p>
+<h2 id="when_you_write_your_tests-vendor-product">Vendor product<a class="headerlink" href="#when_you_write_your_tests-vendor-product" title="Permanent link">&para;</a></h2>
+<h3 id="when_you_write_your_tests-general-hints">General hints<a class="headerlink" href="#when_you_write_your_tests-general-hints" title="Permanent link">&para;</a></h3>
+<p>Vendor product specific code is entirely in developer&rsquo;s hands. There are however some hints you may find useful:</p>
+<ol>
+<li>
+<p><strong>Consult Product Documentation</strong>:<br />
+   Begin with the official product documentation. These resources often include code samples and integration guides that can be directly applied to your tests, saving development time and effort.</p>
+</li>
+<li>
+<p><strong>Explore Official Repositories</strong>:<br />
+   Check vendor official repositories (eg. GitHub). These repositories might contain supporting libraries or example code that can aid in developing integrations.</p>
+</li>
+<li>
+<p><strong>Leverage Package Indexes</strong>:<br />
+   Utilize PyPI.org or equivalent package indexes for discovering SDKs and libraries that are specific to the vendor products. These SDKs can simplify the integration process and ensure compatibility.</p>
+</li>
+<li>
+<p><strong>Utilize OpenAPI Specifications</strong>:<br />
+   If available, use OpenAPI or equivalent specifications to create or generate client libraries for the vendor products. This can facilitate a more streamlined and automated integration process.</p>
+</li>
+<li>
+<p><strong>Engage with Developer Communities</strong>:<br />
+   Platforms like Reddit and StackOverflow are valuable for community support. You can find discussions, troubleshooting tips, and shared experiences related to integrating vendor products.</p>
+</li>
+<li>
+<p><strong>Consult AI Tools</strong>:<br />
+   Consider using AI services to assist with coding, integration challenges, or generating documentation. These tools can provide insights or generate code snippets that may enhance your framework.</p>
+</li>
+</ol>
+<h3 id="when_you_write_your_tests-framework-specific-hints">Framework specific hints<a class="headerlink" href="#when_you_write_your_tests-framework-specific-hints" title="Permanent link">&para;</a></h3>
+<p>It is highly recommended to stay consistent with Splunk specific code to have internally consistent and easier to maintain tests. To achieve it, consider following hints:</p>
+<ol>
+<li>
+<p>Follow <code>vendor/</code> directory structure as described in <a href="#before_you_write_your_first_line_of_code-learn-from-splunk-add-on-for-example">the example TA</a></p>
+</li>
+<li>
+<p>Store credentials in environment variables and use <code>get_from_environment_variable</code> from <code>splunk_add_on_ucc_modinput_test.common.utils</code> to read the credentials</p>
+<ol>
+<li>if environment variable is optional, use <code>is_optional=True</code> parameter - eg.:</li>
+</ol>
+<p><div class="highlight"><pre><span></span><code>self.username = utils.get_from_environment_variable(&quot;MODINPUT_TEST_FOOBAR_USERNAME&quot;, is_optional=True)
+</code></pre></div>
+<code>None</code> will be assigned to <code>self.username</code> in example as above</p>
+<ol start="2">
+<li>
+<p>if environent variable should be encoded, use relevant sufix to emphasize a fact it was done and use <code>string_function</code> parameter when calling <code>get_from_environment_variable</code> function - eg.:
+<div class="highlight"><pre><span></span><code>self.token = utils.get_from_environment_variable(&quot;MODINPUT_TEST_FOOBAR_TOKEN_BASE64&quot;, string_function=utils.Base64.decode)
+</code></pre></div>
+in example as above:</p>
+<ul>
+<li>
+<p><code>_BASE64</code> suffix is used to emphasize the password value should be base64 encoded</p>
+</li>
+<li>
+<p><code>string_function</code> is pointing to callable object that will do string transformation.</p>
+</li>
+</ul>
+</li>
+</ol>
+</li>
+</ol>
+<h2 id="when_you_write_your_tests-splunk">Splunk<a class="headerlink" href="#when_you_write_your_tests-splunk" title="Permanent link">&para;</a></h2>
+<p>Proper spl query construction is crucial for proper tests results and performance.</p>
+<p>The spl query format looks like below:</p>
+<p><div class="highlight"><pre><span></span><code>search index={index_name} source={source_name_containing_input_name} {raw_event_specific_string} | where _time&gt;{start_time}
+</code></pre></div>
+where:</p>
+<ul>
+<li>
+<p><strong>index_name</strong> can be:</p>
+<ul>
+<li>
+<p>default - assigned to <code>splunk_client.splunk_configuration.dedicated_index.name</code></p>
+</li>
+<li>
+<p>dedicated - check <a href="#design_principles-data-isolation">data isolation principle</a> or <a href="#test_scenarios-isolate-data-in-indexes">relevant test scenario</a> for more</p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>source_name_containing_input_name</strong> highly depends on add-on implementation; eg. for example add-on source part of the spl is defined as <code>source="example://{name}"</code> (where <code>name</code> is for input name)</p>
+</li>
+<li>
+<p><strong>raw_event_specific_string</strong> that can be skipped, if other values are sufficient, one or many strings that define uniquely raw event we are interested in</p>
+</li>
+<li>
+<p><strong>start_time</strong> - epoch timestamp should be used, however where timestamp is collected should be pick with special care. Check <a href="#test_scenarios">test scenarios</a> to understand what potential options you&rsquo;ve got. Timestamp of begginig of tests can be used as default: <code>start_time = utils.get_epoch_timestamp()</code></p>
+</li>
+</ul>
+<h1 id="when_you_write_your_tests-when-your-tests-are-ready">When your tests are ready<a class="headerlink" href="#when_you_write_your_tests-when-your-tests-are-ready" title="Permanent link">&para;</a></h1>
+<ol>
+<li>
+<p>Export environment variables for <a href="#addonfactory-ucc-test_pytest_plugin-expected-environment-variables">Splunk</a> and for <a href="#when_you_write_your_tests-framework-specific-hints">vendor</a></p>
+</li>
+<li>
+<p>Run tests: <code>pytest tests/ucc_modinput_functional/</code> (and fix tests if needed)</p>
+</li>
+<li>
+<p>Document add-on specific information related to the functional tests in <code>tests/ucc_modinput_functional/README.md</code>. Particularly - how vendor product should be prepared (or reference to relevant documentation) as well as what vendor and test specific environment variables should be exported</p>
+</li>
+<li>
+<p>Commit and push your modifications to code repository. Ignore <code>output/</code> and <code>swagger_client/</code> directories that are generated by <code>ucc-gen gen</code> and <code>ucc-test-modinput gen</code> respectively.</p>
+</li>
+</ol></section><section class="print-page" id="ucc-test-modinput_cli_tool"><h1 id="ucc-test-modinput_cli_tool-ucc-test-modinput-cli-tool">ucc-test-modinput CLI tool<a class="headerlink" href="#ucc-test-modinput_cli_tool-ucc-test-modinput-cli-tool" title="Permanent link">&para;</a></h1>
+<p>ucc-test-modinput CLI is a supporting tool.</p>
+<p>It comes with following arguments:</p>
+<ul>
+<li>
+<p><code>--help</code> or <code>-h</code> ; shows help message and exits ; you can use it for arguments as well - eg. <code>ucc-test-modinput base64encode -h</code> will show help message for <code>base64encode</code></p>
+</li>
+<li>
+<p><code>--version</code> - shows program&rsquo;s version number and exit </p>
+</li>
+<li>
+<p><code>base64encode</code> - converts complex string (due to special characters or structure) to base64 string</p>
+<ul>
+<li>
+<p><code>--string</code> or <code>-s</code> ; <code>-s [string you want to encode]</code> - eg. <code>base64encode -s ThisIsMyPassword</code></p>
+</li>
+<li>
+<p><code>--file</code> or <code>-f</code> ; <code>-f [text file path; string from the file will be encoded]</code> - eg. <code>ucc-test-modinput base64encode -f ~/client_secret.json</code></p>
+</li>
+</ul>
+</li>
+<li>
+<p><code>base64decode -s [string you want to decode]</code> - eg. <code>ucc-test-modinput base64decode -s VGghczEkTXlQQHNzdzByZA==</code></p>
+</li>
+<li>
+<p><code>gen</code> - does two things: 1. creates add-on SDK from given openapi.json, 2. creates splunk client module and checks if existing (<code>ucc_modinput_functional/splunk/client/client.py</code>) is the same</p>
+<ul>
+<li>
+<p><code>--openapi-json</code> or <code>-o</code> ; <code>-o [path to openapi.json / source file ]</code> - default value is <code>output/*/appserver/static/openapi.json</code> ; refer to <a href="https://splunk.github.io/addonfactory-ucc-generator/openapi/#how-to-find-the-document">UCC documentation</a> to learn more where you can find this document</p>
+</li>
+<li>
+<p><code>--client-code</code> or <code>-c</code> ; <code>-c [path to client code / target directory]</code> - default value is set to repo root directory ; this is where <code>swagger_client</code> directory will be saved or overwriten if some exists already. The directory contains client code for TA REST API and <code>swagger_client/README.md</code> file that documents the client API</p>
+</li>
+<li>
+<p><code>--tmp</code> or <code>-t</code> ; <code>-t [path to directory where temporary files are stored]</code> - default value is set to <code>/modinput/</code> subdirectory of <a href="https://docs.python.org/3/library/tempfile.html#tempfile.gettempdir">directory used for temporary files</a></p>
+</li>
+<li>
+<p><code>--platform</code> or <code>-p</code> - not used by default ; <a href="https://docs.docker.com/build/building/multi-platform/"><code>--platform</code></a> flag that can be used to run <a href="https://hub.docker.com/r/swaggerapi/swagger-codegen-cli-v3">swaggerapi/swagger-codegen-cli-v3 docker image</a></p>
+</li>
+<li>
+<p><code>--skip-splunk-client-check</code> - exisitng splunk client will not be checked aginst consistency with swagger client that may lead to inconsistent state of splunk client; this is <code>gen</code> specific flag and does not exists for <code>init</code></p>
+</li>
+<li>
+<p><code>--force-splunk-client-overwritten</code> - existing splunk client will be backup and overwritten by new one; this is <code>gen</code> specific flag and does not exists for <code>init</code></p>
+</li>
+</ul>
+</li>
+<li>
+<p><code>init</code> - initialize modinput tests (you can read more on that <a href="#before_you_write_your_first_line_of_code-ucc-test-modinput-init">here</a>) and runs <code>gen</code> to have add-on SDK created ; none additional argument is required for the initialization step, so argument list is as for <code>gen</code> (excluding <code>--skip-splunk-client-check</code> and <code>--force-splunk-client-overwritten</code>)</p>
+</li>
+</ul></section><section class="print-page" id="addonfactory-ucc-test_pytest_plugin"><h1 id="addonfactory-ucc-test_pytest_plugin-addonfactory-ucc-test-pytest-plugin">addonfactory-ucc-test pytest plugin<a class="headerlink" href="#addonfactory-ucc-test_pytest_plugin-addonfactory-ucc-test-pytest-plugin" title="Permanent link">&para;</a></h1>
+<p>addonfactory-ucc-test plugin extendst <a href="https://pytest.org/">pytest</a> to support <a href="#addonfactory-ucc-test_pytest_plugin-action-diagram">end-to-end Splunk add-ons flow</a>.</p>
+<p>It comes with libraries that cover standard Splunk (Enterprise and Cloud) functionalities as well as general UCC functionalities, such as:</p>
+<ul>
+<li>
+<p>indexes creation</p>
+</li>
+<li>
+<p>searching</p>
+</li>
+<li>
+<p>common configuration and inputs management</p>
+</li>
+</ul>
+<p>Relevant <a href="#addonfactory-ucc-test_pytest_plugin-expected-environment-variables">environment variables</a> have to be defined to benefit from the functionalities.</p>
+<p>The plugin requires vendor product specific and add-on specific functionalities to be covered by add-on developer.
+This includes specifying environment variables that include information about vendor product address, user that should be used to generate events or user that should be used for integration.</p>
+<h2 id="addonfactory-ucc-test_pytest_plugin-expected-environment-variables">Expected environment variables<a class="headerlink" href="#addonfactory-ucc-test_pytest_plugin-expected-environment-variables" title="Permanent link">&para;</a></h2>
+<p>Information about Splunk has to be given in relevant environment variables:</p>
+<ul>
+<li>
+<p><strong>MODINPUT_TEST_SPLUNK_HOST</strong> - Splunk Enterprise IP or domain address or Splunk Cloud domain address (eg. <code>127.0.0.1</code>, <code>localhost</code> or <code>test.splunkcloud.com</code>). <code>https</code> protocol is used for connection and ssl verification is skipped to support developer and test Splunk instances.</p>
+</li>
+<li>
+<p><strong>MODINPUT_TEST_SPLUNK_PORT</strong> - management port (<code>8089</code> in most cases)</p>
+</li>
+<li>
+<p><strong>MODINPUT_TEST_SPLUNK_USERNAME</strong> - Splunk admin username (<code>admin</code> in most cases) that will be used for tests</p>
+</li>
+<li>
+<p><strong>MODINPUT_TEST_SPLUNK_PASSWORD_BASE64</strong> - base64 encoded Splunk user used for tests password  (eg. <code>Q2hhbmczZCE=</code>  as a result of <code>ucc-test-modinput base64encode -s 'Chang3d!'</code>; check <a href="#ucc-test-modinput_cli_tool">ucc-test-modinput documentation</a> for more)</p>
+</li>
+<li>
+<p><strong><em>(optional) MODINPUT_TEST_SPLUNK_DEDICATED_INDEX</em></strong> - existing index name that should be used to write test events. If not defined, dedicated index is created for each test run and used for the same purpose.</p>
+</li>
+<li>
+<p>following variables are required only if <strong>Splunk Cloud</strong> is used for tests <strong>and any index needs to be created</strong> for tests:</p>
+<ul>
+<li>
+<p><strong>MODINPUT_TEST_SPLUNK_TOKEN_BASE64</strong> - base64 encoded <a href="https://docs.splunk.com/Documentation/SplunkCloud/latest/Security/CreateAuthTokens">Splunk Cloud authentication token</a></p>
+</li>
+<li>
+<p><strong>MODINPUT_TEST_ACS_SERVER</strong> -  <a href="https://docs.splunk.com/Documentation/SplunkCloud/latest/Config/ACSCLI#Set_environment_variables">ACS server</a> (eg. <code>https://admin.splunk.com</code>, <code>https://staging.admin.splunk.com</code> or <code>https://admin.splunkcloudgc.com</code>)</p>
+</li>
+<li>
+<p><strong>MODINPUT_TEST_ACS_STACK</strong> - ACS stack, that in majority of the cases will be just part of Splunk Cloud domain address (eg. for <code>ucc-test.stg.splunkcloud.com</code>, ACS server would be <code>https://staging.admin.splunk.com</code> and ACS stack <code>ucc-test</code>)</p>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="addonfactory-ucc-test_pytest_plugin-action-diagram">Action diagram<a class="headerlink" href="#addonfactory-ucc-test_pytest_plugin-action-diagram" title="Permanent link">&para;</a></h2>
+<p><img alt="image" src="../images/addonfactory-ucc-test-action-diagram.png" /></p>
+<!--
+https://app.diagrams.net/#G176U5PybjM_AZ2A_fMCUYRVkRoJJ4CKJp#%7B%22pageId%22%3A%22kMcs2QKimi5lbFpNUQGU%22%7D
+-->
+
+<h2 id="addonfactory-ucc-test_pytest_plugin-plugin-arguments">Plugin arguments<a class="headerlink" href="#addonfactory-ucc-test_pytest_plugin-plugin-arguments" title="Permanent link">&para;</a></h2>
+<p>addonfactory-ucc-test pytest plugin comes with following arguments:</p>
+<ul>
+<li>
+<p><code>--sequential-execution</code> - use no threading (for debugging)</p>
+</li>
+<li>
+<p><code>--do-not-fail-with-teardown</code> - do not fail test if test&rsquo;s teardown fails. By default a test will fail if any of its forges teardowns fail, even if the test itself passed.</p>
+</li>
+<li>
+<p><code>--do-not-delete-at-teardown</code> - do not delete created resoueces at teardown. This flag is for debug purposes and should be handled by developer if needed. For example, based on this flag developers can add alternative code to forges&rsquo; teardowns, to disable inputs instead of deleting them in order to study inputs configurations after tests execution.</p>
+</li>
+<li>
+<p><code>--number-of-threads=[NUMBER_OF_THREADS]</code> - number of threads to use to execute forges. Allowed range: [10, 20]. Default value: 10.</p>
+</li>
+<li>
+<p><code>--probe-invoke-interval=[PROBE_INVOKE_INTERVAL]</code> - interval in seconds used to repeat invocation of yes/no type of probes. Allowed range: [1, 60]. Default value: 5.</p>
+</li>
+<li>
+<p><code>--probe-wait-timeout=[PROBE_WAIT_TIMEOUT]</code> - maximum time in seconds given to a single probe to turn positive. Allowed range: [60, 600]. Default value: 300.</p>
+</li>
+<li>
+<p><code>--bootstrap-wait-timeout=[BOOTSTRAP_WAIT_TIMEOUT]</code> - maximum time in seconds given to all bootstrap tasks to finish. Allowed range: [300, 3600]. Default value: 1800.</p>
+</li>
+<li>
+<p><code>--attached-tasks-wait-timeout=[ATTACHED_TASKS_WAIT_TIMEOUT]</code> - maximum time in seconds given to finish all tasks attached to a single test. Allowed range: [60, 1200]. Default value: 600.</p>
+</li>
+<li>
+<p><code>--completion-check-frequency=[COMPLETION_CHECK_FREQUENCY]</code> - frequency to check that bootstrap or attached tasks bundle has finished to execute. Allowed range: [1, 30]. Default value: 5.</p>
+</li>
+</ul></section><section class="print-page" id="contributing"><h1 id="contributing-contributing-guidelines">Contributing Guidelines<a class="headerlink" href="#contributing-contributing-guidelines" title="Permanent link">&para;</a></h1>
+<p>We welcome contributions from the community! This guide will help you understand our contribution process and requirements.</p>
+<h2 id="contributing-development-guidelines">Development guidelines<a class="headerlink" href="#contributing-development-guidelines" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Small PRs (<a href="https://testing.googleblog.com/2024/07/in-praise-of-small-pull-requests.html">blogpost</a>)</li>
+<li>When fixing a bug, include a test that reproduces the issue in the same pull request (the test should fail without your changes)</li>
+<li>If you are refactoring, ensure adequate test coverage exists for the target area. If coverage is insufficient, create tests in a separate pull request first. This approach provides a safety net for validating current behavior and simplifies code reviews.</li>
+</ol>
+<h2 id="contributing-build-and-test">Build and Test<a class="headerlink" href="#contributing-build-and-test" title="Permanent link">&para;</a></h2>
+<p>Prerequisites:</p>
+<ul>
+<li>Poetry 1.5.1. <a href="https://python-poetry.org/docs/#installing-with-the-official-installer">Installation guide</a></li>
+</ul>
+<p>Build a new local version:</p>
+<div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>build
+</code></pre></div>
+<h3 id="contributing-unit-tests">Unit tests<a class="headerlink" href="#contributing-unit-tests" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>tests/unit
+</code></pre></div>
+<h3 id="contributing-linting-and-type-checking">Linting and Type-checking<a class="headerlink" href="#contributing-linting-and-type-checking" title="Permanent link">&para;</a></h3>
+<p><code>ucc-gen</code> uses the <a href="https://pre-commit.com"><code>pre-commit</code></a> framework for linting and type-checking.
+Consult with <code>pre-commit</code> documentation about what is the best way to install the software.</p>
+<p>To run it locally:</p>
+<div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>run<span class="w"> </span>pre-commit<span class="w"> </span>run<span class="w"> </span>--all-files
+</code></pre></div>
+<!--
+## Testing TA with the Local Version of AUT
+
+AUT is a testing tool for Technology Add-ons (TAs), so it's important to use the tool for TA tests while developing AUT locally.
+
+...
+-->
+
+<h2 id="contributing-documentation-changes">Documentation changes<a class="headerlink" href="#contributing-documentation-changes" title="Permanent link">&para;</a></h2>
+<p>Documentation changes are also welcome!</p>
+<p>To verify changes locally:</p>
+<div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>run<span class="w"> </span>mkdocs<span class="w"> </span>serve<span class="w"> </span>-a<span class="w"> </span>localhost:8001
+</code></pre></div>
+<h2 id="contributing-issues-and-bug-reports">Issues and bug reports<a class="headerlink" href="#contributing-issues-and-bug-reports" title="Permanent link">&para;</a></h2>
+<p>If you&rsquo;re seeing some unexpected behavior with AUT, create an <a href="https://github.com/splunk/addonfactory-ucc-test/issues">issue</a> on GitHub. You can click on &ldquo;New Issue&rdquo; and use the template provided.</p>
+<h2 id="contributing-pull-requests">Pull requests<a class="headerlink" href="#contributing-pull-requests" title="Permanent link">&para;</a></h2>
+<p>We love to see pull requests!</p>
+<h3 id="contributing-pr-title">PR Title<a class="headerlink" href="#contributing-pr-title" title="Permanent link">&para;</a></h3>
+<p>We follow <a href="https://www.conventionalcommits.org/en/v1.0.0/">Conventional Commits</a> for PR titles. The title format is crucial as we squash commits during merge, and this PR title will be used in the release notes (for feat and fix types).
+Here&rsquo;s a short TL;DR of the format:</p>
+<div class="highlight"><pre><span></span><code>&lt;type&gt;(&lt;scope&gt;): &lt;description&gt;
+
+Types:
+- feat: New feature (user facing)
+- fix: Bug fix (user facing)
+- docs: Documentation changes (user facing)
+- style: Code style changes (formatting, etc.)
+- refactor: Code changes that neither fix bugs nor add features
+- perf: Performance improvements
+- test: Adding or updating tests
+- chore: Maintenance tasks
+</code></pre></div>
+<p>Example: <code>feat(ui): add new input validation for text fields</code></p>
+<h3 id="contributing-pr-description">PR Description<a class="headerlink" href="#contributing-pr-description" title="Permanent link">&para;</a></h3>
+<p>Includes:</p>
+<ul>
+<li>Motivation behind the changes (any reference to issues or user stories)</li>
+<li>High level description of code changes</li>
+<li>Description of changes in user experience if applicable.</li>
+<li>Steps to reproduce the issue or test the new feature, if possible. This will speed up the review process.</li>
+</ul>
+<p>After submitting your PR, GitHub will automatically add relevant reviewers, and CI checks will run automatically.</p>
+<blockquote>
+<p>Note: <code>semgrep</code> and <code>fossa</code> checks might fail for external contributors. This is expected and will be handled by maintainers.</p>
+</blockquote>
+<h2 id="contributing-release-flow">Release flow<a class="headerlink" href="#contributing-release-flow" title="Permanent link">&para;</a></h2>
+<p>The instructions below utilize the <a href="https://cli.github.com/">GitHub CLI tool</a>, which you can install via HomeBrew:</p>
+<div class="highlight"><pre><span></span><code>brew<span class="w"> </span>install<span class="w"> </span>gh
+gh<span class="w"> </span>auth<span class="w"> </span>login
+</code></pre></div>
+<ul>
+<li>The default development branch is <code>develop</code>. Use this branch for creating pull requests (PRs) for your features, fixes, documentation updates, etc. PRs to the <code>develop</code> branch should be merged using the squash option on GitHub.</li>
+<li>When it&rsquo;s time for a release (handled by the UCC team), create a PR from <code>develop</code> to <code>main</code> using the following commands:</li>
+</ul>
+<div class="highlight"><pre><span></span><code>gh<span class="w"> </span>pr<span class="w"> </span>create<span class="w"> </span>--title<span class="w"> </span><span class="s2">&quot;chore: merge develop into main&quot;</span><span class="w"> </span>--body<span class="w"> </span><span class="s2">&quot;&quot;</span><span class="w"> </span>--head<span class="w"> </span>develop<span class="w"> </span>--base<span class="w"> </span>main
+<span class="c1"># set automerge with merge commit to avoid accidentally squashing PR</span>
+gh<span class="w"> </span>pr<span class="w"> </span>merge<span class="w"> </span>develop<span class="w"> </span>--auto<span class="w"> </span>--merge
+</code></pre></div>
+<ul>
+<li>Ensure CI passes and await team review.</li>
+<li>PR should be merged using <strong>merge commit</strong> option in GitHub (already included in the command)</li>
+<li>Releases are made automatically (both on GitHub and PyPI), and a bot will push a commit to <code>main</code> with all necessary changes</li>
+<li>If necessary, update release notes and CHANGELOG.md accordingly to the content of the release.</li>
+<li>If any issue was solved by this release, remove <strong>waiting-for-release</strong> label from it and then close the issue.</li>
+<li>After the release, backport the bot&rsquo;s changes to the <code>develop</code> branch:</li>
+</ul>
+<div class="highlight"><pre><span></span><code>gh<span class="w"> </span>pr<span class="w"> </span>create<span class="w"> </span>--title<span class="w"> </span><span class="s2">&quot;chore: merge main into develop&quot;</span><span class="w"> </span>--body<span class="w"> </span><span class="s2">&quot;&quot;</span><span class="w"> </span>--head<span class="w"> </span>main<span class="w"> </span>--base<span class="w"> </span>develop
+<span class="c1"># set automerge with merge commit to avoid accidentally squashing PR</span>
+gh<span class="w"> </span>pr<span class="w"> </span>merge<span class="w"> </span>main<span class="w"> </span>--auto<span class="w"> </span>--merge
+</code></pre></div>
+<ul>
+<li>
+<p>If a release encounters issues requiring a quick bug fix (handled by the AUT team):</p>
+<ul>
+<li>Create a PR to the main branch with the fix, including tests that reproduce and then fix the issue.</li>
+<li>Ensure CI passes and await team review.</li>
+<li>Merge the PR using the merge commit option on GitHub.</li>
+<li>Backport the bug fix PR to the develop branch.</li>
+</ul>
+</li>
+<li>
+<p>After release is done, announce it to community on slack channels:</p>
+<ul>
+<li><a href="https://splunk.enterprise.slack.com/archives/C081JT7R69Z">Internal UCC test channel</a></li>
+<li><a href="https://splunk-usergroups.slack.com/archives/C03SG3ZL4S1">Splunk Usergroup UCC channel</a></li>
+</ul>
+</li>
+</ul></section><section class="print-page" id="changelog"><h1 id="changelog-changelog">Changelog<a class="headerlink" href="#changelog-changelog" title="Permanent link">&para;</a></h1>
+<h1 id="changelog-100-2025-05-27">1.0.0 (2025-05-27)<a class="headerlink" href="#changelog-100-2025-05-27" title="Permanent link">&para;</a></h1></section><section class="print-page" id="troubleshooting"><h1 id="troubleshooting-troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting-troubleshooting" title="Permanent link">&para;</a></h1>
+<h3 id="troubleshooting-ci-issues">CI issues<a class="headerlink" href="#troubleshooting-ci-issues" title="Permanent link">&para;</a></h3>
+<p>While installing the framework from Git instead of PyPI, you may encounter the following error:
+<div class="highlight"><pre><span></span><code>HangupExceptionThe remote server unexpectedly closed the connection
+....
+The following error occurred when trying to handle this error:
+HangupException
+
+git@github.com: Permission denied (publickey)
+....
+</code></pre></div></p>
+<p>To resolve that, please install the package using PyPI. If that is not possible, and you use <code>addonfactory-workflow-addon-release</code>, please make sure you&rsquo;re using at least <code>v4.19</code> version.</p></section></div>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": "/addonfactory-ucc-test/", "features": ["content.code.copy", "navigation.indexes"], "search": "../assets/javascripts/workers/search.dfff1995.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.dff1b7c8.min.js"></script>
+      
+        <script src="../js/print-site.js"></script>
+      
+    
+  </body>
+</html>
