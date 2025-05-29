@@ -3,6 +3,6 @@ contact_links:
   - name: Have questions or need support (for Splunkers)?
     url: https://splunk.enterprise.slack.com/archives/C081JT7R69Z
     about: Please ask questions in the Splunk Slack
-  # - name: Have questions or need support (for external community)?
-  #   url: https://splunk-usergroups.slack.com/archives/C03SG3ZL4S1
-  #   about: Please ask questions in the Splunk User Groups Slack
+  - name: Have questions or need support (for external community)?
+    url: https://splunk-usergroups.slack.com/archives/C03SG3ZL4S1
+    about: Please ask questions in the Splunk User Groups Slack
