@@ -59,6 +59,13 @@ def test_parametrized(pytester):
         )
 
 
+def test_wrongly_parametrized(pytester):
+    with ScenarioTester(pytester, "invalid_parameters") as tester:
+        tester.result.stdout.fnmatch_lines(
+            "*! _pytest.outcomes.Exit: Errors occurred during test collection. Exiting pytest. !*"  # noqa: E501
+        )
+
+
 def test_probes(pytester):
     with ScenarioTester(pytester, "probes") as tester:
         tester.result.assert_outcomes(passed=1)
