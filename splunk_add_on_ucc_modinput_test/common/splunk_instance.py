@@ -324,6 +324,10 @@ class Configuration:
         )
 
     @property
+    def acs_stack(self) -> str:
+        return self._acs_stack
+
+    @property
     def service(self) -> Service:
         return self._service
 
