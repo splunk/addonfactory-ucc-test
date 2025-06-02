@@ -58,10 +58,9 @@ class Configuration:
                 "Index name must consist of only numbers, "
                 "lowercase letters, underscores, and hyphens."
             )
-        if index_name.startswith(("_", "-")) or "kvstore" in index_name:
+        if index_name.startswith(("_", "-")):
             logger.error(
-                "Index name cannot begin with an underscore "
-                "or hyphen, or contain the word 'kvstore'."
+                "Index name cannot begin with an underscore or hyphen."
             )
 
     @staticmethod
