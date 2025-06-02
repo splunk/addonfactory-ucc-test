@@ -47,9 +47,29 @@ class Configuration:
             return None
 
     @staticmethod
+    def validate_index_name(index_name: str) -> None:
+        """
+        Validate the index name according to Splunk's naming conventions.
+        """
+        if not index_name:
+            logger.error("Index name must not be empty.")
+        if not all((c.isalnum() or c in ("_-")) for c in index_name):
+            logger.error(
+                "Index name must consist of only numbers, "
+                "lowercase letters, underscores, and hyphens."
+            )
+        if index_name.startswith(("_", "-")) or "kvstore" in index_name:
+            logger.error(
+                "Index name cannot begin with an underscore "
+                "or hyphen, or contain the word 'kvstore'."
+            )
+
+    @staticmethod
     def _victoria_create_index(
         index_name: str, *, acs_stack: str, acs_server: str, splunk_token: str
     ) -> None:
+        index_name = index_name.lower()
+        Configuration.validate_index_name(index_name)
         url = f"{acs_server}/{acs_stack}/adminconfig/v2/indexes"
         data = json.dumps(
             {
@@ -93,6 +113,8 @@ class Configuration:
                         except error.HTTPError as e:
                             if e.code == 404:
                                 time.sleep(backoff_factor * (2**attempt))
+                            elif e.code == 503:
+                                time.sleep(backoff_factor * 2 * attempt)
                             else:
                                 raise
                     idx_not_created_msg += " or creation time exceeded timeout"
