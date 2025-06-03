@@ -47,28 +47,32 @@ class Configuration:
             return None
 
     @staticmethod
-    def validate_index_name(index_name: str) -> None:
+    def _validate_index_name(index_name: str) -> None:
         """
         Validate the index name according to Splunk's naming conventions.
         """
         if not index_name:
-            logger.error("Index name must not be empty.")
+            reason = "Index name must not be empty"
+            logger.error(reason)
+            raise ValueError(reason)
         if not all((c.isalnum() or c in ("_-")) for c in index_name):
-            logger.error(
+            reason = (
                 "Index name must consist of only numbers, "
                 "lowercase letters, underscores, and hyphens."
             )
+            logger.error(reason)
+            raise ValueError(reason)
         if index_name.startswith(("_", "-")):
-            logger.error(
-                "Index name cannot begin with an underscore or hyphen."
-            )
+            reason = "Index name cannot begin with an underscore or hyphen."
+            logger.error(reason)
+            raise ValueError(reason)
 
     @staticmethod
     def _victoria_create_index(
         index_name: str, *, acs_stack: str, acs_server: str, splunk_token: str
     ) -> None:
         index_name = index_name.lower()
-        Configuration.validate_index_name(index_name)
+        Configuration._validate_index_name(index_name)
         url = f"{acs_server}/{acs_stack}/adminconfig/v2/indexes"
         data = json.dumps(
             {
@@ -92,10 +96,9 @@ class Configuration:
 
         context = ssl.create_default_context(cafile=certifi.where())
 
-        try:
-            retries_503 = 5
-            sleep_503 = 30
-            for attempt_503 in range(retries_503):
+        retries_http_errors = 6
+        for attempt_http in range(retries_http_errors):
+            try:
                 with request.urlopen(req, context=context) as response:
                     if response.status == 202:
                         retries = 25
@@ -120,23 +123,31 @@ class Configuration:
                         idx_not_created_msg += (
                             " or creation time exceeded timeout"
                         )
-                    elif response.status == 503:
-                        if attempt_503 < retries_503:
-                            logger.info(
-                                f"HTTP Error 503 appeared, retrying... "
-                                f"{attempt_503+1}/{retries_503}"
-                            )
-                            time.sleep(sleep_503)
-                            continue
-                        else:
-                            idx_not_created_msg += (
-                                f" after {retries_503} "
-                                f"retries due to HTTP Error 503"
-                            )
-                    break
+                        break
+            except error.HTTPError as e:
+                # Retry logic for specific HTTP error codes:
+                # 424: Failed Dependency - indicates a temporary issue with a required resource. # noqa: E501
+                # 503: Service Unavailable - suggests the server is temporarily overloaded or down. # noqa: E501
+                if e.code in (424, 503):
+                    if attempt_http < retries_http_errors:
+                        logger.info(
+                            f"HTTP Response status {e.code}, retrying to "
+                            f"create index {index_name}... "
+                            f"{attempt_http + 1}/{retries_http_errors}"
+                        )
+                        time.sleep(2**attempt_http)
+                        continue
+                    else:
+                        idx_not_created_msg += (
+                            " or creation time exceeded timeout"
+                        )
+                        raise
+                else:
+                    raise
 
-        except error.URLError as e:
-            idx_not_created_msg += f"\nException raised:\n{e}"
+            except Exception as e:
+                idx_not_created_msg += f"\nException raised:\n{e}"
+                break
 
         logger.critical(idx_not_created_msg)
         pytest.exit(idx_not_created_msg)
