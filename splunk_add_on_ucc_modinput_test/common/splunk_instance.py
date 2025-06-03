@@ -115,6 +115,18 @@ class Configuration:
                             else:
                                 raise
                     idx_not_created_msg += " or creation time exceeded timeout"
+                elif response.status == 503:
+                    time.sleep(30)
+                    try:
+                        request.urlopen(req, context=context)
+                    except Exception as e:
+                        idx_not_created_msg += (
+                            f"\nException raised:\n{e} while retrying "
+                            f"index creation after HTTP Error 503"
+                        )
+                        logger.critical(idx_not_created_msg)
+                        pytest.exit(idx_not_created_msg)
+
         except error.URLError as e:
             idx_not_created_msg += f"\nException raised:\n{e}"
 
