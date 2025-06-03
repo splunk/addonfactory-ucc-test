@@ -112,8 +112,6 @@ class Configuration:
                         except error.HTTPError as e:
                             if e.code == 404:
                                 time.sleep(backoff_factor * (2**attempt))
-                            elif e.code == 503:
-                                time.sleep(backoff_factor * 2 * attempt)
                             else:
                                 raise
                     idx_not_created_msg += " or creation time exceeded timeout"
