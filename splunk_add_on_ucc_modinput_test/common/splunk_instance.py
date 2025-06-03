@@ -93,39 +93,47 @@ class Configuration:
         context = ssl.create_default_context(cafile=certifi.where())
 
         try:
-            with request.urlopen(req, context=context) as response:
-                if response.status == 202:
-                    retries = 25
-                    backoff_factor = 1
-                    for attempt in range(retries):
-                        try:
-                            get_req = request.Request(
-                                f"{url}/{index_name}",
-                                headers=headers,
-                                method="GET",
-                            )
-                            with request.urlopen(
-                                get_req, context=context
-                            ) as get_response:
-                                if get_response.status == 200:
-                                    return
-                        except error.HTTPError as e:
-                            if e.code == 404:
-                                time.sleep(backoff_factor * (2**attempt))
-                            else:
-                                raise
-                    idx_not_created_msg += " or creation time exceeded timeout"
-                elif response.status == 503:
-                    time.sleep(30)
-                    try:
-                        request.urlopen(req, context=context)
-                    except Exception as e:
+            retries_503 = 5
+            sleep_503 = 30
+            for attempt_503 in range(retries_503):
+                with request.urlopen(req, context=context) as response:
+                    if response.status == 202:
+                        retries = 25
+                        backoff_factor = 1
+                        for attempt in range(retries):
+                            try:
+                                get_req = request.Request(
+                                    f"{url}/{index_name}",
+                                    headers=headers,
+                                    method="GET",
+                                )
+                                with request.urlopen(
+                                    get_req, context=context
+                                ) as get_response:
+                                    if get_response.status == 200:
+                                        return
+                            except error.HTTPError as e:
+                                if e.code == 404:
+                                    time.sleep(backoff_factor * (2**attempt))
+                                else:
+                                    raise
                         idx_not_created_msg += (
-                            f"\nException raised:\n{e} while retrying "
-                            f"index creation after HTTP Error 503"
+                            " or creation time exceeded timeout"
                         )
-                        logger.critical(idx_not_created_msg)
-                        pytest.exit(idx_not_created_msg)
+                    elif response.status == 503:
+                        if attempt_503 < retries_503:
+                            logger.info(
+                                f"HTTP Error 503 appeared, retrying... "
+                                f"{attempt_503+1}/{retries_503}"
+                            )
+                            time.sleep(sleep_503)
+                            continue
+                        else:
+                            idx_not_created_msg += (
+                                f" after {retries_503} "
+                                f"retries due to HTTP Error 503"
+                            )
+                    break
 
         except error.URLError as e:
             idx_not_created_msg += f"\nException raised:\n{e}"
