@@ -47,9 +47,32 @@ class Configuration:
             return None
 
     @staticmethod
+    def _validate_index_name(index_name: str) -> None:
+        """
+        Validate the index name according to Splunk's naming conventions.
+        """
+        if not index_name:
+            reason = "Index name must not be empty"
+            logger.error(reason)
+            raise ValueError(reason)
+        if not all((c.isalnum() or c in ("_-")) for c in index_name):
+            reason = (
+                "Index name must consist of only numbers, "
+                "lowercase letters, underscores, and hyphens."
+            )
+            logger.error(reason)
+            raise ValueError(reason)
+        if index_name.startswith(("_", "-")):
+            reason = "Index name cannot begin with an underscore or hyphen."
+            logger.error(reason)
+            raise ValueError(reason)
+
+    @staticmethod
     def _victoria_create_index(
         index_name: str, *, acs_stack: str, acs_server: str, splunk_token: str
     ) -> None:
+        index_name = index_name.lower()
+        Configuration._validate_index_name(index_name)
         url = f"{acs_server}/{acs_stack}/adminconfig/v2/indexes"
         data = json.dumps(
             {
@@ -73,31 +96,58 @@ class Configuration:
 
         context = ssl.create_default_context(cafile=certifi.where())
 
-        try:
-            with request.urlopen(req, context=context) as response:
-                if response.status == 202:
-                    retries = 25
-                    backoff_factor = 1
-                    for attempt in range(retries):
-                        try:
-                            get_req = request.Request(
-                                f"{url}/{index_name}",
-                                headers=headers,
-                                method="GET",
-                            )
-                            with request.urlopen(
-                                get_req, context=context
-                            ) as get_response:
-                                if get_response.status == 200:
-                                    return
-                        except error.HTTPError as e:
-                            if e.code == 404:
-                                time.sleep(backoff_factor * (2**attempt))
-                            else:
-                                raise
-                    idx_not_created_msg += " or creation time exceeded timeout"
-        except error.URLError as e:
-            idx_not_created_msg += f"\nException raised:\n{e}"
+        retries_http_errors = 6
+        for attempt_http in range(retries_http_errors):
+            try:
+                with request.urlopen(req, context=context) as response:
+                    if response.status == 202:
+                        retries = 25
+                        backoff_factor = 1
+                        for attempt in range(retries):
+                            try:
+                                get_req = request.Request(
+                                    f"{url}/{index_name}",
+                                    headers=headers,
+                                    method="GET",
+                                )
+                                with request.urlopen(
+                                    get_req, context=context
+                                ) as get_response:
+                                    if get_response.status == 200:
+                                        return
+                            except error.HTTPError as e:
+                                if e.code == 404:
+                                    time.sleep(backoff_factor * (2**attempt))
+                                else:
+                                    raise
+                        idx_not_created_msg += (
+                            " or creation time exceeded timeout"
+                        )
+                        break
+            except error.HTTPError as e:
+                # Retry logic for specific HTTP error codes:
+                # 424: Failed Dependency - indicates a temporary issue with a required resource. # noqa: E501
+                # 503: Service Unavailable - suggests the server is temporarily overloaded or down. # noqa: E501
+                if e.code in (424, 503):
+                    if attempt_http < retries_http_errors:
+                        logger.info(
+                            f"HTTP Response status {e.code}, retrying to "
+                            f"create index {index_name}... "
+                            f"{attempt_http + 1}/{retries_http_errors}"
+                        )
+                        time.sleep(2**attempt_http)
+                        continue
+                    else:
+                        idx_not_created_msg += (
+                            " or creation time exceeded timeout"
+                        )
+                        raise
+                else:
+                    raise
+
+            except Exception as e:
+                idx_not_created_msg += f"\nException raised:\n{e}"
+                break
 
         logger.critical(idx_not_created_msg)
         pytest.exit(idx_not_created_msg)
@@ -322,6 +372,10 @@ class Configuration:
             if self._acs_server or not self.is_cloud
             else "https://admin.splunk.com"
         )
+
+    @property
+    def acs_stack(self) -> str:
+        return self._acs_stack
 
     @property
     def service(self) -> Service:
