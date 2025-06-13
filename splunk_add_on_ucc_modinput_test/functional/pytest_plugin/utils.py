@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import pytest
 from typing import Any, Dict, List, Tuple
 from splunk_add_on_ucc_modinput_test.functional import logger
 from splunk_add_on_ucc_modinput_test.functional.entities.test import (
@@ -21,7 +22,7 @@ from splunk_add_on_ucc_modinput_test.functional.entities.test import (
 from splunk_add_on_ucc_modinput_test.functional.manager import (
     dependency_manager,
 )
-from pytest import Item
+from pytest import Item, Session
 from _pytest.mark.structures import Mark
 
 from splunk_add_on_ucc_modinput_test.typing import ExecutableKeyType
@@ -142,3 +143,20 @@ def _log_test_order(items: List[Item]) -> None:
             logger.debug(f"NOT FOUND: {item}, {pytest_funcname} ")
 
     logger.info(order)
+
+
+def _check_session_terminal_output(session: Session) -> None:
+    # Access the terminal reporter to check for collection errors
+    terminal_reporter = session.config.pluginmanager.get_plugin(
+        "terminalreporter"
+    )
+    if terminal_reporter and "error" in terminal_reporter.stats:
+        errors = terminal_reporter.stats["error"]
+        if errors:
+            logger.error("Errors occurred during test collection:")
+            for error in errors:
+                logger.error(error.longrepr)
+            pytest.exit(
+                "Errors occurred during test collection. Exiting pytest.",
+                returncode=1,
+            )

@@ -31,6 +31,7 @@ from splunk_add_on_ucc_modinput_test.functional.pytest_plugin.utils import (
     _collect_parametrized_tests,
     _extract_parametrized_data,
     _map_forged_tests_to_pytest_items,
+    _check_session_terminal_output,
 )
 from pytest import Session, Config, Item
 from typing import Sequence
@@ -99,6 +100,8 @@ def pytest_collection_modifyitems(
 def pytest_collection_finish(session: Session) -> None:
     if dependency_manager.collectonly:
         return
+    _check_session_terminal_output(session)
+
     dependency_manager.start_bootstrap_execution()
 
 
