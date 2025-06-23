@@ -30,6 +30,7 @@ from urllib import request, error
 import ssl
 import certifi
 import logging
+import re
 
 logger = logging.getLogger("ucc-modinput-test")
 
@@ -55,7 +56,7 @@ class Configuration:
             reason = "Index name must not be empty"
             logger.error(reason)
             raise ValueError(reason)
-        if not all((c.isalnum() or c in ("_-")) for c in index_name):
+        if not re.fullmatch(r"[a-z0-9_-]+", index_name):
             reason = (
                 "Index name must consist of only numbers, "
                 "lowercase letters, underscores, and hyphens."
@@ -137,12 +138,8 @@ class Configuration:
                         )
                         time.sleep(2**attempt_http)
                         continue
-                    else:
-                        idx_not_created_msg += (
-                            " or creation time exceeded timeout"
-                        )
-                        raise
                 else:
+                    # In case of HTTP errors other than 424 and 503
                     raise
 
             except Exception as e:
