@@ -281,6 +281,8 @@ Alongside with environment variables for Splunk, export API key for server-examp
 ```
 Once we can be sure the variable is defined, we want to read it. Open `splunk-example-ta-test/tests/ucc_modinput_functional/vendor/client/configuration.py`, make sure the key is read from the variable and expose for use:
 ```
+from splunk_add_on_ucc_modinput_test.common import utils
+
 class Configuration(VendorConfigurationBase):
     def customize_configuration(self) -> None:
         self._api_key = utils.get_from_environment_variable(

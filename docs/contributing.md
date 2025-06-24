@@ -28,7 +28,7 @@ poetry run pytest tests/unit
 
 ### Linting and Type-checking
 
-`ucc-gen` uses the [`pre-commit`](https://pre-commit.com) framework for linting and type-checking.
+`addonfactory-ucc-test` uses the [`pre-commit`](https://pre-commit.com) framework for linting and type-checking.
 Consult with `pre-commit` documentation about what is the best way to install the software.
 
 To run it locally:
