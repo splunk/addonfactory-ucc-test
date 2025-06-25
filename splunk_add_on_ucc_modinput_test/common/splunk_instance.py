@@ -69,7 +69,7 @@ class Configuration:
             raise ValueError(reason)
 
     @staticmethod
-    def _victoria_create_index(
+    def _cloud_create_index(
         index_name: str, *, acs_stack: str, acs_server: str, splunk_token: str
     ) -> None:
         index_name = index_name.lower()
@@ -182,7 +182,7 @@ class Configuration:
             logger.critical(reason)
             pytest.exit(reason)
         if is_cloud:
-            Configuration._victoria_create_index(
+            Configuration._cloud_create_index(
                 index_name,
                 acs_stack=acs_stack,
                 acs_server=acs_server,
