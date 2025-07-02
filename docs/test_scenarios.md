@@ -27,7 +27,7 @@ We want to ingest some general events for few inputs and vendor product is *talk
 
 ## Isolate data in indexes
 
-***Note:** this case is just an extension of [basic](#basic) and as such, just concepts that touches the differences will be described*
+***Note:** this case is just an extension of [Basic scenario](#basic-scenario) and as such, just concepts that touches the differences will be described*
 
 Specifics of an add-on considered in this scenario does not allow to distinguish which input was used to ingest specific event.
 
@@ -53,7 +53,7 @@ Specifics of an add-on considered in this scenario does not allow to distinguish
 
 ## Test proxies
 
-***Note:** this case is just an extension of [basic](#basic) and as such, just concepts that touches the differences will be described*
+***Note:** this case is just an extension of [Basic scenario](#basic-scenario) and as such, just concepts that touches the differences will be described*
 
 We want to be sure the add-on can be configured to use proxy if needed.
 

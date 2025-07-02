@@ -38,7 +38,7 @@ There are following concepts used in the framework as well as rules add-on devel
 
 1. **Vendor product-related and add-on specific functionalities** are left to the **developer to deal with**
 
-2. **test function**s should be used just **to assert** actual vs expected values
+2. **test functions** should be used just **to assert** actual vs expected values
 
 3. test functions are wrapped by **forge decorators** that **define setup and teardown tasks**
 
@@ -54,7 +54,7 @@ There are following concepts used in the framework as well as rules add-on devel
 
 9. **attach** decorators group forge tasks that are **specific for certain test**
 
-*Note: [Order of importance is discussed separately.](./index.md#principles)*
+*Note: [Order of importance is discussed separately.](./framework_deepdive.md/#forges)*
 
 ## Performance
 
