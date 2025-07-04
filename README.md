@@ -1,7 +1,7 @@
 # addonfactory-ucc-test
 
-![PyPI](https://img.shields.io/pypi/v/addonfactory-ucc-test)
-![Python](https://img.shields.io/pypi/pyversions/addonfactory-ucc-test.svg)
+![PyPI](https://img.shields.io/pypi/v/splunk-add-on-ucc-modinput-test)
+![Python](https://img.shields.io/pypi/pyversions/splunk-add-on-ucc-modinput-test.svg)
 
 ## What is AUT
 
