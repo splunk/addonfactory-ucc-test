@@ -12,20 +12,24 @@ class SplunkClientBase:
 
     def _bind_swagger_client(self):
         # this method is replaced in inherited class by the decorator
-        # splunk_add_on_ucc_modinput_test.functional.decorators.register_splunk_class 
+        # splunk_add_on_ucc_modinput_test.functional.decorators.register_splunk_class
         pass
-    
+
     @property
     def splunk_configuration(self):
         return self._splunk_configuration
-    
+
     @property
-    def config(self): # short alias for splunk_configuration 
+    def config(self): # short alias for splunk_configuration
         return self._splunk_configuration
 
     @property
     def splunk(self):
         return self._splunk_configuration.service
+
+    @property
+    def splunk_no_idm(self):
+        return self._splunk_configuration._service_no_idm
 
     @property
     def ta_api(self):
@@ -36,12 +40,12 @@ class SplunkClientBase:
     def instance_epoch_time(self) -> int:
         state = self.search("| makeresults | eval splunk_epoch_time=_time")
         return int(state.results[0]["splunk_epoch_time"])
-    
+
     @property
     def default_index(self) -> str:
         state = self.search("* | head 1 | fields index")
         return state.results[0]["index"]
-    
+
     def _make_conf_error(self, prop_name: str):
         return f"Make sure you have '{prop_name}' attribute in your Splunk configuration class {self.config.__class__.__name__}"
 
@@ -54,7 +58,7 @@ class SplunkClientBase:
             password = self.config.password,
         )
         return SplunkInstanceFileHelper(**connect)
-    
+
     @property
     def instance_file_helper(self) -> SplunkInstanceFileHelper:
         assert hasattr(self.config, "home") and self.config.splunk_home, self._make_conf_error("home")
@@ -62,7 +66,7 @@ class SplunkClientBase:
             splunk_url = f"https://{self.config.host}:{self.config.port}",
             username = self.config.username,
             password = self.config.password,
-            base_dir = self.config.home,     
+            base_dir = self.config.home,
         )
         return SplunkInstanceFileHelper(**connect)
 
@@ -97,12 +101,13 @@ class SplunkClientBase:
 
     def create_index(self, index_name: str) -> Index:
         return self.config.create_index(
-            index_name, 
+            index_name,
             self.splunk,
             is_cloud="splunkcloud.com" in self.config.host.lower(),
             acs_stack=self.config.acs_stack,
             acs_server=self.config.acs_server,
             splunk_token=self.config.splunk_token,
+            no_idm_service= self.splunk_no_idm,
         )
 
     def search_probe(
@@ -167,7 +172,7 @@ class SplunkClientBase:
             interval=interval,
             probe_name=None,
         )
-        
+
         try:
             while True:
                 wait = next(it)
