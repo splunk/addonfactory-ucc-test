@@ -52,6 +52,7 @@ class Configuration:
         """
         Validate the index name according to Splunk's naming conventions.
         """
+        logger.info(f"Validate index name: {index_name}")
         if not index_name:
             reason = "Index name must not be empty"
             logger.error(reason)
