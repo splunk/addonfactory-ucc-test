@@ -87,13 +87,13 @@ class Configuration:
         acs_stack: str = None,
         acs_server: str = None,
         splunk_token: str = None,
-        no_idm_service: SplunkServicePool = None,
+        classic_no_idm_service: SplunkServicePool = None,
     ) -> Index:
         if Configuration.get_index(index_name, client_service):
             reason = f"Index {index_name} already exists"
             utils.logger.critical(reason)
             pytest.exit(reason)
-        if is_cloud and not no_idm_service:
+        if is_cloud and not classic_no_idm_service:
             Configuration._victoria_create_index(
                 index_name,
                 acs_stack=acs_stack,
@@ -104,7 +104,7 @@ class Configuration:
                 index_name,
                 client_service,
             )
-        elif is_cloud and no_idm_service:
+        elif is_cloud and classic_no_idm_service:
             Configuration._victoria_create_index(
                 index_name,
                 acs_stack=acs_stack,
@@ -113,7 +113,7 @@ class Configuration:
             )
             created_index = Configuration.get_index(
                 index_name,
-                no_idm_service,
+                classic_no_idm_service,
             )
         else:
             created_index = Configuration._enterprise_create_index(
@@ -227,10 +227,10 @@ class Configuration:
             username=instance._username,
             password=instance._password,
         )
-        instance._service_no_idm = None
+        instance._classic_no_idm_service = None
         if instance._host.startswith('idm'):
             _, not_idm_host = instance._host.split('.', maxsplit=1)
-            instance._service_no_idm = SplunkServicePool(
+            instance._classic_no_idm_service = SplunkServicePool(
                 host=not_idm_host,
                 port=instance._port,
                 username=instance._username,
@@ -263,7 +263,7 @@ class Configuration:
                     acs_stack=instance._acs_stack,
                     acs_server=instance._acs_server,
                     splunk_token=instance._token,
-                    no_idm_service=instance._service_no_idm,
+                    classic_no_idm_service=instance._classic_no_idm_service,
                 )
             )
 
@@ -321,8 +321,8 @@ class Configuration:
         return self._service
 
     @property
-    def service_no_idm(self) -> Service:
-        return self._service_no_idm
+    def classic_no_idm_service(self) -> Service:
+        return self._classic_no_idm_service
 
     @property
     def dedicated_index(self) -> Index:

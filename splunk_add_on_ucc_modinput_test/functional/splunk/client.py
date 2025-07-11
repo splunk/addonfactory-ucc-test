@@ -28,8 +28,8 @@ class SplunkClientBase:
         return self._splunk_configuration.service
 
     @property
-    def splunk_no_idm(self):
-        return self._splunk_configuration._service_no_idm
+    def splunk_classic_no_idm_service(self):
+        return self._splunk_configuration.classic_no_idm_service
 
     @property
     def ta_api(self):
@@ -107,7 +107,7 @@ class SplunkClientBase:
             acs_stack=self.config.acs_stack,
             acs_server=self.config.acs_server,
             splunk_token=self.config.splunk_token,
-            no_idm_service= self.splunk_no_idm,
+            classic_no_idm_service= self.classic_no_idm_service,
         )
 
     def search_probe(
