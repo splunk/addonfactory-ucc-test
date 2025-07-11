@@ -61,6 +61,10 @@ class SplunkClientBase:
         return self._splunk_configuration.service
 
     @property
+    def splunk_classic_no_idm_service(self) -> SplunkServicePool | None:
+        return self._splunk_configuration.classic_no_idm_service
+
+    @property
     def ta_api(
         self,
     ) -> swagger_client.api.default_api.DefaultApi:  # type: ignore    # noqa: E501, F821
@@ -153,6 +157,7 @@ class SplunkClientBase:
             acs_stack=self.config.acs_stack if self._is_cloud else None,
             acs_server=self.config.acs_server if self._is_cloud else None,
             splunk_token=self.config.token if self._is_cloud else None,
+            classic_no_idm_service=self.splunk_classic_no_idm_service,
         )
 
     def get_index(self, index_name: str) -> Index | None:
