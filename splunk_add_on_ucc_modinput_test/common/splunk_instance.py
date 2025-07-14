@@ -72,7 +72,6 @@ class Configuration:
     def _victoria_create_index(
         index_name: str, *, acs_stack: str, acs_server: str, splunk_token: str
     ) -> None:
-        index_name = index_name.lower()
         Configuration._validate_index_name(index_name)
         url = f"{acs_server}/{acs_stack}/adminconfig/v2/indexes"
         data = json.dumps(
@@ -176,12 +175,13 @@ class Configuration:
         acs_stack: str | None = None,
         acs_server: str | None = None,
         splunk_token: str | None = None,
+        cloud_instance_type: str | None = None,
     ) -> Index:
         if Configuration.get_index(index_name, client_service):
             reason = f"Index {index_name} already exists"
             logger.critical(reason)
             pytest.exit(reason)
-        if is_cloud:
+        if is_cloud and cloud_instance_type == "victoria":
             Configuration._victoria_create_index(
                 index_name,
                 acs_stack=acs_stack,
@@ -291,6 +291,14 @@ class Configuration:
             username=instance._username,
             password=instance._password,
         )
+        if instance._is_cloud:
+            instance._cloud_instance_type = (
+                "classic"
+                if (not instance._host.startswith(instance._acs_stack))
+                else "victoria"
+            )
+        else:
+            instance._cloud_instance_type = None
 
         if dedicated_index_name:
             instance._dedicated_index = cls.get_index(
@@ -317,6 +325,7 @@ class Configuration:
                 acs_stack=instance._acs_stack,
                 acs_server=instance._acs_server,
                 splunk_token=instance._token,
+                cloud_instance_type=instance._cloud_instance_type,
             )
 
         logger.info(
@@ -381,6 +390,10 @@ class Configuration:
     @property
     def dedicated_index(self) -> Index:
         return self._dedicated_index
+
+    @property
+    def cloud_instance_type(self) -> str:
+        return self._cloud_instance_type
 
 
 class SearchState:
