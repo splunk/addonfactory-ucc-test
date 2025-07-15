@@ -103,6 +103,7 @@ class SplunkClientBase:
             acs_stack=self.config.acs_stack,
             acs_server=self.config.acs_server,
             splunk_token=self.config.splunk_token,
+            cloud_instance_type=self.config.cloud_instance_type
         )
 
     def search_probe(

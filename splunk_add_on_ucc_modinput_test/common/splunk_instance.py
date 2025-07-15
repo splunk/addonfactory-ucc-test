@@ -87,12 +87,13 @@ class Configuration:
         acs_stack: str = None,
         acs_server: str = None,
         splunk_token: str = None,
+        cloud_instance_type: str | None = None,
     ) -> Index:
         if Configuration.get_index(index_name, client_service):
             reason = f"Index {index_name} already exists"
             utils.logger.critical(reason)
             pytest.exit(reason)
-        if is_cloud:
+        if is_cloud and cloud_instance_type == "victoria":
             Configuration._victoria_create_index(
                 index_name,
                 acs_stack=acs_stack,
@@ -215,6 +216,14 @@ class Configuration:
             username=instance._username,
             password=instance._password,
         )
+        if instance._is_cloud:
+            instance._cloud_instance_type = (
+                "classic"
+                if (not instance._host.startswith(instance._acs_stack))
+                else "victoria"
+            )
+        else:
+            instance._cloud_instance_type = None
 
         if existing_index:
             instance._dedicated_index = cls.get_index(
@@ -242,6 +251,7 @@ class Configuration:
                     acs_stack=instance._acs_stack,
                     acs_server=instance._acs_server,
                     splunk_token=instance._token,
+                    cloud_instance_type=instance._cloud_instance_type,
                 )
             )
 
@@ -301,6 +311,10 @@ class Configuration:
     @property
     def dedicated_index(self) -> Index:
         return self._dedicated_index
+
+    @property
+    def cloud_instance_type(self) -> str:
+        return self._cloud_instance_type
 
 
 class SearchState:
