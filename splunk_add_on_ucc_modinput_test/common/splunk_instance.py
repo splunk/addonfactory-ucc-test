@@ -77,6 +77,7 @@ class Configuration:
     def get_index(
         index_name: str,
         client_service: SplunkServicePool,
+        is_cloud: bool = False,
         acs_stack: str | None = None,
         acs_server: str | None = None,
         splunk_token: str | None = None,
@@ -84,7 +85,7 @@ class Configuration:
         if any(i.name == index_name for i in client_service.indexes):
             return client_service.indexes[index_name]
         else:
-            if acs_stack:
+            if is_cloud:
                 return Configuration.get_index_from_classic_instance(
                     index_name,
                     client_service,
@@ -224,7 +225,12 @@ class Configuration:
         splunk_token: str | None = None,
     ) -> Index:
         if Configuration.get_index(
-            index_name, client_service, acs_stack, acs_server, splunk_token
+            index_name,
+            client_service,
+            is_cloud,
+            acs_stack,
+            acs_server,
+            splunk_token,
         ):
             reason = f"Index {index_name} already exists"
             logger.critical(reason)
@@ -239,6 +245,7 @@ class Configuration:
             created_index = Configuration.get_index(
                 index_name,
                 client_service,
+                is_cloud,
                 acs_stack,
                 acs_server,
                 splunk_token,
