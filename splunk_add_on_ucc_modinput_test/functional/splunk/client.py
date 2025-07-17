@@ -153,9 +153,6 @@ class SplunkClientBase:
             acs_stack=self.config.acs_stack if self._is_cloud else None,
             acs_server=self.config.acs_server if self._is_cloud else None,
             splunk_token=self.config.token if self._is_cloud else None,
-            cloud_instance_type=self.config.cloud_instance_type
-            if self._is_cloud
-            else None,
         )
 
     def get_index(self, index_name: str) -> Index | None:

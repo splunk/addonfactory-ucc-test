@@ -39,13 +39,60 @@ MODINPUT_TEST_SPLUNK_DEDICATED_INDEX = "MODINPUT_TEST_SPLUNK_DEDICATED_INDEX"
 
 class Configuration:
     @staticmethod
+    def get_index_from_classic_instance(
+        index_name: str,
+        client_service: SplunkServicePool,
+        acs_stack: str,
+        acs_server: str,
+        splunk_token: str,
+    ) -> Index:
+        url = f"{acs_server}/{acs_stack}/adminconfig/v2/indexes/{index_name}"
+
+        headers = {
+            "Authorization": "Bearer " + splunk_token,
+            "Content-Type": "application/json",
+        }
+        req = request.Request(url, headers=headers, method="GET")
+        context = ssl.create_default_context(cafile=certifi.where())
+        with request.urlopen(req, context=context) as response:
+            if response.status == 200:
+                if not client_service._host.startswith(acs_stack):
+                    new_host_start = client_service._host.find(acs_stack)
+                host = client_service._host[new_host_start:]
+                service = SplunkServicePool(
+                    host=host,
+                    port=client_service._port,
+                    username=client_service._username,
+                    password=client_service._password,
+                )
+                return Index(service, f"/services/data/indexes/{index_name}")
+        idx_not_created_msg = (
+            f"Index {index_name} was not found on stack {acs_stack} "
+            f"controlled by {acs_server}."
+        )
+        utils.logger.critical(idx_not_created_msg)
+        return None
+
+    @staticmethod
     def get_index(
-        index_name: str, client_service: SplunkServicePool
+        index_name: str,
+        client_service: SplunkServicePool,
+        acs_stack: str | None = None,
+        acs_server: str | None = None,
+        splunk_token: str | None = None,
     ) -> Index | None:
         if any(i.name == index_name for i in client_service.indexes):
             return client_service.indexes[index_name]
         else:
-            return None
+            if acs_stack:
+                return Configuration.get_index_from_classic_instance(
+                    index_name,
+                    client_service,
+                    acs_stack,
+                    acs_server,
+                    splunk_token,
+                )
+        return None
 
     @staticmethod
     def _validate_index_name(index_name: str) -> None:
@@ -175,13 +222,14 @@ class Configuration:
         acs_stack: str | None = None,
         acs_server: str | None = None,
         splunk_token: str | None = None,
-        cloud_instance_type: str | None = None,
     ) -> Index:
-        if Configuration.get_index(index_name, client_service):
+        if Configuration.get_index(
+            index_name, client_service, acs_stack, acs_server, splunk_token
+        ):
             reason = f"Index {index_name} already exists"
             logger.critical(reason)
             pytest.exit(reason)
-        if is_cloud and cloud_instance_type == "victoria":
+        if is_cloud:
             Configuration._victoria_create_index(
                 index_name,
                 acs_stack=acs_stack,
@@ -191,6 +239,9 @@ class Configuration:
             created_index = Configuration.get_index(
                 index_name,
                 client_service,
+                acs_stack,
+                acs_server,
+                splunk_token,
             )
         else:
             created_index = Configuration._enterprise_create_index(
@@ -291,14 +342,6 @@ class Configuration:
             username=instance._username,
             password=instance._password,
         )
-        if instance._is_cloud:
-            instance._cloud_instance_type = (
-                "classic"
-                if (not instance._host.startswith(instance._acs_stack))
-                else "victoria"
-            )
-        else:
-            instance._cloud_instance_type = None
 
         if dedicated_index_name:
             instance._dedicated_index = cls.get_index(
@@ -325,7 +368,6 @@ class Configuration:
                 acs_stack=instance._acs_stack,
                 acs_server=instance._acs_server,
                 splunk_token=instance._token,
-                cloud_instance_type=instance._cloud_instance_type,
             )
 
         logger.info(
@@ -390,10 +432,6 @@ class Configuration:
     @property
     def dedicated_index(self) -> Index:
         return self._dedicated_index
-
-    @property
-    def cloud_instance_type(self) -> str:
-        return self._cloud_instance_type
 
 
 class SearchState:
