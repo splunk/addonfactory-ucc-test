@@ -22,11 +22,12 @@ MODINPUT_TEST_SPLUNK_DEDICATED_INDEX = "MODINPUT_TEST_SPLUNK_DEDICATED_INDEX"
 class Configuration:
     @staticmethod
     def get_index_from_classic_instance(
-            index_name: str,
-            client_service: SplunkServicePool,
-            acs_stack: str,
-            acs_server: str,
-            splunk_token: str) -> Index:
+        index_name: str,
+        client_service: SplunkServicePool,
+        acs_stack: str,
+        acs_server: str,
+        splunk_token: str,
+    ) -> Index:
         url = f"{acs_server}/{acs_stack}/adminconfig/v2/indexes/{index_name}"
 
         headers = {
@@ -38,8 +39,12 @@ class Configuration:
             if not client_service._host.startswith(acs_stack):
                 new_host_start = client_service._host.find(acs_stack)
             host = client_service._host[new_host_start:]
-            service = SplunkServicePool(host=host, port=client_service._port, username=client_service._username,
-                                        password=client_service._password)
+            service = SplunkServicePool(
+                host=host,
+                port=client_service._port,
+                username=client_service._username,
+                password=client_service._password,
+            )
             return Index(service, f"/services/data/indexes/{index_name}")
         else:
             idx_not_created_msg = f"Index {index_name} was not found on stack {acs_stack} controlled by {acs_server}."
@@ -48,17 +53,24 @@ class Configuration:
 
     @staticmethod
     def get_index(
-            index_name: str,
-            client_service: SplunkServicePool,
-            acs_stack: str = None,
-            acs_server: str = None,
-            splunk_token: str = None) -> Index:
+        index_name: str,
+        client_service: SplunkServicePool,
+        is_cloud: bool = False,
+        acs_stack: str = None,
+        acs_server: str = None,
+        splunk_token: str = None,
+    ) -> Index | None:
         if any(i.name == index_name for i in client_service.indexes):
             return client_service.indexes[index_name]
         else:
-            if acs_stack:
-                return Configuration.get_index_from_classic_instance(index_name, client_service, acs_stack, acs_server,
-                                                                     splunk_token)
+            if is_cloud:
+                return Configuration.get_index_from_classic_instance(
+                    index_name,
+                    client_service,
+                    acs_stack,
+                    acs_server,
+                    splunk_token,
+                )
         return None
 
     @staticmethod
@@ -122,7 +134,14 @@ class Configuration:
         acs_server: str = None,
         splunk_token: str = None,
     ) -> Index:
-        if Configuration.get_index(index_name, client_service, acs_stack, acs_server, splunk_token):
+        if Configuration.get_index(
+            index_name,
+            client_service,
+            is_cloud,
+            acs_stack,
+            acs_server,
+            splunk_token,
+        ):
             reason = f"Index {index_name} already exists"
             utils.logger.critical(reason)
             pytest.exit(reason)
@@ -136,33 +155,28 @@ class Configuration:
             created_index = Configuration.get_index(
                 index_name,
                 client_service,
+                is_cloud,
                 acs_stack,
                 acs_server,
-                splunk_token
+                splunk_token,
             )
         else:
             created_index = Configuration._enterprise_create_index(
                 index_name,
                 client_service,
             )
-        utils.logger.debug(
-            f"Index {index_name} has just been created"
-        )
+        utils.logger.debug(f"Index {index_name} has just been created")
         return created_index
 
     __instances: dict[tuple[str, str, str], Configuration] = {}
 
     @classmethod
     def collect_host(cls) -> str:
-        return utils.get_from_environment_variable(
-            "MODINPUT_TEST_SPLUNK_HOST"
-        )
+        return utils.get_from_environment_variable("MODINPUT_TEST_SPLUNK_HOST")
 
     @classmethod
     def collect_port(cls) -> str:
-        return utils.get_from_environment_variable(
-            "MODINPUT_TEST_SPLUNK_PORT"
-        )
+        return utils.get_from_environment_variable("MODINPUT_TEST_SPLUNK_PORT")
 
     @classmethod
     def collect_username(cls) -> str:
@@ -271,15 +285,13 @@ class Configuration:
                     test in splunk {instance._host}"
             )
         else:
-            instance._dedicated_index = (
-                instance.create_index(
-                    f"idx_{utils.Common().sufix}",
-                    instance._service,
-                    is_cloud=instance._is_cloud,
-                    acs_stack=instance._acs_stack,
-                    acs_server=instance._acs_server,
-                    splunk_token=instance._token,
-                )
+            instance._dedicated_index = instance.create_index(
+                f"idx_{utils.Common().sufix}",
+                instance._service,
+                is_cloud=instance._is_cloud,
+                acs_stack=instance._acs_stack,
+                acs_server=instance._acs_server,
+                splunk_token=instance._token,
             )
 
         utils.logger.info(
@@ -338,7 +350,6 @@ class Configuration:
     @property
     def dedicated_index(self) -> Index:
         return self._dedicated_index
-
 
 
 class SearchState:
