@@ -54,24 +54,35 @@ class Configuration:
         }
         req = request.Request(url, headers=headers, method="GET")
         context = ssl.create_default_context(cafile=certifi.where())
-        with request.urlopen(req, context=context) as response:
-            if response.status == 200:
-                if not client_service._host.startswith(acs_stack):
-                    new_host_start = client_service._host.find(acs_stack)
-                host = client_service._host[new_host_start:]
-                service = SplunkServicePool(
-                    host=host,
-                    port=client_service._port,
-                    username=client_service._username,
-                    password=client_service._password,
+        try:
+            with request.urlopen(req, context=context) as response:
+                if response.status == 200:
+                    if not client_service._host.startswith(acs_stack):
+                        new_host_start = client_service._host.find(acs_stack)
+                    host = client_service._host[new_host_start:]
+                    service = SplunkServicePool(
+                        host=host,
+                        port=client_service._port,
+                        username=client_service._username,
+                        password=client_service._password,
+                    )
+                    return Index(
+                        service, f"/services/data/indexes/{index_name}"
+                    )
+        except error.HTTPError as e:
+            if e.code == 404:
+                idx_not_created_msg = (
+                    f"Index {index_name} was not found on stack {acs_stack} "
+                    f"controlled by {acs_server}."
                 )
-                return Index(service, f"/services/data/indexes/{index_name}")
-        idx_not_created_msg = (
-            f"Index {index_name} was not found on stack {acs_stack} "
-            f"controlled by {acs_server}."
-        )
-        utils.logger.critical(idx_not_created_msg)
-        return None
+            else:
+                idx_not_created_msg = (
+                    f"Failed to retrieve index {index_name} from stack "
+                    f"{acs_stack} controlled by {acs_server}. "
+                    f"HTTP error: {e.code}"
+                )
+            utils.logger.critical(idx_not_created_msg)
+            return None
 
     @staticmethod
     def get_index(
