@@ -88,7 +88,6 @@ class Configuration:
     def get_index(
         index_name: str,
         client_service: SplunkServicePool,
-        is_cloud: bool = False,
         acs_stack: str | None = None,
         acs_server: str | None = None,
         splunk_token: str | None = None,
@@ -96,7 +95,10 @@ class Configuration:
         if any(i.name == index_name for i in client_service.indexes):
             return client_service.indexes[index_name]
         else:
-            if is_cloud:
+            if (
+                "splunkcloud.com" in client_service._host.lower()
+                and not client_service._host.startswith(acs_stack)
+            ):
                 return Configuration.get_index_from_classic_instance(
                     index_name,
                     client_service,
@@ -238,7 +240,6 @@ class Configuration:
         if Configuration.get_index(
             index_name,
             client_service,
-            is_cloud,
             acs_stack,
             acs_server,
             splunk_token,
@@ -256,7 +257,6 @@ class Configuration:
             created_index = Configuration.get_index(
                 index_name,
                 client_service,
-                is_cloud,
                 acs_stack,
                 acs_server,
                 splunk_token,
