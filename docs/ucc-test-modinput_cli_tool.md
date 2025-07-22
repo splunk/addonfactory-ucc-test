@@ -16,7 +16,7 @@ It comes with following arguments:
 
 - `base64decode -s [string you want to decode]` - eg. `ucc-test-modinput base64decode -s VGghczEkTXlQQHNzdzByZA==`
 
-- `gen` - does two things: 1. creates add-on SDK from given openapi.json, 2. creates splunk client module and checks if existing (`ucc_modinput_functional/splunk/client/client.py`) is the same
+- `gen` - does three things: 1. creates add-on SDK from given openapi.json, 2. creates splunk client module and checks if existing (`ucc_modinput_functional/splunk/client/client.py`) is the same 3. updates classes in `splunk_add_on_ucc_modinput_test/common/bootstrap.py` if `--update-classes` is set ; 
 
     - `--openapi-json` or `-o` ; `-o [path to openapi.json / source file ]` - default value is `output/*/appserver/static/openapi.json` ; refer to [UCC documentation](https://splunk.github.io/addonfactory-ucc-generator/openapi/#how-to-find-the-document) to learn more where you can find this document
 
@@ -29,5 +29,7 @@ It comes with following arguments:
     - `--skip-splunk-client-check` - exisitng splunk client will not be checked aginst consistency with swagger client that may lead to inconsistent state of splunk client; this is `gen` specific flag and does not exists for `init`
 
     - `--force-splunk-client-overwritten` - existing splunk client will be backup and overwritten by new one; this is `gen` specific flag and does not exists for `init`
+  
+    - `--update-classes` - new classes will be added; existing classes will be updated (if set to overwrite in `splunk_add_on_ucc_modinput_test/common/bootstrap.py`); this is `gen` specific flag and does not exists for `init`
 
-- `init` - initialize modinput tests (you can read more on that [here](./before_you_write_your_first_line_of_code.md/#ucc-test-modinput-init)) and runs `gen` to have add-on SDK created ; none additional argument is required for the initialization step, so argument list is as for `gen` (excluding `--skip-splunk-client-check` and `--force-splunk-client-overwritten`)
+- `init` - initialize modinput tests (you can read more on that [here](./before_you_write_your_first_line_of_code.md/#ucc-test-modinput-init)) and runs `gen` to have add-on SDK created ; none additional argument is required for the initialization step, so argument list is as for `gen` (excluding `--skip-splunk-client-check`, `--force-splunk-client-overwritten` and `--update-classes`)
