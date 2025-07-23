@@ -30,4 +30,4 @@ It comes with following arguments:
 
     - `--force-splunk-client-overwritten` - existing splunk client will be backup and overwritten by new one; this is `gen` specific flag and does not exists for `init`
 
-- `init` - initialize modinput tests (you can read more on that [here](./before_you_write_your_first_line_of_code.md/#ucc-test-modinput-init)) and runs `gen` to have add-on SDK created ; none additional argument is required for the initialization step, so argument list is as for `gen` (excluding `--skip-splunk-client-check`, `--force-splunk-client-overwritten`)
+- `init` - initialize modinput tests (you can read more on that [here](./before_you_write_your_first_line_of_code.md/#ucc-test-modinput-init)) and runs `gen` to have add-on SDK created ; none additional argument is required for the initialization step, so argument list is as for `gen` (excluding `--skip-splunk-client-check` and `--force-splunk-client-overwritten`)
