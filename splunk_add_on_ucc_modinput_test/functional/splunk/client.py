@@ -14,8 +14,13 @@
 # limitations under the License.
 #
 from __future__ import annotations
+import json
 import time
 from typing import Callable
+
+from splunklib.client import Endpoint
+from splunklib.binding import ResponseReader
+
 from splunk_add_on_ucc_modinput_test.common.splunk_instance import (
     search,
     Configuration,
@@ -160,6 +165,32 @@ class SplunkClientBase:
             index_name,
             self.splunk,
         )
+
+    def get_kv_store_collection(
+        self, user_name: str, app_name: str, collection_name: str
+    ) -> list[dict[str, str]]:
+        kvstore_path = (
+            f"/servicesNS/{user_name}/{app_name}/"
+            f"storage/collections/data/{collection_name}"
+        )
+        kvstore_endpoint = Endpoint(self.splunk, kvstore_path)
+        response = ResponseReader(kvstore_endpoint.get()["body"]).read()
+        return json.loads(response.decode("utf-8"))
+
+    def get_kv_store_record(
+        self,
+        user_name: str,
+        app_name: str,
+        collection_name: str,
+        record_id: str,
+    ) -> dict[str, str]:
+        kvstore_path = (
+            f"/servicesNS/{user_name}/{app_name}/"
+            f"storage/collections/data/{collection_name}/{record_id}"
+        )
+        kvstore_endpoint = Endpoint(self.splunk, kvstore_path)
+        response = ResponseReader(kvstore_endpoint.get()["body"]).read()
+        return json.loads(response.decode("utf-8"))
 
     def search_probe(
         self,

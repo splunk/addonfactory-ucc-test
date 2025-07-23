@@ -319,11 +319,6 @@ def write_other_classes(*, unified_tests_root_dir: Path) -> None:
                 "template": "splunk_client_class.tmpl",
                 "overwrite": False,
             },
-            {
-                "file": "kv_store.py",
-                "template": "kv_store_class.tmpl",
-                "overwrite": False,
-            },
         ],
         unified_tests_root_dir
         / "vendor": [

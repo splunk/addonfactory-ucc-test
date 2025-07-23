@@ -216,11 +216,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         action="store_true",
         help="Existing splunk client will be overwritten by new one. WARNING: This may lead to loss of existing splunk client.",
     )
-    feature_group.add_argument(
-        "--update-classes",
-        action="store_true",
-        help="Newly added classes will be generated. Some existing classes might be overwritten.",
-    )
 
     base64decode_parser.add_argument(
         "-s",
@@ -326,10 +321,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     f"Existing splunk client ({current_splunk_client}) is outdated. Use --force-splunk-client-overwritten to overwrite it or --skip-splunk-client-check if you want to post."
                 )
                 return 1
-            elif args.update_classes:
-                bootstrap.write_other_classes(
-                    unified_tests_root_dir=modinput_path
-                )
             else:
                 """
                 Existing splunk client is up to date.
