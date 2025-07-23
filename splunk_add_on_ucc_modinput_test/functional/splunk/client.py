@@ -168,14 +168,20 @@ class SplunkClientBase:
 
     def get_kv_store_collection(
         self, user_name: str, app_name: str, collection_name: str
-    ) -> list[dict[str, str]]:
+    ) -> list[dict[str, str]] | None:
         kvstore_path = (
             f"/servicesNS/{user_name}/{app_name}/"
             f"storage/collections/data/{collection_name}"
         )
-        kvstore_endpoint = Endpoint(self.splunk, kvstore_path)
-        response = ResponseReader(kvstore_endpoint.get()["body"]).read()
-        return json.loads(response.decode("utf-8"))
+        try:
+            kvstore_endpoint = Endpoint(self.splunk, kvstore_path)
+            response = ResponseReader(kvstore_endpoint.get()["body"]).read()
+            return json.loads(response.decode("utf-8"))
+        except Exception as e:
+            logger.error(
+                f"Failed to get KV store collection {collection_name}: {e}"
+            )
+            raise e
 
     def get_kv_store_record(
         self,
@@ -183,14 +189,21 @@ class SplunkClientBase:
         app_name: str,
         collection_name: str,
         record_id: str,
-    ) -> dict[str, str]:
+    ) -> dict[str, str] | None:
         kvstore_path = (
             f"/servicesNS/{user_name}/{app_name}/"
             f"storage/collections/data/{collection_name}/{record_id}"
         )
-        kvstore_endpoint = Endpoint(self.splunk, kvstore_path)
-        response = ResponseReader(kvstore_endpoint.get()["body"]).read()
-        return json.loads(response.decode("utf-8"))
+        try:
+            kvstore_endpoint = Endpoint(self.splunk, kvstore_path)
+            response = ResponseReader(kvstore_endpoint.get()["body"]).read()
+            return json.loads(response.decode("utf-8"))
+        except Exception as e:
+            logger.error(
+                f"Failed to get KV store record {record_id} from "
+                f"collection {collection_name}: {e}"
+            )
+            raise e
 
     def search_probe(
         self,
