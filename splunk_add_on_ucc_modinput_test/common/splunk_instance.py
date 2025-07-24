@@ -57,8 +57,7 @@ class Configuration:
         try:
             with request.urlopen(req, context=context) as response:
                 if response.status == 200:
-                    if not client_service._host.startswith(acs_stack):
-                        new_host_start = client_service._host.find(acs_stack)
+                    new_host_start = client_service._host.find(acs_stack)
                     host = client_service._host[new_host_start:]
                     service = SplunkServicePool(
                         host=host,
