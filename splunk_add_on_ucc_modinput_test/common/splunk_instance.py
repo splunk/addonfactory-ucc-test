@@ -70,14 +70,19 @@ class Configuration:
 
     @staticmethod
     def _victoria_create_index(
-        index_name: str, *, acs_stack: str, acs_server: str, splunk_token: str
+        index_name: str,
+        *,
+        datatype: str,
+        acs_stack: str,
+        acs_server: str,
+        splunk_token: str,
     ) -> None:
         index_name = index_name.lower()
         Configuration._validate_index_name(index_name)
         url = f"{acs_server}/{acs_stack}/adminconfig/v2/indexes"
         data = json.dumps(
             {
-                "datatype": "event",
+                "datatype": datatype,
                 "maxDataSizeMB": 0,
                 "name": index_name,
                 "searchableDays": 365,
@@ -151,12 +156,14 @@ class Configuration:
 
     @staticmethod
     def _enterprise_create_index(
-        index_name: str, client_service: Service
+        index_name: str, datatype: str, client_service: Service
     ) -> Index:
         idx_not_created_msg = f"Index {index_name} was not created on \
             instance {client_service.host}"
         try:
-            new_index = client_service.indexes.create(index_name)
+            new_index = client_service.indexes.create(
+                index_name, datatype=datatype
+            )
         except Exception as e:
             reason = f"{idx_not_created_msg}\nException raised:\n{e}"
             logger.critical(reason)
@@ -172,6 +179,7 @@ class Configuration:
         index_name: str,
         client_service: SplunkServicePool,
         *,
+        datatype: str = "event",
         is_cloud: bool = False,
         acs_stack: str | None = None,
         acs_server: str | None = None,
@@ -184,6 +192,7 @@ class Configuration:
         if is_cloud:
             Configuration._victoria_create_index(
                 index_name,
+                datatype=datatype,
                 acs_stack=acs_stack,
                 acs_server=acs_server,
                 splunk_token=splunk_token,
@@ -195,6 +204,7 @@ class Configuration:
         else:
             created_index = Configuration._enterprise_create_index(
                 index_name,
+                datatype,
                 client_service,
             )
         logger.debug(f"Index {index_name} has just been created")
