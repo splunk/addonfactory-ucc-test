@@ -36,8 +36,7 @@ class Configuration:
         }
         response = requests.get(url, headers=headers)
         if response.status_code == 200:
-            if not client_service._host.startswith(acs_stack):
-                new_host_start = client_service._host.find(acs_stack)
+            new_host_start = client_service._host.find(acs_stack)
             host = client_service._host[new_host_start:]
             service = SplunkServicePool(
                 host=host,
@@ -63,7 +62,7 @@ class Configuration:
         if any(i.name == index_name for i in client_service.indexes):
             return client_service.indexes[index_name]
         else:
-            if is_cloud:
+            if is_cloud and not client_service._host.startswith(acs_stack):
                 return Configuration.get_index_from_classic_instance(
                     index_name,
                     client_service,
