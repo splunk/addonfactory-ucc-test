@@ -31,6 +31,10 @@ logger = logging.getLogger("ucc-modinput-test")
 
 @dataclass
 class SplunkInstanceKVStoreAPI:
+    """
+    This class provides an interface to interact with the Splunk KV store.
+    """
+
     splunk: SplunkServicePool
     collection_name: str
     record_id: str
