@@ -14,12 +14,8 @@
 # limitations under the License.
 #
 from __future__ import annotations
-import json
 import time
 from typing import Callable
-
-from splunklib.client import Endpoint
-from splunklib.binding import ResponseReader
 
 from splunk_add_on_ucc_modinput_test.common.splunk_instance import (
     search,
@@ -33,6 +29,9 @@ from splunk_add_on_ucc_modinput_test.common.splunk_service_pool import (
 from splunk_add_on_ucc_modinput_test.common.ta_base import ConfigurationBase
 from splunk_add_on_ucc_modinput_test.functional.common.splunk_instance_file import (  # noqa: E501
     SplunkInstanceFileHelper,
+)
+from splunk_add_on_ucc_modinput_test.functional.common.splunk_instance_kvstore import (  # noqa: E501
+    SplunkInstanceKVStoreAPI,
 )
 from splunk_add_on_ucc_modinput_test.typing import ProbeGenType
 import logging
@@ -166,44 +165,25 @@ class SplunkClientBase:
             self.splunk,
         )
 
-    def get_kv_store_collection(
-        self, user_name: str, app_name: str, collection_name: str
-    ) -> list[dict[str, str]] | None:
-        kvstore_path = (
-            f"/servicesNS/{user_name}/{app_name}/"
-            f"storage/collections/data/{collection_name}"
-        )
-        try:
-            kvstore_endpoint = Endpoint(self.splunk, kvstore_path)
-            response = ResponseReader(kvstore_endpoint.get()["body"]).read()
-            return json.loads(response.decode("utf-8"))
-        except Exception as e:
-            logger.error(
-                f"Failed to get KV store collection {collection_name}: {e}"
-            )
-            raise e
-
-    def get_kv_store_record(
+    def kvstore_api_helper(
         self,
-        user_name: str,
-        app_name: str,
         collection_name: str,
         record_id: str,
-    ) -> dict[str, str] | None:
-        kvstore_path = (
-            f"/servicesNS/{user_name}/{app_name}/"
-            f"storage/collections/data/{collection_name}/{record_id}"
+    ) -> SplunkInstanceKVStoreAPI:
+        assert hasattr(
+            self.config, "app_name"
+        ), "app_name attribute is not set in Splunk configuration"
+        assert hasattr(
+            self.config, "app_user"
+        ), "app_user attribute is not set in Splunk configuration"
+        connect = dict(
+            splunk=self.splunk,
+            collection_name=collection_name,
+            record_id=record_id,
+            app_name=self.config.app_name,
+            app_user=self.config.app_user,
         )
-        try:
-            kvstore_endpoint = Endpoint(self.splunk, kvstore_path)
-            response = ResponseReader(kvstore_endpoint.get()["body"]).read()
-            return json.loads(response.decode("utf-8"))
-        except Exception as e:
-            logger.error(
-                f"Failed to get KV store record {record_id} from "
-                f"collection {collection_name}: {e}"
-            )
-            raise e
+        return SplunkInstanceKVStoreAPI(**connect)
 
     def search_probe(
         self,
