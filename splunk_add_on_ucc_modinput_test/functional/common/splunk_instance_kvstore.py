@@ -41,15 +41,16 @@ class SplunkInstanceKVStoreAPI:
     app_name: str
     app_user: str = "nobody"
 
-    def __post_init__(self) -> None:
-        self.kvstore_path = (
-            f"/servicesNS/{self.app_user}/{self.app_name}/"
-            f"storage/collections/data/{self.collection_name}/{self.record_id}"
+    def _create_record_path(self) -> str:
+        return (
+            f"/servicesNS/{self.app_user}/{self.app_name}/storage/"
+            f"collections/data/{self.collection_name}/{self.record_id}"
         )
 
     def get_record_from_collection(self) -> dict[str, str]:
         try:
-            kvstore_endpoint = Endpoint(self.splunk, self.kvstore_path)
+            record_path = self._create_record_path()
+            kvstore_endpoint = Endpoint(self.splunk, record_path)
             response = kvstore_endpoint.get()
             response_body = ResponseReader(response["body"]).read()
             return json.loads(response_body.decode("utf-8"))
