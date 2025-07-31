@@ -47,7 +47,7 @@ class SplunkInstanceKVStoreAPI:
             f"storage/collections/data/{self.collection_name}/{self.record_id}"
         )
 
-    def get_record(self) -> dict[str, str]:
+    def get_record_from_collection(self) -> dict[str, str]:
         try:
             kvstore_endpoint = Endpoint(self.splunk, self.kvstore_path)
             response = kvstore_endpoint.get()
