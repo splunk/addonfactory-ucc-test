@@ -94,7 +94,7 @@ Splunk client class is supposed to implement methods providing access to Splunk 
 
 - *splunk_client.app_file_helper()* - same as instance_file_helper except SplunkInstanceFileHelper (*splunk_add_on_ucc_modinput_test.functional.common.splunk_instance_file*) will treat provided file paths as relative to add-on root folder on Splunk host. Requires ```app_name``` property to be part of ```splunk_client``` configuration class.
 
-- *splunk_client.kvstore_api_helper()* - Factory method for SplunkInstanceKVStoreAPI, allowing to execute api calls for KV store directly on Splunk host. Requires app_name and app_user properties to be part of splunk_client configuration class. It is used to get the record from KV store collection. 
+- *splunk_client.kvstore_api_helper()* - Factory method for SplunkInstanceKVStoreAPI, allowing to execute api calls for KV store directly on Splunk host. Requires ```app_name``` and ```app_user``` properties to be part of splunk_client configuration class. It is used to get the record from KV store collection. 
 
 #### Add-on API endpoint support
 Each technical add-on creates an additional set of API endpoints responsible for add-on resources like inputs, configuration files and custom rest handlers. 
