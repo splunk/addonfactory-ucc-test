@@ -19,8 +19,8 @@
     ```
     Please make sure to synchronize your output folder with the latest TA dev state and regenerate `_managed_client.py` by running 
 
-    ```bash
-   ucc-gen build 
-   ucc-test-modinput gen --force-splunk-client-overwritten
-   ```
+    ```
+    ucc-gen build 
+    ucc-test-modinput gen --force-splunk-client-overwritten
+    ```
    and add the `_managed_client.py` file to your commit.
