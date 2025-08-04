@@ -82,7 +82,7 @@ Splunk client class is supposed to implement methods providing access to Splunk 
 
 - *splunk_client.search(query)* - executes SPL search query at Splunk instance and returns result in SearchState class object (*splunk_add_on_ucc_modinput_test.common.splunk_instance.SearchState*)
 
-- *splunk_client.create_index(name)* - creates Splunk index with a given name and returns *splunklib.Index* object.
+- *splunk_client.create_index(name, datatype)* - creates Splunk index with a given name and data type (event or metric). Returns *splunklib.Index* object.
 
 - *splunk_client.default_index()* - returns default Splunk index name if framework configured to create one.
 
