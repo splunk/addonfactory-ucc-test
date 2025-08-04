@@ -150,7 +150,7 @@ class SplunkClientBase:
         return "splunkcloud.com" in self.config.host.lower()
 
     def create_index(self, index_name: str) -> Index:
-        return self.config.create_index(
+        return self.config._create_index(
             index_name,
             self.splunk,
             is_cloud=self._is_cloud,
@@ -160,7 +160,7 @@ class SplunkClientBase:
         )
 
     def get_index(self, index_name: str) -> Index | None:
-        return self.config.get_index(
+        return self.config._get_index(
             index_name,
             self.splunk,
             acs_stack=self.config.acs_stack if self._is_cloud else None,

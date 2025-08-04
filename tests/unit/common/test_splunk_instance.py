@@ -44,7 +44,7 @@ def test_get_index_from_classic_instance_none(mock_urlopen, response_status):
     mock_client._port = 8089
     mock_client._username = "mock_user"
     mock_client._password = "mock_password"
-    cloud_index = Configuration.get_index_from_classic_instance(
+    cloud_index = Configuration._get_index_from_classic_instance(
         "test_index",
         mock_client,
         "mock_acs",
