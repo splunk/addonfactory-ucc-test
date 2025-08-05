@@ -39,7 +39,7 @@ MODINPUT_TEST_SPLUNK_DEDICATED_INDEX = "MODINPUT_TEST_SPLUNK_DEDICATED_INDEX"
 
 class Configuration:
     @staticmethod
-    def get_index_from_classic_instance(
+    def _get_index_from_classic_instance(
         index_name: str,
         client_service: SplunkServicePool,
         acs_stack: str,
@@ -84,7 +84,7 @@ class Configuration:
             return None
 
     @staticmethod
-    def get_index(
+    def _get_index(
         index_name: str,
         client_service: SplunkServicePool,
         acs_stack: str | None = None,
@@ -98,7 +98,7 @@ class Configuration:
                 "splunkcloud.com" in client_service._host.lower()
                 and not client_service._host.startswith(acs_stack)
             ):
-                return Configuration.get_index_from_classic_instance(
+                return Configuration._get_index_from_classic_instance(
                     index_name,
                     client_service,
                     acs_stack,
@@ -227,7 +227,7 @@ class Configuration:
             pytest.exit(idx_not_created_msg)
 
     @staticmethod
-    def create_index(
+    def _create_index(
         index_name: str,
         client_service: SplunkServicePool,
         *,
@@ -236,7 +236,7 @@ class Configuration:
         acs_server: str | None = None,
         splunk_token: str | None = None,
     ) -> Index:
-        if Configuration.get_index(
+        if Configuration._get_index(
             index_name,
             client_service,
             acs_stack,
@@ -253,7 +253,7 @@ class Configuration:
                 acs_server=acs_server,
                 splunk_token=splunk_token,
             )
-            created_index = Configuration.get_index(
+            created_index = Configuration._get_index(
                 index_name,
                 client_service,
                 acs_stack,
@@ -361,7 +361,7 @@ class Configuration:
         )
 
         if dedicated_index_name:
-            instance._dedicated_index = cls.get_index(
+            instance._dedicated_index = cls._get_index(
                 dedicated_index_name, instance._service
             )
             if not instance._dedicated_index:
@@ -378,7 +378,7 @@ class Configuration:
                     test in splunk {instance._host}"
             )
         else:
-            instance._dedicated_index = instance.create_index(
+            instance._dedicated_index = instance._create_index(
                 f"idx_{utils.Common().sufix}",
                 instance._service,
                 is_cloud=instance._is_cloud,
