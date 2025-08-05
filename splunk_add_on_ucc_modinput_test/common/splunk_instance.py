@@ -91,7 +91,10 @@ class Configuration:
         acs_server: str | None = None,
         splunk_token: str | None = None,
     ) -> Index | None:
-        if any(i.name == index_name for i in client_service.indexes):
+        if any(
+            i.name == index_name
+            for i in client_service.indexes.iter(datatype="all")
+        ):
             return client_service.indexes[index_name]
         else:
             if (
