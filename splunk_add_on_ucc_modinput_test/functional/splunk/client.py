@@ -156,10 +156,11 @@ class SplunkClientBase:
             splunk_token=self.config.token if self._is_cloud else None,
         )
 
-    def get_index(self, index_name: str) -> Index | None:
+    def get_index(self, index_name: str, datatype: str = None) -> Index | None:
         return self.config.get_index(
             index_name,
             self.splunk,
+            datatype=datatype,
         )
 
     def search_probe(

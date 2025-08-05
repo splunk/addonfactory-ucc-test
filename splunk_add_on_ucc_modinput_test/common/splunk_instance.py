@@ -40,9 +40,14 @@ MODINPUT_TEST_SPLUNK_DEDICATED_INDEX = "MODINPUT_TEST_SPLUNK_DEDICATED_INDEX"
 class Configuration:
     @staticmethod
     def get_index(
-        index_name: str, client_service: SplunkServicePool
+        index_name: str, client_service: SplunkServicePool, datatype: str = None
     ) -> Index | None:
-        if any(i.name == index_name for i in client_service.indexes):
+        if datatype is None:
+            iterator = client_service.indexes
+        else:
+            iterator = client_service.indexes.iter(datatype=datatype)
+
+        if any(i.name == index_name for i in iterator):
             return client_service.indexes[index_name]
         else:
             return None
@@ -200,6 +205,7 @@ class Configuration:
             created_index = Configuration.get_index(
                 index_name,
                 client_service,
+                datatype,
             )
         else:
             created_index = Configuration._enterprise_create_index(
