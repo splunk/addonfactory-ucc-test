@@ -87,6 +87,7 @@ class Configuration:
     def _get_index(
         index_name: str,
         client_service: SplunkServicePool,
+        is_cloud: bool = False,
         acs_stack: str | None = None,
         acs_server: str | None = None,
         splunk_token: str | None = None,
@@ -96,18 +97,14 @@ class Configuration:
             for i in client_service.indexes.iter(datatype="all")
         ):
             return client_service.indexes[index_name]
-        else:
-            if (
-                "splunkcloud.com" in client_service._host.lower()
-                and not client_service._host.startswith(acs_stack)
-            ):
-                return Configuration._get_index_from_classic_instance(
-                    index_name,
-                    client_service,
-                    acs_stack,
-                    acs_server,
-                    splunk_token,
-                )
+        if is_cloud and not client_service._host.startswith(acs_stack):
+            return Configuration._get_index_from_classic_instance(
+                index_name,
+                client_service,
+                acs_stack,
+                acs_server,
+                splunk_token,
+            )
         return None
 
     @staticmethod
@@ -132,7 +129,7 @@ class Configuration:
             raise ValueError(reason)
 
     @staticmethod
-    def _victoria_create_index(
+    def _cloud_create_index(
         index_name: str,
         *,
         datatype: str,
@@ -250,6 +247,7 @@ class Configuration:
         if Configuration._get_index(
             index_name,
             client_service,
+            is_cloud,
             acs_stack,
             acs_server,
             splunk_token,
@@ -258,7 +256,7 @@ class Configuration:
             logger.critical(reason)
             pytest.exit(reason)
         if is_cloud:
-            Configuration._victoria_create_index(
+            Configuration._cloud_create_index(
                 index_name,
                 datatype=datatype,
                 acs_stack=acs_stack,
@@ -268,6 +266,7 @@ class Configuration:
             created_index = Configuration._get_index(
                 index_name,
                 client_service,
+                is_cloud,
                 acs_stack,
                 acs_server,
                 splunk_token,

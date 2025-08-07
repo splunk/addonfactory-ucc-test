@@ -164,6 +164,7 @@ class SplunkClientBase:
         return self.config._get_index(
             index_name,
             self.splunk,
+            is_cloud=self._is_cloud,
             acs_stack=self.config.acs_stack if self._is_cloud else None,
             acs_server=self.config.acs_server if self._is_cloud else None,
             splunk_token=self.config.token if self._is_cloud else None,
