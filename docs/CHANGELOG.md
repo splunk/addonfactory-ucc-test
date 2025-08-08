@@ -1,5 +1,64 @@
 # Changelog
 
+# [2.0.0](https://github.com/splunk/addonfactory-ucc-test/compare/v1.0.1...v2.0.0) (2025-08-08)
+
+
+### Features
+
+* add support for creating metric index ([c9f9e00](https://github.com/splunk/addonfactory-ucc-test/commit/c9f9e003e2b42d4dc1b5f973432f4b9ba926fca9))
+* add support for creating metric index ([#134](https://github.com/splunk/addonfactory-ucc-test/issues/134)) ([38cfd58](https://github.com/splunk/addonfactory-ucc-test/commit/38cfd582910b7c74bbc4388510dd0870b78d4f99))
+* release 2.0.0 ([#135](https://github.com/splunk/addonfactory-ucc-test/issues/135)) ([8516563](https://github.com/splunk/addonfactory-ucc-test/commit/85165635e83198e275b8b58022ceb16b7fe62dd2))
+* search for all types of indexes in get_index ([35ef4b5](https://github.com/splunk/addonfactory-ucc-test/commit/35ef4b55ddd12bf77399cfdc6e3a54afc745adc6))
+* support kvstore api ([#131](https://github.com/splunk/addonfactory-ucc-test/issues/131)) ([930a076](https://github.com/splunk/addonfactory-ucc-test/commit/930a0760a3debc57ce75e1ab4dac810171e60961))
+
+
+### BREAKING CHANGES
+
+* change get_index method interface so it's able to get
+indexes from idm stacks.
+
+### PR Type
+
+**What kind of change does this PR introduce?**
+* [X] Feature
+* [ ] Bug Fix
+* [ ] Refactoring (no functional or API changes)
+* [X] Documentation Update
+* [ ] Maintenance (dependency updates, CI, etc.)
+
+## Summary
+
+Test runs:
+
+https://cd.splunkdev.com/taautomation/ta-automation-compatibility-tests/-/pipelines/28335229
+
+https://cd.splunkdev.com/taautomation/ta-automation-compatibility-tests/-/pipelines/28340518
+
+https://cd.splunkdev.com/taautomation/ta-automation-compatibility-tests/-/pipelines/28533993
+
+https://cd.splunkdev.com/taautomation/ta-automation-compatibility-tests/-/pipelines/28533938
+### Changes
+
+Please provide a summary of the changes.
+
+### User experience
+
+Please describe the user experience before and after this change.
+Screenshots are welcome for additional context.
+
+## Checklist
+
+If an item doesn't apply to your changes, leave it unchecked.
+
+* [X] I have performed a self-review of this change according to the
+[development
+guidelines](https://splunk.github.io/addonfactory-ucc-test/contributing/#development-guidelines)
+* [X] Tests have been added/modified to cover the changes [(testing
+doc)](https://splunk.github.io/addonfactory-ucc-test/contributing/#build-and-test)
+* [X] Changes are documented
+* [X] PR title and description follows the [contributing
+principles](https://splunk.github.io/addonfactory-ucc-test/contributing/#pull-requests)
+
 ## [1.0.1](https://github.com/splunk/addonfactory-ucc-test/compare/v1.0.0...v1.0.1) (2025-07-02)
 
 
