@@ -16,6 +16,7 @@
 from __future__ import annotations
 import time
 from typing import Callable
+
 from splunk_add_on_ucc_modinput_test.common.splunk_instance import (
     search,
     Configuration,
@@ -28,6 +29,9 @@ from splunk_add_on_ucc_modinput_test.common.splunk_service_pool import (
 from splunk_add_on_ucc_modinput_test.common.ta_base import ConfigurationBase
 from splunk_add_on_ucc_modinput_test.functional.common.splunk_instance_file import (  # noqa: E501
     SplunkInstanceFileHelper,
+)
+from splunk_add_on_ucc_modinput_test.functional.common.splunk_instance_kvstore import (  # noqa: E501
+    SplunkInstanceKVStoreAPI,
 )
 from splunk_add_on_ucc_modinput_test.typing import ProbeGenType
 import logging
@@ -145,8 +149,19 @@ class SplunkClientBase:
     def _is_cloud(self) -> bool:
         return "splunkcloud.com" in self.config.host.lower()
 
-    def create_index(self, index_name: str) -> Index:
-        return self.config.create_index(
+    def create_index(self, index_name: str, datatype: str = "event") -> Index:
+        return self.config._create_index(
+            index_name,
+            self.splunk,
+            datatype=datatype,
+            is_cloud=self._is_cloud,
+            acs_stack=self.config.acs_stack if self._is_cloud else None,
+            acs_server=self.config.acs_server if self._is_cloud else None,
+            splunk_token=self.config.token if self._is_cloud else None,
+        )
+
+    def get_index(self, index_name: str) -> Index | None:
+        return self.config._get_index(
             index_name,
             self.splunk,
             is_cloud=self._is_cloud,
@@ -155,11 +170,25 @@ class SplunkClientBase:
             splunk_token=self.config.token if self._is_cloud else None,
         )
 
-    def get_index(self, index_name: str) -> Index | None:
-        return self.config.get_index(
-            index_name,
-            self.splunk,
+    def kvstore_api_helper(
+        self,
+        collection_name: str,
+        record_id: str,
+    ) -> SplunkInstanceKVStoreAPI:
+        assert hasattr(
+            self.config, "app_name"
+        ), "app_name attribute is not set in Splunk configuration"
+        assert hasattr(
+            self.config, "app_user"
+        ), "app_user attribute is not set in Splunk configuration"
+        connect = dict(
+            splunk=self.splunk,
+            collection_name=collection_name,
+            record_id=record_id,
+            app_name=self.config.app_name,
+            app_user=self.config.app_user,
         )
+        return SplunkInstanceKVStoreAPI(**connect)
 
     def search_probe(
         self,

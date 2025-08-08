@@ -39,13 +39,73 @@ MODINPUT_TEST_SPLUNK_DEDICATED_INDEX = "MODINPUT_TEST_SPLUNK_DEDICATED_INDEX"
 
 class Configuration:
     @staticmethod
-    def get_index(
-        index_name: str, client_service: SplunkServicePool
-    ) -> Index | None:
-        if any(i.name == index_name for i in client_service.indexes):
-            return client_service.indexes[index_name]
-        else:
+    def _get_index_from_classic_instance(
+        index_name: str,
+        client_service: SplunkServicePool,
+        acs_stack: str,
+        acs_server: str,
+        splunk_token: str,
+    ) -> Index:
+        url = f"{acs_server}/{acs_stack}/adminconfig/v2/indexes/{index_name}"
+
+        headers = {
+            "Authorization": "Bearer " + splunk_token,
+            "Content-Type": "application/json",
+        }
+        req = request.Request(url, headers=headers, method="GET")
+        context = ssl.create_default_context(cafile=certifi.where())
+        try:
+            with request.urlopen(req, context=context) as response:
+                if response.status == 200:
+                    new_host_start = client_service._host.find(acs_stack)
+                    host = client_service._host[new_host_start:]
+                    service = SplunkServicePool(
+                        host=host,
+                        port=client_service._port,
+                        username=client_service._username,
+                        password=client_service._password,
+                    )
+                    return Index(
+                        service, f"/services/data/indexes/{index_name}"
+                    )
+        except error.HTTPError as e:
+            if e.code == 404:
+                idx_not_created_msg = (
+                    f"Index {index_name} was not found on stack {acs_stack} "
+                    f"controlled by {acs_server}."
+                )
+            else:
+                idx_not_created_msg = (
+                    f"Failed to retrieve index {index_name} from stack "
+                    f"{acs_stack} controlled by {acs_server}. "
+                    f"HTTP error: {e.code}"
+                )
+            utils.logger.critical(idx_not_created_msg)
             return None
+
+    @staticmethod
+    def _get_index(
+        index_name: str,
+        client_service: SplunkServicePool,
+        is_cloud: bool = False,
+        acs_stack: str | None = None,
+        acs_server: str | None = None,
+        splunk_token: str | None = None,
+    ) -> Index | None:
+        if any(
+            i.name == index_name
+            for i in client_service.indexes.iter(datatype="all")
+        ):
+            return client_service.indexes[index_name]
+        if is_cloud and not client_service._host.startswith(acs_stack):
+            return Configuration._get_index_from_classic_instance(
+                index_name,
+                client_service,
+                acs_stack,
+                acs_server,
+                splunk_token,
+            )
+        return None
 
     @staticmethod
     def _validate_index_name(index_name: str) -> None:
@@ -69,15 +129,19 @@ class Configuration:
             raise ValueError(reason)
 
     @staticmethod
-    def _victoria_create_index(
-        index_name: str, *, acs_stack: str, acs_server: str, splunk_token: str
+    def _cloud_create_index(
+        index_name: str,
+        *,
+        datatype: str,
+        acs_stack: str,
+        acs_server: str,
+        splunk_token: str,
     ) -> None:
-        index_name = index_name.lower()
         Configuration._validate_index_name(index_name)
         url = f"{acs_server}/{acs_stack}/adminconfig/v2/indexes"
         data = json.dumps(
             {
-                "datatype": "event",
+                "datatype": datatype,
                 "maxDataSizeMB": 0,
                 "name": index_name,
                 "searchableDays": 365,
@@ -151,12 +215,14 @@ class Configuration:
 
     @staticmethod
     def _enterprise_create_index(
-        index_name: str, client_service: Service
+        index_name: str, datatype: str, client_service: Service
     ) -> Index:
         idx_not_created_msg = f"Index {index_name} was not created on \
             instance {client_service.host}"
         try:
-            new_index = client_service.indexes.create(index_name)
+            new_index = client_service.indexes.create(
+                index_name, datatype=datatype
+            )
         except Exception as e:
             reason = f"{idx_not_created_msg}\nException raised:\n{e}"
             logger.critical(reason)
@@ -168,33 +234,47 @@ class Configuration:
             pytest.exit(idx_not_created_msg)
 
     @staticmethod
-    def create_index(
+    def _create_index(
         index_name: str,
         client_service: SplunkServicePool,
         *,
+        datatype: str = "event",
         is_cloud: bool = False,
         acs_stack: str | None = None,
         acs_server: str | None = None,
         splunk_token: str | None = None,
     ) -> Index:
-        if Configuration.get_index(index_name, client_service):
+        if Configuration._get_index(
+            index_name,
+            client_service,
+            is_cloud,
+            acs_stack,
+            acs_server,
+            splunk_token,
+        ):
             reason = f"Index {index_name} already exists"
             logger.critical(reason)
             pytest.exit(reason)
         if is_cloud:
-            Configuration._victoria_create_index(
+            Configuration._cloud_create_index(
                 index_name,
+                datatype=datatype,
                 acs_stack=acs_stack,
                 acs_server=acs_server,
                 splunk_token=splunk_token,
             )
-            created_index = Configuration.get_index(
+            created_index = Configuration._get_index(
                 index_name,
                 client_service,
+                is_cloud,
+                acs_stack,
+                acs_server,
+                splunk_token,
             )
         else:
             created_index = Configuration._enterprise_create_index(
                 index_name,
+                datatype,
                 client_service,
             )
         logger.debug(f"Index {index_name} has just been created")
@@ -293,7 +373,7 @@ class Configuration:
         )
 
         if dedicated_index_name:
-            instance._dedicated_index = cls.get_index(
+            instance._dedicated_index = cls._get_index(
                 dedicated_index_name, instance._service
             )
             if not instance._dedicated_index:
@@ -310,7 +390,7 @@ class Configuration:
                     test in splunk {instance._host}"
             )
         else:
-            instance._dedicated_index = instance.create_index(
+            instance._dedicated_index = instance._create_index(
                 f"idx_{utils.Common().sufix}",
                 instance._service,
                 is_cloud=instance._is_cloud,
