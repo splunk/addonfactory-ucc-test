@@ -20,7 +20,8 @@ def try_to_set_loglevel(
     except ValueError as e:
         error = str(e)
 
-    yield dict(expected_loglevel=loglevel, error=error)
+    new_loglevel = splunk_client.get_settings_logging().get("loglevel")
+    yield dict(expected_loglevel=new_loglevel, error=error)
 
     # teardown
     if error is None:
@@ -36,8 +37,9 @@ def set_loglevel(
 
     splunk_client.update_settings_logging(loglevel)
 
+    new_loglevel = splunk_client.get_settings_logging().get("loglevel")
     yield dict(
-        expected_loglevel=loglevel,
+        expected_loglevel=new_loglevel,
     )
 
     # teardown

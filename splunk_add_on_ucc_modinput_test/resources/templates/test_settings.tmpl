@@ -29,7 +29,7 @@ def test_valid_loglevel(wait_for_loglevel: bool) -> None:
     "overwrite,expected_error",
     [
         ({"proxy_url": "@#$%!*123"}, "Not matching the pattern: "),
-        ({"proxy_port": "not-a-number"}, "Bad Request -- Invalid format for integer value"),        
+        ({"proxy_port": "not-a-number"}, "Bad Request -- Invalid format for numeric value"),
     ],
 )
 @attach(forge(try_to_configure_proxy))
