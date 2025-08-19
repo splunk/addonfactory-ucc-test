@@ -51,7 +51,6 @@ jobs:
     strategy:
       matrix:
         python-version:
-          - "3.7"
           - "3.9"
           # - "3.13"  # there are issues to fix for this version
     steps:
@@ -78,16 +77,15 @@ jobs:
     strategy:
       matrix:
         python-version:
-          - "3.7"
-          # - "3.9"
+          - "3.9"
           # - "3.13"
           # use version currently used in CI/CD pipelines
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.7"
-      - run: curl -sSL https://install.python-poetry.org | python3 - --version 1.5.1
+          python-version: "3.9"
+      - run: curl -sSL https://install.python-poetry.org | python3 - --version 2.1.4
       - run: poetry install
       - name: Build UCC test
         run: |
@@ -102,7 +100,6 @@ jobs:
     strategy:
       matrix:
         python-version:
-          # - "3.7"
           - "3.9"
           - "3.13"
     steps:
@@ -110,7 +107,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-      - run: curl -sSL https://install.python-poetry.org | python3 - --version 1.5.1
+      - run: curl -sSL https://install.python-poetry.org | python3 - --version 2.1.4
       - run: poetry install
       - name: Build UCC test
         run: |
@@ -122,7 +119,6 @@ jobs:
     strategy:
       matrix:
         python-version:
-          - "3.7"
           - "3.9"
           - "3.13"
     steps:
@@ -130,7 +126,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-      - run: curl -sSL https://install.python-poetry.org | python3 - --version 1.5.1
+      - run: curl -sSL https://install.python-poetry.org | python3 - --version 2.1.4
       - run: |
           poetry install
           poetry run pytest tests/unit
@@ -141,7 +137,6 @@ jobs:
     strategy:
       matrix:
         python-version:
-          - "3.7"
           - "3.9"
           - "3.13"
     steps:
@@ -149,7 +144,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-      - run: curl -sSL https://install.python-poetry.org | python3 - --version 1.5.1
+      - run: curl -sSL https://install.python-poetry.org | python3 - --version 2.1.4
       - run: |
           poetry install
           poetry run pytest -p pytester tests/functional/flow
@@ -160,7 +155,6 @@ jobs:
     strategy:
       matrix:
         python-version:
-          - "3.7"
           - "3.9"
           - "3.13"
     steps:
@@ -168,7 +162,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-      - run: curl -sSL https://install.python-poetry.org | python3 - --version 1.5.1
+      - run: curl -sSL https://install.python-poetry.org | python3 - --version 2.1.4
       - run: |
           poetry install
           poetry run pytest tests/functional/feature
@@ -179,7 +173,6 @@ jobs:
     strategy:
       matrix:
         python-version:
-          - "3.7"
           - "3.9"
           - "3.13"
     needs:
@@ -219,7 +212,6 @@ jobs:
     strategy:
       matrix:
         python-version:
-          - "3.7"
           - "3.9"
           - "3.13"
     needs:
@@ -273,8 +265,8 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.7"
-      - run: curl -sSL https://install.python-poetry.org | python3 - --version 1.5.1
+          python-version: "3.9"
+      - run: curl -sSL https://install.python-poetry.org | python3 - --version 2.1.4
       - uses: actions/download-artifact@v4
         with:
           name: THIRDPARTY
