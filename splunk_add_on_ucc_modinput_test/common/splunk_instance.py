@@ -145,7 +145,6 @@ class Configuration:
                 "maxDataSizeMB": 0,
                 "name": index_name,
                 "searchableDays": 365,
-                "splunkArchivalRetentionDays": 366,
                 "totalEventCount": "0",
                 "totalRawSizeMB": "0",
             }
