@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.1](https://github.com/splunk/addonfactory-ucc-test/compare/v2.0.0...v2.0.1) (2025-08-25)
+
+
+### Bug Fixes
+
+* update index creation for azure cloud instance ([#144](https://github.com/splunk/addonfactory-ucc-test/issues/144)) ([d67d22d](https://github.com/splunk/addonfactory-ucc-test/commit/d67d22dde9628e984d2551e62e45c691fb736d22))
+
 # [2.0.0](https://github.com/splunk/addonfactory-ucc-test/compare/v1.0.1...v2.0.0) (2025-08-08)
 
 
