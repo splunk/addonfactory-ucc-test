@@ -562,6 +562,8 @@ class TestDependencyManager(PytestConfigAdapter):
             exec_steps.append([tasks])
         logger.debug(dump)
         self.inplace_tasks_execution(exec_steps)
+        inplace_tasks_list = self.tasks.get_inplace_tasks_list(test.key)
+        self._check_failed_tasks(test, inplace_tasks_list)
 
     def test_setup_error_report(
         self, test: FrameworkTest

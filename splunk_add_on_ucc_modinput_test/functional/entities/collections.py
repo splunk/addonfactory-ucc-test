@@ -173,3 +173,11 @@ class TaskCollection:
             else:
                 pending.append(task)
         return done, pending
+
+    def get_inplace_tasks_list(
+        self, test_key: ExecutableKeyType
+    ) -> List[FrameworkTask]:
+        inplace_tasks_list = [
+            task for _, _, task in self.enumerate_inplace_tasks(test_key)
+        ]
+        return inplace_tasks_list
