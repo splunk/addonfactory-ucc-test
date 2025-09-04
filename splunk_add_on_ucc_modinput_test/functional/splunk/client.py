@@ -263,9 +263,18 @@ class SplunkClientBase:
         @return: SearchState object.
         """
 
+        last_state: SearchState | None = None
+
+        def internal_condition_fn(state: SearchState) -> bool:
+            nonlocal last_state
+            last_state = state
+            if callable(condition_fn):
+                return condition_fn(state)
+            return state.result_count > 0
+
         it = self.search_probe(
             probe_spl=spl,
-            verify_fn=condition_fn,
+            verify_fn=internal_condition_fn,
             timeout=timeout,
             interval=interval,
             probe_name=None,
@@ -275,5 +284,5 @@ class SplunkClientBase:
             while True:
                 wait = next(it)
                 time.sleep(wait)
-        except StopIteration as si:
-            return si.value
+        except StopIteration:
+            return last_state
