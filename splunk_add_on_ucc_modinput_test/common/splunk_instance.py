@@ -193,13 +193,14 @@ class Configuration:
                 # 424: Failed Dependency - indicates a temporary issue with a required resource. # noqa: E501
                 # 503: Service Unavailable - suggests the server is temporarily overloaded or down. # noqa: E501
                 if e.code in (424, 503):
+                    backoff_factor_for_failed_response = 9
                     if attempt_http < retries_http_errors:
                         logger.info(
                             f"HTTP Response status {e.code}, retrying to "
                             f"create index {index_name}... "
                             f"{attempt_http + 1}/{retries_http_errors}"
                         )
-                        time.sleep(2**attempt_http)
+                        time.sleep(backoff_factor_for_failed_response * (2**attempt_http))
                         continue
                 else:
                     # In case of HTTP errors other than 424 and 503
