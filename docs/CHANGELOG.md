@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.2](https://github.com/splunk/addonfactory-ucc-test/compare/v2.0.1...v2.0.2) (2025-10-17)
+
+
+### Bug Fixes
+
+* increase backoff delay for index creation retries on 424/503 errors ([#147](https://github.com/splunk/addonfactory-ucc-test/issues/147)) ([6e03f0d](https://github.com/splunk/addonfactory-ucc-test/commit/6e03f0d09d656d23e93b6b793515913a1a19c486))
+
 ## [2.0.1](https://github.com/splunk/addonfactory-ucc-test/compare/v2.0.0...v2.0.1) (2025-08-25)
 
 
