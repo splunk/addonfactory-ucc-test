@@ -353,7 +353,7 @@ class Configuration:
         dedicated_index_name = cls.collect_splunk_dedicated_index()
 
         instance._is_cloud = (
-            "splunkcloud.com" in instance._host.lower()  # type: ignore
+            "splunkcloud" in instance._host.lower()  # type: ignore
         )
         create_index_in_cloud = instance._is_cloud and not dedicated_index_name
         instance._token = cls.collect_splunk_token(
