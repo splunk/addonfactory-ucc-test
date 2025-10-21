@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.3](https://github.com/splunk/addonfactory-ucc-test/compare/v2.0.2...v2.0.3) (2025-10-21)
+
+
+### Bug Fixes
+
+* splunk cloud identification ([#148](https://github.com/splunk/addonfactory-ucc-test/issues/148)) ([e22e777](https://github.com/splunk/addonfactory-ucc-test/commit/e22e77731217d381d2bef062e4c2fb70d720d12e))
+
 ## [2.0.2](https://github.com/splunk/addonfactory-ucc-test/compare/v2.0.1...v2.0.2) (2025-10-17)
 
 
