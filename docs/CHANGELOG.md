@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.5](https://github.com/splunk/addonfactory-ucc-test/compare/v2.0.4...v2.0.5) (2025-11-17)
+
+
+### Bug Fixes
+
+* index creation in SHC ([#150](https://github.com/splunk/addonfactory-ucc-test/issues/150)) ([1991d1e](https://github.com/splunk/addonfactory-ucc-test/commit/1991d1e445e4d832b8bb1ae1a19a2d094a9af880))
+
 ## [2.0.4](https://github.com/splunk/addonfactory-ucc-test/compare/v2.0.3...v2.0.4) (2025-10-21)
 
 
