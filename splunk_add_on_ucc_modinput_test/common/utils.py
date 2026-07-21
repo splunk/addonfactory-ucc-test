@@ -21,16 +21,55 @@ import datetime
 from functools import lru_cache
 import pytz  # type: ignore
 import base64
+from http.client import RemoteDisconnected
 from pathlib import Path
-from typing import Callable, List, Optional
+from typing import Callable, List, Optional, Tuple, Type, TypeVar
+from urllib3.exceptions import ProtocolError
 import hashlib
 import logging
 
 logger = logging.getLogger("ucc-modinput-test")
 
+T = TypeVar("T")
+
+RETRYABLE_CONNECTION_ERRORS: Tuple[Type[Exception], ...] = (
+    RemoteDisconnected,
+    ProtocolError,
+)
+
 
 class SplunkClientConfigurationException(Exception):
     pass
+
+
+def retry_on_connection_error(
+    func: Callable[[], T],
+    *,
+    retries: int = 2,
+    delay: float = 2,
+    exceptions: Tuple[Type[Exception], ...] = RETRYABLE_CONNECTION_ERRORS,
+) -> T:
+    """Retry ``func`` when it raises a dropped-connection error.
+
+    A REST call made long after a prior call on the same client (for
+    example a session-scoped forge's teardown, which can run tens of
+    minutes after its setup) may reuse an HTTP keep-alive connection
+    that Splunk has since closed. That first write fails with e.g.
+    ``RemoteDisconnected`` even though the server is healthy; retrying
+    opens a fresh connection.
+    """
+    for attempt in range(retries + 1):
+        try:
+            return func()
+        except exceptions as e:
+            if attempt == retries:
+                raise
+            logger.warning(
+                f"Retrying after connection error: {e} "
+                f"(attempt {attempt + 1}/{retries})"
+            )
+            time.sleep(delay)
+    raise AssertionError("unreachable")  # pragma: no cover
 
 
 def get_from_environment_variable(
