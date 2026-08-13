@@ -1,4 +1,7 @@
 [flake8]
+; E203 and E231 are enforced by black. E713 and E272 are ignored for
+; compatibility with the existing codebase.
+extend-ignore = E203,E231,E713,E272
 per-file-ignores =
     ; imported but unused
     tests/functional/demo_addon_for_splunk/package/bin/demo_addon_for_splunk_rh_endpoint.py: F401,
@@ -12,6 +15,7 @@ per-file-ignores =
     splunk_add_on_ucc_modinput_test/functional/entities/test.py: E501,
     splunk_add_on_ucc_modinput_test/functional/entities/task.py: E501,
     splunk_add_on_ucc_modinput_test/functional/pytest_plugin/utils.py: E501,
+    splunk_add_on_ucc_modinput_test/functional/pytest_plugin/options.py: E501,
     splunk_add_on_ucc_modinput_test/functional/manager.py: E501,
     splunk_add_on_ucc_modinput_test/functional/entities/forge.py: E501,
     ; undefined name 'configuration'
