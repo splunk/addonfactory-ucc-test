@@ -1,7 +1,9 @@
 import runpy
 import sys
+from collections.abc import Callable, Generator
 from pathlib import Path
 from types import ModuleType
+from typing import cast
 
 import pytest
 
@@ -17,8 +19,8 @@ TEMPLATE_PATH = (
 
 def load_template(monkeypatch: pytest.MonkeyPatch) -> dict[str, object]:
     client_module = ModuleType("tests.ucc_modinput_functional.splunk.client")
-    client_module.SplunkClient = object
-    client_module.SplunkApiError = RuntimeError
+    setattr(client_module, "SplunkClient", object)
+    setattr(client_module, "SplunkApiError", RuntimeError)
     monkeypatch.setitem(
         sys.modules,
         "tests.ucc_modinput_functional.splunk.client",
@@ -44,15 +46,18 @@ class LogLevelClient:
         self.loglevel = loglevel
 
 
-@pytest.mark.parametrize(
-    "forge_name", ["try_to_set_loglevel", "set_loglevel"]
-)
+@pytest.mark.parametrize("forge_name", ["try_to_set_loglevel", "set_loglevel"])
 def test_loglevel_forge_restores_state_when_post_update_read_fails(
     monkeypatch: pytest.MonkeyPatch, forge_name: str
 ) -> None:
     template = load_template(monkeypatch)
     client = LogLevelClient()
-    forge = template[forge_name]
+    forge = cast(
+        Callable[
+            [LogLevelClient, str], Generator[dict[str, object], None, None]
+        ],
+        template[forge_name],
+    )
 
     with pytest.raises(RuntimeError, match="failed to read updated log level"):
         next(forge(client, "DEBUG"))
