@@ -92,11 +92,9 @@ class Configuration:
         acs_server: str | None = None,
         splunk_token: str | None = None,
     ) -> Index | None:
-        if any(
-            i.name == index_name
-            for i in client_service.indexes.iter(datatype="all")
-        ):
-            return client_service.indexes[index_name]
+        for index_obj in client_service.indexes.iter(datatype="all"):
+            if index_obj.name == index_name:
+                return index_obj
         if is_cloud and not client_service._host.startswith(acs_stack):
             return Configuration._get_index_from_classic_instance(
                 index_name,
@@ -193,13 +191,14 @@ class Configuration:
                 # 424: Failed Dependency - indicates a temporary issue with a required resource. # noqa: E501
                 # 503: Service Unavailable - suggests the server is temporarily overloaded or down. # noqa: E501
                 if e.code in (424, 503):
+                    backoff_factor = 9
                     if attempt_http < retries_http_errors:
                         logger.info(
                             f"HTTP Response status {e.code}, retrying to "
                             f"create index {index_name}... "
                             f"{attempt_http + 1}/{retries_http_errors}"
                         )
-                        time.sleep(2**attempt_http)
+                        time.sleep(backoff_factor * (2**attempt_http))
                         continue
                 else:
                     # In case of HTTP errors other than 424 and 503
@@ -352,7 +351,7 @@ class Configuration:
         dedicated_index_name = cls.collect_splunk_dedicated_index()
 
         instance._is_cloud = (
-            "splunkcloud.com" in instance._host.lower()  # type: ignore
+            "splunkcloud" in instance._host.lower()  # type: ignore
         )
         create_index_in_cloud = instance._is_cloud and not dedicated_index_name
         instance._token = cls.collect_splunk_token(
