@@ -1,4 +1,5 @@
 from tests.functional.common import ScenarioTester
+import pytest
 
 
 def test_arguments(pytester):
@@ -89,3 +90,19 @@ def test_probes(pytester):
                 "*test_probes execution started",
             ]
         )
+
+
+@pytest.mark.parametrize(
+    "pytest_args",
+    [(), ("--sequential-execution",)],
+    ids=["parallel", "sequential"],
+)
+def test_attached_forge_failure(pytester, pytest_args):
+    with ScenarioTester(
+        pytester, "attached_forge_failure", *pytest_args
+    ) as tester:
+        tester.result.assert_outcomes(errors=1)
+        tester.framework_log_matcher.fnmatch_lines(
+            ["*Forge has failed to execute: attached forge failure*"]
+        )
+        tester.test_log_matcher.no_fnmatch_line("*parent test body executed*")
