@@ -1,5 +1,5 @@
 #
-# Copyright 2025 Splunk Inc.
+# Copyright 2026 Splunk Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -173,3 +173,11 @@ class TaskCollection:
             else:
                 pending.append(task)
         return done, pending
+
+    def get_inplace_tasks_list(
+        self, test_key: ExecutableKeyType
+    ) -> List[FrameworkTask]:
+        inplace_tasks_list = [
+            task for _, _, task in self.enumerate_inplace_tasks(test_key)
+        ]
+        return inplace_tasks_list

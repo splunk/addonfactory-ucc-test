@@ -1,7 +1,9 @@
+from http.client import RemoteDisconnected
 from pathlib import Path
 import shutil
 from typing import Optional
 from splunk_add_on_ucc_modinput_test.common import utils
+from urllib3.exceptions import ProtocolError
 import pytest
 import tempfile
 
@@ -195,3 +197,55 @@ def test_md5():
     assert md5 == md5_unchanged_chunk_size_1024
     assert md5 == md5_unchanged_chunk_size_32768
     assert md5 != md5_modified
+
+
+def test_retry_on_connection_error_succeeds_after_retry() -> None:
+    calls = {"n": 0}
+
+    def flaky() -> str:
+        calls["n"] += 1
+        if calls["n"] < 2:
+            raise RemoteDisconnected("Remote end closed connection")
+        return "ok"
+
+    result = utils.retry_on_connection_error(flaky, delay=0)
+    assert result == "ok"
+    assert calls["n"] == 2
+
+
+def test_retry_on_connection_error_retries_protocol_error() -> None:
+    calls = {"n": 0}
+
+    def flaky() -> str:
+        calls["n"] += 1
+        if calls["n"] < 2:
+            raise ProtocolError("Connection aborted.")
+        return "ok"
+
+    result = utils.retry_on_connection_error(flaky, delay=0)
+    assert result == "ok"
+    assert calls["n"] == 2
+
+
+def test_retry_on_connection_error_reraises_after_exhausting_retries() -> None:
+    calls = {"n": 0}
+
+    def always_fails() -> None:
+        calls["n"] += 1
+        raise RemoteDisconnected("Remote end closed connection")
+
+    with pytest.raises(RemoteDisconnected):
+        utils.retry_on_connection_error(always_fails, retries=2, delay=0)
+    assert calls["n"] == 3
+
+
+def test_retry_on_connection_error_does_not_retry_other_errors() -> None:
+    calls = {"n": 0}
+
+    def raises_value_error() -> None:
+        calls["n"] += 1
+        raise ValueError("not retryable")
+
+    with pytest.raises(ValueError):
+        utils.retry_on_connection_error(raises_value_error, delay=0)
+    assert calls["n"] == 1

@@ -20,7 +20,7 @@
       "groupName": "{{manager}}"
     },
     {
-      "description": "Ignore python packages that cannot be updated thanks to 3.7 support",
+      "description": "Ignore Python package major updates that exceed supported Python versions",
       "matchManagers": [
         "poetry"
       ],
@@ -42,7 +42,7 @@
       "enabled": false
     },
     {
-      "description": "Ignore mkdocs and its plugins that drop Python 3.7 support",
+      "description": "Ignore mkdocs and plugin updates that exceed supported Python versions",
       "matchPackageNames": [
         "/^mkdocs"
       ],
@@ -54,7 +54,7 @@
     },
     {
       "matchPackageNames": ["urllib3"],
-      "allowedVersions": "<2.0.0"
+      "allowedVersions": ">=2.7.0,<3"
     },
     {
       "description": "Ignore updates for ubuntu in GitHub (ref #1374)",

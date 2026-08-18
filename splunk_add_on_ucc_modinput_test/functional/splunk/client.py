@@ -1,5 +1,5 @@
 #
-# Copyright 2025 Splunk Inc.
+# Copyright 2026 Splunk Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -130,8 +130,8 @@ class SplunkClientBase:
 
     @property
     def app_file_helper(self) -> SplunkInstanceFileHelper:
-        assert hasattr(self.config, "home") and self._make_conf_error("home")
-        assert hasattr(self.config, "app_name") and self._make_conf_error(
+        assert hasattr(self.config, "home"), self._make_conf_error("home")
+        assert hasattr(self.config, "app_name"), self._make_conf_error(
             "app_name"
         )
         connect = dict(

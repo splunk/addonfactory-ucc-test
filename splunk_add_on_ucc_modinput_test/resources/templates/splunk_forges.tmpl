@@ -15,16 +15,20 @@ def try_to_set_loglevel(
         old_loglevel != loglevel
     ), f"Invalid initial conditions: loglevel is already set to {loglevel}"
 
+    update_succeeded = False
     try:
-        splunk_client.update_settings_logging(loglevel)
-    except ValueError as e:
-        error = str(e)
+        try:
+            splunk_client.update_settings_logging(loglevel)
+            update_succeeded = True
+        except ValueError as e:
+            error = str(e)
 
-    yield dict(expected_loglevel=loglevel, error=error)
-
-    # teardown
-    if error is None:
-        splunk_client.update_settings_logging(old_loglevel)
+        new_loglevel = splunk_client.get_settings_logging().get("loglevel")
+        yield dict(expected_loglevel=new_loglevel, error=error)
+    finally:
+        # teardown
+        if update_succeeded:
+            splunk_client.update_settings_logging(old_loglevel)
 
 
 def set_loglevel(
@@ -34,14 +38,19 @@ def set_loglevel(
     # It does not catch and pass any error messages, instead API exception causes forge crash handled by framework and turned into corresponding test fast fail.
     old_loglevel = splunk_client.get_settings_logging().get("loglevel")
 
-    splunk_client.update_settings_logging(loglevel)
+    update_succeeded = False
+    try:
+        splunk_client.update_settings_logging(loglevel)
+        update_succeeded = True
 
-    yield dict(
-        expected_loglevel=loglevel,
-    )
-
-    # teardown
-    splunk_client.update_settings_logging(old_loglevel)
+        new_loglevel = splunk_client.get_settings_logging().get("loglevel")
+        yield dict(
+            expected_loglevel=new_loglevel,
+        )
+    finally:
+        # teardown
+        if update_succeeded:
+            splunk_client.update_settings_logging(old_loglevel)
 
 
 def try_to_configure_proxy(
