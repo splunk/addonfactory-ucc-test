@@ -1,5 +1,32 @@
 # Changelog
 
+# [3.0.0](https://github.com/splunk/addonfactory-ucc-test/compare/v2.0.5...v3.0.0) (2026-08-18)
+
+
+* feat!: require Python 3.13 ([#154](https://github.com/splunk/addonfactory-ucc-test/issues/154)) ([3073cff](https://github.com/splunk/addonfactory-ucc-test/commit/3073cff38129dafdfd0bbc9d2e73e559f04f8e54))
+
+
+### Bug Fixes
+
+* add check for failed tasks in attched forges ([#146](https://github.com/splunk/addonfactory-ucc-test/issues/146)) ([b2c88a3](https://github.com/splunk/addonfactory-ucc-test/commit/b2c88a39a1cbcc7285a818b73ed596b4eed402e7))
+* address release review findings ([#157](https://github.com/splunk/addonfactory-ucc-test/issues/157)) ([62dc853](https://github.com/splunk/addonfactory-ucc-test/commit/62dc85362e35824482f8a3e6e86f5d458d875fa2))
+* correct typo ([#145](https://github.com/splunk/addonfactory-ucc-test/issues/145)) ([e9a0316](https://github.com/splunk/addonfactory-ucc-test/commit/e9a0316273584f96c710e6249761dbe8029a801d))
+* fix minor logic issues in templates ([#141](https://github.com/splunk/addonfactory-ucc-test/issues/141)) ([da231dd](https://github.com/splunk/addonfactory-ucc-test/commit/da231dd33f154da289b660449efe237767b236fb))
+* update index creation ([1c4d2bc](https://github.com/splunk/addonfactory-ucc-test/commit/1c4d2bcb54be60b8b84b9b7628ec166dbd73edc1))
+
+
+### Features
+
+* add retry_on_connection_error helper for dropped keep-alive connections ([#153](https://github.com/splunk/addonfactory-ucc-test/issues/153)) ([455d476](https://github.com/splunk/addonfactory-ucc-test/commit/455d4763f8efc0ba561a2ec470b63a755c570e17))
+* update index creation to support azure env ([#143](https://github.com/splunk/addonfactory-ucc-test/issues/143)) ([49f1092](https://github.com/splunk/addonfactory-ucc-test/commit/49f1092d6f300059839a9986a9144399667061c0))
+
+
+### BREAKING CHANGES
+
+* Python 3.7 through 3.12 are no longer supported.
+
+Co-authored-by: Marcin Kolasinski <mkolasinski@splunk.com>
+
 ## [2.0.5](https://github.com/splunk/addonfactory-ucc-test/compare/v2.0.4...v2.0.5) (2025-11-17)
 
 
