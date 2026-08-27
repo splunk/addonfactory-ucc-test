@@ -60,6 +60,19 @@ def test_parametrized(pytester):
         )
 
 
+def test_partially_selected_parametrized(pytester):
+    with ScenarioTester(
+        pytester, "partially_selected_parametrized", "-m", "selected"
+    ) as tester:
+        tester.result.assert_outcomes(passed=1, deselected=1)
+        tester.test_log_matcher.fnmatch_lines(
+            ["*provide_selected_value value=selected"]
+        )
+        tester.test_log_matcher.no_fnmatch_line(
+            "*provide_selected_value value=deselected"
+        )
+
+
 def test_wrongly_parametrized(pytester):
     with ScenarioTester(pytester, "invalid_parameters") as tester:
         tester.result.stdout.fnmatch_lines(

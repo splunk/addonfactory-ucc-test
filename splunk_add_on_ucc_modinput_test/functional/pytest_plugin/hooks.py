@@ -44,17 +44,21 @@ def pytest_deselected(items: Sequence[Item]) -> None:
         return
 
     for item in items:
-        found_tests_keys = (
-            dependency_manager.tests.lookup_by_original_function(item._obj)
+        pytest_funcname, _ = _extract_parametrized_data(item)
+        selected_test = dependency_manager.find_test(
+            item._obj, pytest_funcname
         )
-        for test_key in found_tests_keys:
-            test = dependency_manager.unregister_test(test_key)
-            msg = "Test deselection:"
-            msg += f'\n\tdeselected: {"Yes" if test else "No"}'
-            msg += f"\n\tlookup key: {test_key}"
-            msg += f'\n\tpath: {test.full_path if test else "not found"}'
-            msg += f'\n\toriginal path: {test.original_full_path if test else "not found"}'
-            logger.info(msg)
+        test = (
+            dependency_manager.unregister_test(selected_test.key)
+            if selected_test
+            else None
+        )
+        msg = "Test deselection:"
+        msg += f'\n\tdeselected: {"Yes" if test else "No"}'
+        msg += f"\n\tlookup name: {pytest_funcname}"
+        msg += f'\n\tpath: {test.full_path if test else "not found"}'
+        msg += f'\n\toriginal path: {test.original_full_path if test else "not found"}'
+        logger.info(msg)
 
 
 @pytest.hookimpl
