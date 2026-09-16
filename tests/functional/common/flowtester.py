@@ -24,9 +24,12 @@ class ScenarioTester:
     SCENARIO_LOCATION = "tests/functional/flow/scenarios"
     PROJECT_FOLDER = os.getcwd()
 
-    def __init__(self, pytester: Pytester, scenario: str) -> None:
+    def __init__(
+        self, pytester: Pytester, scenario: str, *pytest_args: str
+    ) -> None:
         self.pytester = pytester
         self.scenario = scenario
+        self.pytest_args = pytest_args
 
         self._framework_log_path = os.path.join(
             self.PROJECT_FOLDER, self.FRAMEWORK_LOG_FILE
@@ -83,7 +86,7 @@ class ScenarioTester:
         content = self._load_scenario()
         self.test_folder = self.pytester.makepyfile(content)
         start_time = time.time()
-        self.result = self.pytester.runpytest_inprocess()
+        self.result = self.pytester.runpytest_inprocess(*self.pytest_args)
         stop_time = time.time()
         self._load_framework_log(start_time, stop_time)
         self._load_test_log(start_time, stop_time)
