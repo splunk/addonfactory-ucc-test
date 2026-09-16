@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.6](https://github.com/splunk/addonfactory-ucc-test/compare/v2.0.5...v2.0.6) (2026-09-16)
+
+
+### Bug Fixes
+
+* preserve selected parameterized tests ([#159](https://github.com/splunk/addonfactory-ucc-test/issues/159)) ([4ddc382](https://github.com/splunk/addonfactory-ucc-test/commit/4ddc38248f6750f72896dc5ef62d2064b59e9b23))
+
 ## [2.0.5](https://github.com/splunk/addonfactory-ucc-test/compare/v2.0.4...v2.0.5) (2025-11-17)
 
 
