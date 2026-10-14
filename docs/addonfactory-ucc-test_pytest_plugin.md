@@ -19,7 +19,9 @@ This includes specifying environment variables that include information about ve
 
 Information about Splunk has to be given in relevant environment variables:
 
-- **MODINPUT_TEST_SPLUNK_HOST** - Splunk Enterprise IP or domain address or Splunk Cloud domain address (eg. `127.0.0.1`, `localhost` or `test.splunkcloud.com`). `https` protocol is used for connection and ssl verification is skipped to support developer and test Splunk instances.
+- **MODINPUT_TEST_SPLUNK_HOST** - Splunk Enterprise IP or domain address or Splunk Cloud domain address (eg. `127.0.0.1`, `localhost` or `test.splunkcloud.com`). `https` protocol is used for connection. File helper API calls verify the server certificate and hostname.
+
+- ***(optional) MODINPUT_TEST_SPLUNK_CA_BUNDLE*** - path to a PEM CA bundle trusted for file helper API calls. Set this when the test Splunk management endpoint uses a private CA or self-signed certificate. The certificate must also match `MODINPUT_TEST_SPLUNK_HOST`; otherwise these calls fail TLS verification.
 
 - **MODINPUT_TEST_SPLUNK_PORT** - management port (`8089` in most cases)
 
