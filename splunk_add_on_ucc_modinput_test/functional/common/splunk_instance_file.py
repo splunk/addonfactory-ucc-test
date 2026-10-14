@@ -19,6 +19,7 @@ from splunk_add_on_ucc_modinput_test.functional import logger
 from typing import IO
 import json
 from base64 import b64encode
+import os
 import ssl
 import urllib.request
 import urllib.parse
@@ -69,8 +70,10 @@ class SplunkInstanceFileHelper:
         )
         request.add_header("Authorization", f"Basic {encoded_credentials}")
 
-        # Disable SSL verification
-        context = ssl._create_unverified_context()
+        # Trust the system CAs, or a test instance's configured CA bundle.
+        context = ssl.create_default_context(
+            cafile=os.environ.get("MODINPUT_TEST_SPLUNK_CA_BUNDLE") or None
+        )
 
         try:
             with urllib.request.urlopen(request, context=context) as response:
